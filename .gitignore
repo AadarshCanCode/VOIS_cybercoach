@@ -1,13 +1,5 @@
-# Logs
+# Logs and debugging
 .bolt
-node_modules
-
-# Git backups
-.git_backup/
-*.backup
-*.bak
-*~
-
 logs
 *.log
 npm-debug.log*
@@ -16,13 +8,42 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-backend/dist
-*.local
+# Git backups
+.git_backup/
+*.backup
+*.bak
+*~
 
-# Editor directories and files
+# Dependencies
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Build artifacts
+dist/
+dist-ssr/
+backend/dist/
+frontend/dist/
+*.local
+.vercel/
+.azd/
+temp/
+tmp/
+
+# Tool caches
+node_modules/.vite/
+.vite/
+.eslintcache
+.turbo/
+*.tsbuildinfo
+
+# Environment files
+.env
+.env.*
+!.env.example
+!.env*.example
+
+# Editor settings
 .vscode/*
 !.vscode/extensions.json
 .idea
@@ -32,16 +53,14 @@ backend/dist
 *.njsproj
 *.sln
 *.sw?
-.env
 
-# Vite cache
-node_modules/.vite/
-
-# TypeScript
-*.tsbuildinfo
-
-# Public large docs
-public/docs/*.pdf
+# Supabase temp data
+supabase/.temp/
+supabase/.branches/
+supabase/.cache/
 
 # Coverage
 coverage/
+
+# Public large docs
+public/docs/*.pdf
