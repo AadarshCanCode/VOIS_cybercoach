@@ -1,0 +1,7 @@
+:root {
+  --student-accent: #14b8a6;
+}
+
+.student-accent-text {
+  color: var(--student-accent);
+}

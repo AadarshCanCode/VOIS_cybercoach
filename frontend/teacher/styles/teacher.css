@@ -1,0 +1,13 @@
+.teacher-shell {
+  padding: 2rem;
+  background: radial-gradient(circle at top, rgba(30, 64, 175, 0.35), transparent 65%);
+}
+
+.teacher-shell__notice {
+  padding: 1.5rem;
+  border-radius: 1rem;
+  background-color: rgba(30, 64, 175, 0.15);
+  color: #dbeafe;
+  text-align: center;
+  font-weight: 500;
+}
