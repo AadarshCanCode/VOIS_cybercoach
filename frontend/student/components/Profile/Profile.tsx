@@ -32,7 +32,7 @@ export const Profile: React.FC = () => {
             <h1 className="text-3xl font-black tracking-tighter text-white uppercase">
               Operator <span className="text-[#00FF88]">Profile</span>
             </h1>
-            <p className="text-[#00B37A] font-mono text-sm mt-1">PERSONNEL DOSSIER</p>
+            <p className="text-[#00B37A] font-mono text-sm mt-1">PERSONNEL RESUME</p>
           </div>
           <div className="h-10 w-10 rounded bg-[#00FF88]/10 border border-[#00FF88]/20 flex items-center justify-center">
             <User className="h-5 w-5 text-[#00FF88]" />

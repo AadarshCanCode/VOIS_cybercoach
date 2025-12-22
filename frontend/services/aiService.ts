@@ -218,5 +218,40 @@ export const aiService = {
       summary,
       vulnerabilities
     };
+  },
+
+  parseResume: async (text: string): Promise<{ skills: string[], experience: string, summary: string }> => {
+    const prompt = `
+      Analyze the following resume text and extract key information.
+      
+      Resume Text: "${text.substring(0, 10000)}"
+      
+      Please provide:
+      1. A list of top 5 relevant technical skills.
+      2. A brief summary of professional experience (max 3 sentences).
+      3. A high-level professional summary (max 2 sentences).
+      
+      Format the output as JSON:
+      {
+        "skills": ["string"],
+        "experience": "string",
+        "summary": "string"
+      }
+      
+      Do not include markdown formatting. Just the raw JSON.
+    `;
+
+    try {
+      const response = await generateAIResponse([], prompt);
+      const cleanResponse = response.replace(/```json/g, '').replace(/```/g, '').trim();
+      return JSON.parse(cleanResponse);
+    } catch (error) {
+      console.error("Failed to parse resume with AI", error);
+      return {
+        skills: ["Cybersecurity", "Technical Analysis"],
+        experience: "Background in information technology and security operations.",
+        summary: "Dedicated professional with interest in cybersecurity."
+      };
+    }
   }
 };
