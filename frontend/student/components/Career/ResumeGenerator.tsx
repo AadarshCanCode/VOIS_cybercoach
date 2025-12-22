@@ -1,8 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { Download, Shield, Award, Terminal, User, Mail, MapPin, Globe } from 'lucide-react';
 import { useAuth } from '@context/AuthContext';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 
 export const ResumeGenerator: React.FC = () => {
     const { user } = useAuth();
@@ -14,6 +12,14 @@ export const ResumeGenerator: React.FC = () => {
         setIsGenerating(true);
 
         try {
+            // Dynamic imports for code splitting - only load when generating PDF
+            const [html2canvasModule, jsPDFModule] = await Promise.all([
+                import('html2canvas'),
+                import('jspdf')
+            ]);
+            const html2canvas = html2canvasModule.default;
+            const jsPDF = jsPDFModule.default;
+
             const canvas = await html2canvas(resumeRef.current, {
                 scale: 2,
                 backgroundColor: '#ffffff', // Ensure white background for the resume itself

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Play, CheckCircle, Clock, FileText, FlaskRound as Flask, Award } from 'lucide-react';
+import { ArrowLeft, Play, CheckCircle, Clock, FileText, FlaskRound as Flask, Award, Terminal, Lock, ChevronRight } from 'lucide-react';
 import { ModuleViewer } from './ModuleViewer';
 import { courseService } from '@services/courseService';
 import type { Course, Module } from '@types';
@@ -121,9 +121,30 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
     }
   };
 
-  if (loading) return <div className="p-6 text-primary">Loading course...</div>;
+  if (loading) return (
+    <div className="p-6 min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00FF88] mx-auto mb-4"></div>
+        <p className="text-[#00B37A] font-mono">LOADING MISSION DATA...</p>
+      </div>
+    </div>
+  );
   if (!course) {
-    return <div className="p-6 text-primary">Course not found</div>;
+    return (
+      <div className="p-6 min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
+        <div className="max-w-4xl mx-auto text-center py-20">
+          <Terminal className="h-16 w-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-white mb-2">Course Not Found</h2>
+          <p className="text-[#00B37A] mb-6">The requested training module does not exist.</p>
+          <button
+            onClick={onBack}
+            className="px-6 py-3 bg-[#00FF88] text-black font-bold rounded-lg hover:bg-[#00CC66] transition-colors"
+          >
+            Return to Courses
+          </button>
+        </div>
+      </div>
+    );
   }
 
   if (selectedModuleId) {
@@ -156,95 +177,117 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
   })();
 
   return (
-    <div className="p-6 bg-page min-h-screen">
-      <div className="max-w-6xl mx-auto">
+    <div className="p-6 min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-[#EAEAEA]">
+      <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center space-x-4 mb-6">
+        <div className="flex items-center space-x-4">
           <button
             onClick={onBack}
-            className="flex items-center space-x-2 text-muted hover:text-primary transition-colors"
+            className="flex items-center space-x-2 text-[#00B37A] hover:text-[#00FF88] transition-colors group"
           >
-            <ArrowLeft className="h-5 w-5" />
-            <span>Back to Courses</span>
+            <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
+            <span className="font-medium">Back to Courses</span>
           </button>
         </div>
 
         {/* Course Info */}
-  <div className="bg-card rounded-lg shadow p-8 mb-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
-              <h1 className="text-3xl font-bold text-primary mb-4">{course.title}</h1>
-              <p className="text-muted text-lg mb-6">{course.description}</p>
-              
-              <div className="flex items-center space-x-6 text-sm text-muted mb-6">
-                <div className="flex items-center space-x-1">
-                  <FileText className="h-4 w-4" />
-                  <span>{totalModules} Modules</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <Clock className="h-4 w-4" />
-                  <span>~{totalModules * 2} hours</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <Flask className="h-4 w-4" />
-                  <span>Hands-on Labs</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <Award className="h-4 w-4" />
-                  <span>Certificate</span>
-                </div>
-              </div>
-
-              <div className="bg-card rounded-lg p-4">
-                <h3 className="font-bold text-primary mb-2">What You'll Learn</h3>
-                <ul className="text-muted space-y-1">
-                  <li>• Understand the OWASP Top 10 security vulnerabilities</li>
-                  <li>• Learn practical exploitation techniques</li>
-                  <li>• Master vulnerability prevention methods</li>
-                  <li>• Gain hands-on experience with security tools</li>
-                  <li>• Earn industry-recognized certification</li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="space-y-6">
-                {/* Progress Card */}
-              <div className="bg-card border border-card rounded-lg p-6">
-                <h3 className="font-bold text-accent mb-4">Course Progress</h3>
-                  <div className="text-center mb-4">
-                    <div className="text-3xl font-bold text-contrast">{Math.round(progressPercentage)}%</div>
-                        <div className="text-muted">Complete</div>
+        <div className="bg-[#0A0F0A] rounded-xl border border-[#00FF88]/10 overflow-hidden">
+          <div className="p-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2">
+                <div className="flex items-center space-x-3 mb-3">
+                  <div className="p-2 rounded-lg bg-[#00FF88]/10 border border-[#00FF88]/20">
+                    <Terminal className="h-6 w-6 text-[#00FF88]" />
                   </div>
-                  <div className="w-full bg-muted rounded-full h-3 mb-4">
+                  <h1 className="text-3xl font-bold text-white">{course.title}</h1>
+                </div>
+                <p className="text-[#00B37A] text-lg mb-6">{course.description}</p>
+              
+                <div className="flex items-center flex-wrap gap-4 text-sm font-mono mb-6">
+                  <div className="flex items-center space-x-2 text-[#EAEAEA]/60">
+                    <FileText className="h-4 w-4 text-[#00FF88]" />
+                    <span>{totalModules} MODULES</span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-[#EAEAEA]/60">
+                    <Clock className="h-4 w-4 text-[#00FF88]" />
+                    <span>~{totalModules * 2} HOURS</span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-[#EAEAEA]/60">
+                    <Flask className="h-4 w-4 text-[#00FF88]" />
+                    <span>HANDS-ON LABS</span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-[#EAEAEA]/60">
+                    <Award className="h-4 w-4 text-[#00FF88]" />
+                    <span>CERTIFICATE</span>
+                  </div>
+                </div>
+
+                <div className="bg-black/40 rounded-xl p-4 border border-[#00FF88]/10">
+                  <h3 className="font-bold text-[#00FF88] mb-3 text-sm uppercase tracking-wider">Mission Objectives</h3>
+                  <ul className="text-[#00B37A] space-y-2 text-sm">
+                    <li className="flex items-start space-x-2">
+                      <ChevronRight className="h-4 w-4 text-[#00FF88] mt-0.5 flex-shrink-0" />
+                      <span>Understand the OWASP Top 10 security vulnerabilities</span>
+                    </li>
+                    <li className="flex items-start space-x-2">
+                      <ChevronRight className="h-4 w-4 text-[#00FF88] mt-0.5 flex-shrink-0" />
+                      <span>Learn practical exploitation techniques</span>
+                    </li>
+                    <li className="flex items-start space-x-2">
+                      <ChevronRight className="h-4 w-4 text-[#00FF88] mt-0.5 flex-shrink-0" />
+                      <span>Master vulnerability prevention methods</span>
+                    </li>
+                    <li className="flex items-start space-x-2">
+                      <ChevronRight className="h-4 w-4 text-[#00FF88] mt-0.5 flex-shrink-0" />
+                      <span>Gain hands-on experience with security tools</span>
+                    </li>
+                    <li className="flex items-start space-x-2">
+                      <ChevronRight className="h-4 w-4 text-[#00FF88] mt-0.5 flex-shrink-0" />
+                      <span>Earn industry-recognized certification</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                {/* Progress Card */}
+                <div className="bg-black/40 rounded-xl p-6 border border-[#00FF88]/10">
+                  <h3 className="font-bold text-[#00B37A] mb-4 text-xs uppercase tracking-widest">Mission Progress</h3>
+                  <div className="text-center mb-4">
+                    <div className="text-4xl font-bold text-[#00FF88] font-mono">{Math.round(progressPercentage)}%</div>
+                    <div className="text-[#00B37A] text-sm">Complete</div>
+                  </div>
+                  <div className="w-full bg-black rounded-full h-2 mb-4 border border-[#00FF88]/10">
                     <div 
-                      className="accent-amber h-3 rounded-full transition-all duration-300"
+                      className="bg-[#00FF88] h-full rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(0,255,136,0.5)]"
                       style={{ width: `${progressPercentage}%` }}
                     ></div>
                   </div>
-                      <div className="text-sm text-accent text-center">
-                    {completedModules} of {totalModules} modules completed
+                  <div className="text-sm text-[#00B37A] text-center font-mono">
+                    {completedModules} / {totalModules} MODULES COMPLETED
                   </div>
                 </div>
 
-              {/* Quick Stats */}
-              <div className="bg-card border border-card rounded-lg p-6">
-                <h3 className="font-bold text-primary mb-4">Your Stats</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-muted">Modules Completed</span>
-                    <span className="font-medium">{completedModules}/{totalModules}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted">Labs Completed</span>
-                    <span className="font-medium">2/6</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted">Average Score</span>
-                    <span className="font-medium">85%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted">Time Spent</span>
-                    <span className="font-medium">12 hours</span>
+                {/* Quick Stats */}
+                <div className="bg-black/40 rounded-xl p-6 border border-[#00FF88]/10">
+                  <h3 className="font-bold text-[#00B37A] mb-4 text-xs uppercase tracking-widest">Your Stats</h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-[#00B37A]">Modules Completed</span>
+                      <span className="font-medium text-[#EAEAEA] font-mono">{completedModules}/{totalModules}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[#00B37A]">Labs Completed</span>
+                      <span className="font-medium text-[#EAEAEA] font-mono">2/6</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[#00B37A]">Average Score</span>
+                      <span className="font-medium text-[#00FF88] font-mono">85%</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[#00B37A]">Time Spent</span>
+                      <span className="font-medium text-[#EAEAEA] font-mono">12 hrs</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -253,76 +296,102 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
         </div>
 
         {/* Modules List */}
-        <div className="bg-card rounded-lg shadow">
-          <div className="border-b border-card p-6">
-            <h2 className="text-xl font-bold text-primary">Course Modules</h2>
+        <div className="bg-[#0A0F0A] rounded-xl border border-[#00FF88]/10 overflow-hidden">
+          <div className="border-b border-[#00FF88]/10 p-6">
+            <h2 className="text-xl font-bold text-white flex items-center space-x-2">
+              <Terminal className="h-5 w-5 text-[#00FF88]" />
+              <span>Training Modules</span>
+            </h2>
           </div>
           
-          <div className="divide-y divide-card">
-            {(course.modules ?? course.course_modules ?? []).map((module: Module, index: number) => (
-              <div key={module.id} className="p-6 hover:bg-muted transition-colors rounded-md">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-start space-x-4 flex-1">
-                    <div className="flex-shrink-0 mt-1">
-                      {module.completed ? (
-                        <CheckCircle className="h-6 w-6 text-accent" />
-                      ) : (
-                        <div className="h-6 w-6 rounded-full border-2 border-card flex items-center justify-center">
-                          <span className="text-xs font-medium text-muted">{index + 1}</span>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="flex-1">
-                      <h3 className="text-lg font-medium text-primary mb-1">{module.title}</h3>
-                      <p className="text-muted mb-3">{module.description}</p>
-                      
-                      <div className="flex items-center space-x-4 text-sm text-muted">
-                        <div className="flex items-center space-x-1">
-                          <FileText className="h-4 w-4" />
-                          <span>Reading</span>
-                        </div>
-                        {module.videoUrl && (
-                          <div className="flex items-center space-x-1">
-                            <Play className="h-4 w-4" />
-                            <span>Video</span>
+          <div className="divide-y divide-[#00FF88]/10">
+            {(course.modules ?? course.course_modules ?? []).map((module: Module, index: number) => {
+              const isModuleUnlocked = index < allowedModules || user?.role === 'admin';
+              
+              return (
+                <div key={module.id} className="p-6 hover:bg-[#00FF88]/5 transition-colors group">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-start space-x-4 flex-1">
+                      <div className="flex-shrink-0 mt-1">
+                        {module.completed ? (
+                          <div className="h-8 w-8 rounded-full bg-[#00FF88]/10 border border-[#00FF88]/20 flex items-center justify-center">
+                            <CheckCircle className="h-5 w-5 text-[#00FF88]" />
+                          </div>
+                        ) : isModuleUnlocked ? (
+                          <div className="h-8 w-8 rounded-full border border-[#00FF88]/30 flex items-center justify-center group-hover:border-[#00FF88] transition-colors">
+                            <span className="text-sm font-bold text-[#00B37A] font-mono">{String(index + 1).padStart(2, '0')}</span>
+                          </div>
+                        ) : (
+                          <div className="h-8 w-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
+                            <Lock className="h-4 w-4 text-white/30" />
                           </div>
                         )}
-                        {module.labUrl && (
-                          <div className="flex items-center space-x-1">
-                            <Flask className="h-4 w-4" />
-                            <span>Lab</span>
-                          </div>
-                        )}
-                        <div className="flex items-center space-x-1">
-                          <Clock className="h-4 w-4" />
-                          <span>~2 hours</span>
-                        </div>
                       </div>
+                    
+                      <div className="flex-1">
+                        <h3 className={`text-lg font-medium mb-1 ${isModuleUnlocked ? 'text-white group-hover:text-[#00FF88]' : 'text-white/30'} transition-colors`}>
+                          {module.title}
+                        </h3>
+                        <p className={`mb-3 ${isModuleUnlocked ? 'text-[#00B37A]' : 'text-white/20'}`}>{module.description}</p>
                       
-                      {module.testScore && (
-                        <div className="mt-2">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-card text-accent">
-                            Test Score: {module.testScore}%
-                          </span>
+                        <div className={`flex items-center space-x-4 text-sm ${isModuleUnlocked ? 'text-[#EAEAEA]/60' : 'text-white/20'}`}>
+                          <div className="flex items-center space-x-1">
+                            <FileText className="h-4 w-4" />
+                            <span>Reading</span>
+                          </div>
+                          {module.videoUrl && (
+                            <div className="flex items-center space-x-1">
+                              <Play className="h-4 w-4" />
+                              <span>Video</span>
+                            </div>
+                          )}
+                          {module.labUrl && (
+                            <div className="flex items-center space-x-1">
+                              <Flask className="h-4 w-4" />
+                              <span>Lab</span>
+                            </div>
+                          )}
+                          <div className="flex items-center space-x-1">
+                            <Clock className="h-4 w-4" />
+                            <span>~2 hours</span>
+                          </div>
                         </div>
-                      )}
+                      
+                        {module.testScore && (
+                          <div className="mt-2">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#00FF88]/10 text-[#00FF88] border border-[#00FF88]/20">
+                              Test Score: {module.testScore}%
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
                   
-                  <button
-                    onClick={() => setSelectedModuleId(module.id)}
-                    disabled={index >= allowedModules && user?.role !== 'admin'}
-                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${index < allowedModules || user?.role === 'admin' ? 'btn-primary btn-primary-rounded' : 'bg-muted text-muted cursor-not-allowed'}`}
-                  >
-                    <Play className="h-4 w-4" />
-                    <span>
-                      {index < allowedModules || user?.role === 'admin' ? (module.completed ? 'Review' : 'Start') : 'Locked'}
-                    </span>
-                  </button>
+                    <button
+                      onClick={() => setSelectedModuleId(module.id)}
+                      disabled={!isModuleUnlocked}
+                      className={`flex items-center space-x-2 px-5 py-2.5 rounded-lg font-bold transition-all ${
+                        isModuleUnlocked 
+                          ? 'bg-[#00FF88] text-black hover:bg-[#00CC66] hover:shadow-[0_0_20px_rgba(0,255,136,0.3)]' 
+                          : 'bg-white/5 border border-white/10 text-white/30 cursor-not-allowed'
+                      }`}
+                    >
+                      {isModuleUnlocked ? (
+                        <>
+                          <Play className="h-4 w-4" />
+                          <span>{module.completed ? 'Review' : 'Start'}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Lock className="h-4 w-4" />
+                          <span>Locked</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

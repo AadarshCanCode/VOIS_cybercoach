@@ -26,34 +26,31 @@ class StudentService {
 
             if (coursesError) throw new Error(`Failed to fetch completed courses: ${coursesError.message}`);
 
-            // Get assessment score (assuming stored in users table or a separate assessments table)
-            // For now, checking users table based on previous code context
-            const { data: userData, error: userError } = await supabase
-                .from('users')
-                .select('assessment_score, study_time_minutes')
-                .eq('id', userId)
-                .single();
-
-            if (userError) throw new Error(`Failed to fetch user data: ${userError.message}`);
-
             // Get certificates count
             const { count: certificatesEarned, error: certsError } = await supabase
                 .from('certificates')
                 .select('*', { count: 'exact', head: true })
                 .eq('user_id', userId);
 
-            if (certsError && certsError.code !== 'PGRST116') { // Ignore if table doesn't exist yet, handle gracefully
+            if (certsError && certsError.code !== 'PGRST116') { // Ignore if table doesn't exist yet
                 console.warn('Certificates table might not exist or error fetching:', certsError);
             }
 
-            // Format study time
-            const minutes = userData?.study_time_minutes || 0;
-            const hours = Math.floor(minutes / 60);
-            const studyTime = `${hours} hours`;
+            // Try to get study time from user_progress aggregate (sum of time spent)
+            const { data: progressData } = await supabase
+                .from('user_progress')
+                .select('progress')
+                .eq('user_id', userId);
+
+            // Estimate study time based on progress (rough estimate: 1 progress point = 1 minute)
+            const totalProgress = progressData?.reduce((sum, p) => sum + (p.progress || 0), 0) || 0;
+            const estimatedMinutes = totalProgress * 2; // 2 minutes per progress point
+            const hours = Math.floor(estimatedMinutes / 60);
+            const studyTime = hours > 0 ? `${hours} hours` : `${estimatedMinutes} mins`;
 
             return {
                 coursesCompleted: coursesCompleted || 0,
-                assessmentScore: userData?.assessment_score || null,
+                assessmentScore: null, // Assessment scores tracked separately in assessment results
                 certificatesEarned: certificatesEarned || 0,
                 studyTime
             };

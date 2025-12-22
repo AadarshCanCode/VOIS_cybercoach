@@ -28,6 +28,7 @@
     "express": "^5.1.0",
     "google-search-results-nodejs": "^2.1.0",
     "html2canvas": "^1.4.1",
+    "imagekitio-react": "^4.3.0",
     "jspdf": "^3.0.4",
     "lucide-react": "^0.344.0",
     "multer": "^2.0.2",

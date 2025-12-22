@@ -1,9 +1,11 @@
 import express, { type Request, type Response } from 'express';
 import cors from 'cors';
+import 'dotenv/config';
 
 import studentRoutes from './student/routes/index.js';
 import teacherRoutes from './teacher/routes/index.js';
 import adminApiRoutes, { legacyRoutes as adminLegacyRoutes } from './admin/routes/index.js';
+import imagekitRoutes from './admin/routes/imagekitRoutes.js';
 
 const app = express();
 const parsedPort = Number.parseInt(process.env.PORT ?? '', 10);
@@ -15,6 +17,7 @@ app.use(express.json({ limit: '1mb' }));
 app.use('/api/student', studentRoutes);
 app.use('/api/teacher', teacherRoutes);
 app.use('/api/admin', adminApiRoutes);
+app.use('/api/imagekit', imagekitRoutes);
 
 app.use('/', adminLegacyRoutes);
 

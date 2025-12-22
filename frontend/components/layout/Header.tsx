@@ -50,7 +50,7 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
                             <div className="h-8 w-[1px] bg-white/10 mx-1" />
 
                             <div className="flex items-center gap-3 pl-1">
-                                <div className="flex flex-col items-end hidden sm:flex">
+                                <div className="flex-col items-end hidden sm:flex">
                                     <span className="text-sm font-medium text-foreground">{user.name}</span>
                                     <span className="text-xs text-muted-foreground capitalize">{user.role}</span>
                                 </div>

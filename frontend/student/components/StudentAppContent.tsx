@@ -78,6 +78,23 @@ export const StudentAppContent: React.FC<StudentAppContentProps> = ({ initialTab
     }
   }, [user, initialTab]);
 
+  // Listen for navigation events from assessment completion
+  useEffect(() => {
+    const handleNavigateToTab = (e: CustomEvent<{ tab: string }>) => {
+      if (e.detail?.tab) {
+        setActiveTab(e.detail.tab);
+        // Clear any selected items when navigating via event
+        setSelectedCourseId(null);
+        setSelectedLabId(null);
+      }
+    };
+
+    window.addEventListener('navigateToTab', handleNavigateToTab as EventListener);
+    return () => {
+      window.removeEventListener('navigateToTab', handleNavigateToTab as EventListener);
+    };
+  }, []);
+
   const handleLoginSuccess = (targetTab?: string) => {
     if (targetTab) {
       setActiveTab(targetTab);

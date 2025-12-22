@@ -1,6 +1,5 @@
 import React, { useRef } from 'react';
 import { Award, Download } from 'lucide-react';
-import html2canvas from 'html2canvas';
 import { supabase } from '@lib/supabase';
 import { useAuth } from '@context/AuthContext';
 import type { User } from '@types';
@@ -28,6 +27,8 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
   const downloadCertificate = async () => {
     if (!certificateRef.current) return;
 
+    // Dynamic import for code splitting
+    const html2canvas = (await import('html2canvas')).default;
     const canvas = await html2canvas(certificateRef.current);
     const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob((b) => resolve(b), 'image/png'));
     if (!blob) {

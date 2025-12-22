@@ -6,9 +6,11 @@ import type { User } from '../../types';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/Card';
 import { Button } from '../../components/Button';
 import { Badge } from '../../components/Badge';
+import { Header } from '../../components/layout/Header';
+import { AdminSidebar } from './AdminSidebar';
 
 type Role = 'student' | 'teacher' | 'admin';
-type View = 'overview' | 'users' | 'courses' | 'analytics';
+type View = 'overview' | 'users' | 'courses' | 'analytics' | 'settings';
 
 interface DashboardStats {
   users: { teachers: number; students: number; total: number };
@@ -89,49 +91,29 @@ export const AdminDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-8 min-h-screen animate-fade-in">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-white via-white/80 to-white/60 bg-clip-text text-transparent">Admin Dashboard</h1>
-            <Badge variant="destructive" className="animate-pulse">Live</Badge>
-          </div>
-          <p className="text-muted-foreground text-lg">Manage users, courses, and platform analytics</p>
-        </div>
-
-        <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 backdrop-blur-sm">
-          {([
-            { id: 'overview', label: 'Overview', icon: BarChart3 },
-            { id: 'users', label: 'Users', icon: Users },
-            { id: 'courses', label: 'Courses', icon: BookOpen },
-            { id: 'analytics', label: 'Analytics', icon: TrendingUp }
-          ] as const).map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeView === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveView(tab.id)}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${isActive
-                  ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
-                  }`}
-              >
-                <Icon className="h-4 w-4" />
-                <span className="font-medium text-sm">{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
+      <Header />
+      <div className="flex">
+        <AdminSidebar activeTab={activeView} onTabChange={(tab) => setActiveView(tab as View)} />
+        <main className="flex-1 overflow-y-auto h-[calc(100vh-4rem)]">
+          <div className="p-6 space-y-8 animate-fade-in">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <h1 className="text-4xl font-bold bg-gradient-to-r from-white via-white/80 to-white/60 bg-clip-text text-transparent">Admin Dashboard</h1>
+                  <Badge variant="destructive" className="animate-pulse">Live</Badge>
+                </div>
+                <p className="text-muted-foreground text-lg">Manage users, courses, and platform analytics</p>
+              </div>
+            </div>
 
       {/* Overview */}
       {activeView === 'overview' && (
@@ -385,6 +367,36 @@ export const AdminDashboard = () => {
           </Card>
         </div>
       )}
+
+      {/* Settings */}
+      {activeView === 'settings' && (
+        <div className="space-y-8">
+          <Card variant="glass" className="border-white/5 bg-white/[0.02]">
+            <CardHeader>
+              <CardTitle>Platform Settings</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+                  <h3 className="text-lg font-bold text-foreground mb-4">General Settings</h3>
+                  <p className="text-muted-foreground">Platform configuration settings coming soon.</p>
+                </div>
+                <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+                  <h3 className="text-lg font-bold text-foreground mb-4">Security Settings</h3>
+                  <p className="text-muted-foreground">Security and authentication settings coming soon.</p>
+                </div>
+                <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+                  <h3 className="text-lg font-bold text-foreground mb-4">Email Notifications</h3>
+                  <p className="text-muted-foreground">Email notification configuration coming soon.</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+          </div>
+        </main>
+      </div>
     </div>
   );
 };

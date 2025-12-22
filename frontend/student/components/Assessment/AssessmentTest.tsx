@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Clock, CheckCircle, XCircle, AlertCircle, TrendingUp, Camera, Mic, Video } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, AlertCircle, Camera, Mic, Video, ArrowRight } from 'lucide-react';
 import { assessmentQuestions } from '@data/assessmentQuestions';
 import { useAuth } from '@context/AuthContext';
 // import types from '@types' (none needed here)
@@ -18,7 +18,6 @@ export const AssessmentTest: React.FC = () => {
   const [showResults, setShowResults] = useState(false);
   const [timeLeft, setTimeLeft] = useState(30 * 60); // 30 minutes
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-  const [confidenceLevel, setConfidenceLevel] = useState<number>(3);
   const [questionStartTime, setQuestionStartTime] = useState<Date>(new Date());
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
   const [permissionGranted, setPermissionGranted] = useState(false);
@@ -149,7 +148,6 @@ export const AssessmentTest: React.FC = () => {
       if (currentQuestionIndex < assessmentQuestions.length - 1) {
         setCurrentQuestionIndex(currentQuestionIndex + 1);
         setSelectedAnswer(answers[currentQuestionIndex + 1] ?? null);
-        setConfidenceLevel(3); // Reset confidence for next question
         setQuestionStartTime(new Date()); // Reset timer for next question
       } else {
         handleSubmitTest(newAnswers);
@@ -166,7 +164,6 @@ export const AssessmentTest: React.FC = () => {
       }
       setCurrentQuestionIndex(currentQuestionIndex - 1);
       setSelectedAnswer(answers[currentQuestionIndex - 1] ?? null);
-      setConfidenceLevel(3); // Reset confidence
     }
   };
 
@@ -262,15 +259,7 @@ export const AssessmentTest: React.FC = () => {
     return 'advanced';
   };
 
-  const getConfidenceLabel = (level: number) => {
-    const labels = ['Very Low', 'Low', 'Medium', 'High', 'Very High'];
-    return labels[level - 1];
-  };
-
-  const getConfidenceColor = (level: number) => {
-    const colors = ['text-red-500', 'text-orange-500', 'text-yellow-500', 'text-blue-500', 'text-green-500'];
-    return colors[level - 1];
-  };
+  
 
   const saveAssessmentResponse = async () => {
     if (!user || selectedAnswer === null) return;
@@ -284,7 +273,6 @@ export const AssessmentTest: React.FC = () => {
         user_id: user.id,
         question_id: currentQuestion.id,
         selected_answer: selectedAnswer,
-        confidence_level: confidenceLevel,
         is_correct: isCorrect,
         time_taken_seconds: timeTaken,
         context: 'initial'
@@ -356,19 +344,37 @@ export const AssessmentTest: React.FC = () => {
 
   if (user?.completedAssessment && !showResults) {
     return (
-      <div className="p-6">
+      <div className="p-6 min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
         <div className="max-w-2xl mx-auto text-center">
-          <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Assessment Already Completed</h2>
-          <p className="text-gray-600 mb-6">
-            You have already completed the assessment test. Your current level is: <span className="font-bold text-cyan-600">{user.level}</span>
-          </p>
-          <button
-            onClick={() => setShowResults(true)}
-            className="bg-cyan-600 text-white px-6 py-2 rounded-lg hover:bg-cyan-700 transition-colors"
-          >
-            View Results
-          </button>
+          <div className="bg-[#0A0F0A] rounded-xl border border-[#00FF88]/20 p-8">
+            <CheckCircle className="h-16 w-16 text-[#00FF88] mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-white mb-4">Assessment Already Completed</h2>
+            <p className="text-[#00B37A] mb-2">
+              You have already completed the assessment test.
+            </p>
+            <p className="text-[#EAEAEA] mb-6">
+              Your current level: <span className="font-bold text-[#00FF88] uppercase">{user.level}</span>
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent('navigateToTab', { detail: { tab: 'courses' } }));
+                }}
+                className="bg-[#00FF88] text-black px-6 py-3 rounded-lg font-bold hover:bg-[#00CC66] transition-colors flex items-center justify-center space-x-2"
+              >
+                <span>Continue Learning</span>
+                <ArrowRight className="h-5 w-5" />
+              </button>
+              <button
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent('navigateToTab', { detail: { tab: 'dashboard' } }));
+                }}
+                className="border border-[#00FF88]/30 text-[#00FF88] px-6 py-3 rounded-lg hover:bg-[#00FF88]/10 transition-colors"
+              >
+                Go to Dashboard
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -425,13 +431,27 @@ export const AssessmentTest: React.FC = () => {
               <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-6 text-red-700">{submitError}</div>
             )}
 
-            <button
-              onClick={() => window.location.reload()}
-              disabled={submitting}
-              className="bg-cyan-600 text-white px-8 py-3 rounded-lg hover:bg-cyan-700 transition-colors text-lg font-medium disabled:opacity-50"
-            >
-              {submitting ? 'Finalizing…' : 'Continue to Dashboard'}
-            </button>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                onClick={() => {
+                  // Navigate to courses section
+                  window.dispatchEvent(new CustomEvent('navigateToTab', { detail: { tab: 'courses' } }));
+                  window.location.reload();
+                }}
+                disabled={submitting}
+                className="bg-cyan-600 text-white px-8 py-3 rounded-lg hover:bg-cyan-700 transition-colors text-lg font-medium disabled:opacity-50 flex items-center justify-center space-x-2"
+              >
+                <span>{submitting ? 'Finalizing…' : 'Start Learning'}</span>
+                <ArrowRight className="h-5 w-5" />
+              </button>
+              <button
+                onClick={() => window.location.reload()}
+                disabled={submitting}
+                className="border border-gray-300 text-gray-700 px-8 py-3 rounded-lg hover:bg-gray-50 transition-colors text-lg font-medium disabled:opacity-50"
+              >
+                Go to Dashboard
+              </button>
+            </div>
           </div>
 
           {/* Detailed Results */}
@@ -610,35 +630,6 @@ export const AssessmentTest: React.FC = () => {
               </button>
             ))}
           </div>
-
-          {/* Confidence Slider */}
-          {selectedAnswer !== null && (
-            <div className="mb-8 p-6 bg-blue-50 border border-blue-200 rounded-lg">
-              <h3 className="text-lg font-medium text-blue-900 mb-4 flex items-center">
-                <TrendingUp className="h-5 w-5 mr-2" />
-                How confident are you about this answer?
-              </h3>
-              
-              <div className="space-y-4">
-                <div className="flex items-center justify-between text-sm text-blue-700">
-                  <span>Not Confident</span>
-                  <span className={`font-medium ${getConfidenceColor(confidenceLevel)}`}>
-                    {getConfidenceLabel(confidenceLevel)}
-                  </span>
-                  <span>Very Confident</span>
-                </div>
-                
-                <input
-                  type="range"
-                  min="1"
-                  max="5"
-                  value={confidenceLevel}
-                  onChange={(e) => setConfidenceLevel(parseInt(e.target.value))}
-                  className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer slider"
-                />
-              </div>
-            </div>
-          )}
 
           {/* Navigation */}
           <div className="flex justify-between">
