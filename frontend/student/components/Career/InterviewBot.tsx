@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, RefreshCw, Mic, Volume2, Brain, Users, Terminal } from 'lucide-react';
+import { Send, Bot, User, RefreshCw, Mic, Volume2, Brain, Users, Terminal, Upload, X, FileText, CheckCircle, Shield } from 'lucide-react';
 import { interviewService, InterviewQuestion } from '../../../services/interviewService';
+import { aiService } from '../../../services/aiService';
 
 interface Message {
     id: string;
@@ -27,6 +28,11 @@ export const InterviewBot: React.FC = () => {
     const [category, setCategory] = useState<InterviewCategory | null>(null);
     const [currentQuestion, setCurrentQuestion] = useState<InterviewQuestion | null>(null);
     const [isWaitingForAnswer, setIsWaitingForAnswer] = useState(false);
+    const [position, setPosition] = useState('');
+    const [resumeFile, setResumeFile] = useState<File | null>(null);
+    const [resumeSummary, setResumeSummary] = useState<string | null>(null);
+    const [isParsing, setIsParsing] = useState(false);
+    const [showConfig, setShowConfig] = useState(true);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -51,14 +57,63 @@ export const InterviewBot: React.FC = () => {
         }
     }, [messages, category, isWaitingForAnswer, isTyping]);
 
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setResumeFile(file);
+        setIsParsing(true);
+
+        try {
+            let text = "";
+            if (file.type === 'application/pdf') {
+                text = await extractTextFromPDF(file);
+            } else {
+                text = await file.text();
+            }
+
+            const parsed = await aiService.parseResume(text);
+            setResumeSummary(JSON.stringify(parsed));
+        } catch (error) {
+            console.error("Resume parsing failed", error);
+        } finally {
+            setIsParsing(false);
+        }
+    };
+
+    const extractTextFromPDF = async (file: File): Promise<string> => {
+        try {
+            const pdfjs = await import('pdfjs-dist');
+            // @ts-ignore
+            pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
+
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+            let fullText = "";
+
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const content = await page.getTextContent();
+                // @ts-ignore
+                const pageText = content.items.map((item: any) => item.str).join(' ');
+                fullText += pageText + "\n";
+            }
+            return fullText;
+        } catch (error) {
+            console.error("PDF extraction error", error);
+            return "";
+        }
+    };
+
     const startInterview = async (selectedCategory: InterviewCategory) => {
         setCategory(selectedCategory);
+        setShowConfig(false);
         setMessages(prev => [
             ...prev,
             {
                 id: Date.now().toString(),
                 sender: 'bot',
-                text: `Initializing ${selectedCategory.toUpperCase()} PROTOCOL... Accessing secure database...`,
+                text: `Initializing ${selectedCategory.toUpperCase()} PROTOCOL... Target Position: ${position || 'General Cybersecurity'}. Resume analysis complete.`,
                 timestamp: new Date()
             }
         ]);
@@ -68,7 +123,7 @@ export const InterviewBot: React.FC = () => {
     const loadNextQuestion = async (selectedCategory: InterviewCategory) => {
         setIsTyping(true);
         try {
-            const question = await interviewService.getNextQuestion(selectedCategory);
+            const question = await interviewService.getNextQuestion(selectedCategory, position, resumeSummary || undefined);
             if (question) {
                 setCurrentQuestion(question);
                 setIsWaitingForAnswer(true);
@@ -117,7 +172,7 @@ export const InterviewBot: React.FC = () => {
             setIsWaitingForAnswer(false);
 
             try {
-                const validation = await interviewService.validateAnswer(currentQuestion, userMsg.text);
+                const validation = await interviewService.validateAnswer(currentQuestion, userMsg.text, position, resumeSummary || undefined);
 
                 const botMsg: Message = {
                     id: (Date.now() + 1).toString(),
@@ -141,10 +196,13 @@ export const InterviewBot: React.FC = () => {
         setCategory(null);
         setCurrentQuestion(null);
         setIsWaitingForAnswer(false);
+        setShowConfig(true);
+        setResumeFile(null);
+        setResumeSummary(null);
         setMessages([{
             id: Date.now().toString(),
             sender: 'bot',
-            text: "Simulation reset. Select a protocol to begin.",
+            text: "Simulation reset. Update your configuration or select a protocol to begin.",
             timestamp: new Date()
         }]);
     };
@@ -179,41 +237,107 @@ export const InterviewBot: React.FC = () => {
 
             {/* Chat Area */}
             <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-[url('/grid-pattern.png')] bg-repeat opacity-90 relative">
-                {/* Category Selection Overlay */}
-                {!category && (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 animate-in fade-in slide-in-from-bottom-4">
-                        <button
-                            onClick={() => startInterview('technical')}
-                            className="group p-4 bg-[#0A0F0A] border border-[#00FF88]/30 hover:border-[#00FF88] rounded-xl transition-all hover:shadow-[0_0_20px_rgba(0,255,136,0.1)] text-left"
-                        >
-                            <div className="h-10 w-10 rounded-lg bg-[#00FF88]/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                                <Terminal className="h-6 w-6 text-[#00FF88]" />
-                            </div>
-                            <h3 className="text-[#EAEAEA] font-bold mb-1">TECHNICAL</h3>
-                            <p className="text-xs text-[#00B37A]">Cybersecurity protocols & coding assessments.</p>
-                        </button>
+                {/* Configuration Overlay */}
+                {!category && showConfig && (
+                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 mb-8">
+                        <div className="bg-[#0A0F0A] border border-[#00FF88]/20 p-6 rounded-xl space-y-6">
+                            <h3 className="text-[#00FF88] font-bold flex items-center gap-2 tracking-widest text-sm text-center justify-center">
+                                <Shield className="h-4 w-4" /> INTERVIEW PARAMETERS
+                            </h3>
 
-                        <button
-                            onClick={() => startInterview('hr')}
-                            className="group p-4 bg-[#0A0F0A] border border-[#FF00FF]/30 hover:border-[#FF00FF] rounded-xl transition-all hover:shadow-[0_0_20px_rgba(255,0,255,0.1)] text-left"
-                        >
-                            <div className="h-10 w-10 rounded-lg bg-[#FF00FF]/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                                <Users className="h-6 w-6 text-[#FF00FF]" />
-                            </div>
-                            <h3 className="text-[#EAEAEA] font-bold mb-1">BEHAVIORAL</h3>
-                            <p className="text-xs text-[#FF00FF]/80">Culture fit & situational analysis.</p>
-                        </button>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="text-[10px] text-[#00B37A] uppercase font-bold mb-2 block">Target Position</label>
+                                    <input
+                                        type="text"
+                                        value={position}
+                                        onChange={(e) => setPosition(e.target.value)}
+                                        placeholder="e.g. SOC Analyst, Penetration Tester..."
+                                        className="w-full bg-black border border-[#00FF88]/20 rounded-lg px-4 py-3 text-white focus:border-[#00FF88]/50 outline-none placeholder-[#00B37A]/30 transition-all"
+                                    />
+                                </div>
 
-                        <button
-                            onClick={() => startInterview('aptitude')}
-                            className="group p-4 bg-[#0A0F0A] border border-[#00FFFF]/30 hover:border-[#00FFFF] rounded-xl transition-all hover:shadow-[0_0_20px_rgba(0,255,255,0.1)] text-left"
-                        >
-                            <div className="h-10 w-10 rounded-lg bg-[#00FFFF]/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                                <Brain className="h-6 w-6 text-[#00FFFF]" />
+                                <div>
+                                    <label className="text-[10px] text-[#00B37A] uppercase font-bold mb-2 block">Resume Upload (PDF/TXT)</label>
+                                    {!resumeFile ? (
+                                        <div className="relative group">
+                                            <input
+                                                type="file"
+                                                onChange={handleFileUpload}
+                                                accept=".pdf,.txt"
+                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                            />
+                                            <div className="w-full border-2 border-dashed border-[#00FF88]/20 group-hover:border-[#00FF88]/50 rounded-lg p-8 flex flex-col items-center justify-center transition-all bg-black/50">
+                                                <Upload className="h-8 w-8 text-[#00B37A] mb-3 group-hover:scale-110 transition-transform" />
+                                                <p className="text-xs text-[#00B37A] font-mono">DRAG & DROP OR CLICK TO UPLOAD</p>
+                                                <p className="text-[10px] text-[#00B37A]/50 mt-2 italic">SECURE ENCRYPTED PARSING ACTIVE</p>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center justify-between p-4 bg-[#00FF88]/5 border border-[#00FF88]/30 rounded-lg animate-in fade-in zoom-in-95">
+                                            <div className="flex items-center gap-3">
+                                                <div className="h-10 w-10 rounded bg-[#00FF88]/10 flex items-center justify-center">
+                                                    <FileText className="h-5 w-5 text-[#00FF88]" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs font-bold text-white truncate max-w-[200px]">{resumeFile.name}</p>
+                                                    <p className="text-[10px] text-[#00B37A]">
+                                                        {isParsing ? 'ANALYZING NEURAL PATTERNS...' : 'DATA EXTRACTED & VERIFIED'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                {!isParsing && <CheckCircle className="h-5 w-5 text-[#00FF88]" />}
+                                                <button
+                                                    onClick={() => { setResumeFile(null); setResumeSummary(null); }}
+                                                    className="p-1 hover:bg-[#FF0055]/10 rounded text-[#FF0055] transition-colors"
+                                                >
+                                                    <X className="h-4 w-4" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                            <h3 className="text-[#EAEAEA] font-bold mb-1">APTITUDE</h3>
-                            <p className="text-xs text-[#00FFFF]/80">Logic puzzles & cognitive testing.</p>
-                        </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <button
+                                onClick={() => startInterview('technical')}
+                                disabled={isParsing}
+                                className="group p-4 bg-[#0A0F0A] border border-[#00FF88]/30 hover:border-[#00FF88] rounded-xl transition-all hover:shadow-[0_0_20px_rgba(0,255,136,0.1)] text-left disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <div className="h-10 w-10 rounded-lg bg-[#00FF88]/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                    <Terminal className="h-6 w-6 text-[#00FF88]" />
+                                </div>
+                                <h3 className="text-[#EAEAEA] font-bold mb-1">TECHNICAL</h3>
+                                <p className="text-xs text-[#00B37A]">Cybersecurity protocols & coding assessments.</p>
+                            </button>
+
+                            <button
+                                onClick={() => startInterview('hr')}
+                                disabled={isParsing}
+                                className="group p-4 bg-[#0A0F0A] border border-[#FF00FF]/30 hover:border-[#FF00FF] rounded-xl transition-all hover:shadow-[0_0_20px_rgba(255,0,255,0.1)] text-left disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <div className="h-10 w-10 rounded-lg bg-[#FF00FF]/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                    <Users className="h-6 w-6 text-[#FF00FF]" />
+                                </div>
+                                <h3 className="text-[#EAEAEA] font-bold mb-1">BEHAVIORAL</h3>
+                                <p className="text-xs text-[#FF00FF]/80">Culture fit & situational analysis.</p>
+                            </button>
+
+                            <button
+                                onClick={() => startInterview('aptitude')}
+                                disabled={isParsing}
+                                className="group p-4 bg-[#0A0F0A] border border-[#00FFFF]/30 hover:border-[#00FFFF] rounded-xl transition-all hover:shadow-[0_0_20px_rgba(0,255,255,0.1)] text-left disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <div className="h-10 w-10 rounded-lg bg-[#00FFFF]/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                    <Brain className="h-6 w-6 text-[#00FFFF]" />
+                                </div>
+                                <h3 className="text-[#EAEAEA] font-bold mb-1">APTITUDE</h3>
+                                <p className="text-xs text-[#00FFFF]/80">Logic puzzles & cognitive testing.</p>
+                            </button>
+                        </div>
                     </div>
                 )}
 
@@ -224,12 +348,12 @@ export const InterviewBot: React.FC = () => {
                     >
                         <div className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'} w-full`}>
                             <div className={`max-w-[80%] rounded-2xl p-4 ${msg.sender === 'user'
-                                ? 'bg-[#00FF88]/10 border border-[#00FF88]/20 text-[#EAEAEA] rounded-tr-none'
-                                : msg.type === 'feedback'
-                                    ? msg.feedback?.isCorrect
-                                        ? 'bg-[#00FF88]/5 border border-[#00FF88]/30 text-[#00FF88] rounded-tl-none'
-                                        : 'bg-[#FF0055]/5 border border-[#FF0055]/30 text-[#FF0055] rounded-tl-none'
-                                    : 'bg-[#0A0F0A] border border-[#00B37A]/30 text-[#00B37A] rounded-tl-none shadow-[0_0_15px_rgba(0,255,136,0.05)]'
+                                    ? 'bg-[#00FF88]/10 border border-[#00FF88]/20 text-[#EAEAEA] rounded-tr-none'
+                                    : msg.type === 'feedback'
+                                        ? msg.feedback?.isCorrect
+                                            ? 'bg-[#00FF88]/5 border border-[#00FF88]/30 text-[#00FF88] rounded-tl-none'
+                                            : 'bg-[#FF0055]/5 border border-[#FF0055]/30 text-[#FF0055] rounded-tl-none'
+                                        : 'bg-[#0A0F0A] border border-[#00B37A]/30 text-[#00B37A] rounded-tl-none shadow-[0_0_15px_rgba(0,255,136,0.05)]'
                                 }`}>
                                 <div className="flex items-center gap-2 mb-1 opacity-50 text-[10px] uppercase tracking-wider font-bold">
                                     {msg.sender === 'user' ? <User className="h-3 w-3" /> : <Bot className="h-3 w-3" />}

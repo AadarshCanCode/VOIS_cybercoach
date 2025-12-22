@@ -13,8 +13,9 @@ export const interviewService = {
     /**
      * Fetches a random question for the given category and injects a real company name.
      */
-    getNextQuestion: async (category: 'technical' | 'hr' | 'aptitude'): Promise<InterviewQuestion | null> => {
+    getNextQuestion: async (category: 'technical' | 'hr' | 'aptitude', position?: string, resumeText?: string): Promise<InterviewQuestion | null> => {
         try {
+            console.log(`[InterviewService] Fetching ${category} question for position: ${position || 'General'}. Resume context: ${resumeText ? 'Provided' : 'None'}`);
             // 1. Fetch a random question from the DB
             const { data: questions, error: qError } = await supabase
                 .from('interview_questions')
@@ -54,9 +55,11 @@ export const interviewService = {
     /**
      * Validates the user's answer using AI.
      */
-    validateAnswer: async (question: InterviewQuestion, userAnswer: string): Promise<{ isCorrect: boolean; feedback: string }> => {
+    validateAnswer: async (question: InterviewQuestion, userAnswer: string, position?: string, resumeText?: string): Promise<{ isCorrect: boolean; feedback: string }> => {
         const prompt = `
       You are an expert interviewer.
+      ${position ? `The candidate is applying for the position: "${position}".` : ''}
+      ${resumeText ? `Candidate's Resume/Background: "${resumeText}".` : ''}
       
       Question: "${question.question_text}"
       Ideal Answer / Key Points: "${question.ideal_answer}"
@@ -66,6 +69,7 @@ export const interviewService = {
       1. Determine if it is "Correct" (covers key points), "Partially Correct", or "Incorrect".
       2. Provide brief, constructive feedback (max 2 sentences).
       3. If incorrect, explain the right concept simply.
+      ${position ? 'Tailor your feedback based on the target position requirements.' : ''}
       
       Output JSON format:
       {
