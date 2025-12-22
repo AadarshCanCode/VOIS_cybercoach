@@ -33,10 +33,10 @@ export const ResumeGenerator: React.FC = () => {
             const imgHeight = pdfWidth / ratio;
 
             pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, imgHeight);
-            pdf.save(`OPERATOR_DOSSIER_${user?.name?.toUpperCase() || 'UNKNOWN'}.pdf`);
+            pdf.save(`OPERATOR_RESUME_${user?.name?.toUpperCase() || 'UNKNOWN'}.pdf`);
         } catch (error) {
             console.error('Failed to generate PDF:', error);
-            alert('Failed to generate dossier. Check console for details.');
+            alert('Failed to generate resume. Check console for details.');
         } finally {
             setIsGenerating(false);
         }
@@ -48,7 +48,7 @@ export const ResumeGenerator: React.FC = () => {
             <div className="flex items-center justify-between border-b border-[#00FF88]/10 pb-6">
                 <div>
                     <h1 className="text-3xl font-black tracking-tighter text-white uppercase">
-                        Operator <span className="text-[#00FF88]">Dossier</span>
+                        Operator <span className="text-[#00FF88]">Resume</span>
                     </h1>
                     <p className="text-[#00B37A] font-mono text-sm mt-1">AUTO-GENERATED CAREER PROFILE</p>
                 </div>
@@ -173,10 +173,10 @@ export const ResumeGenerator: React.FC = () => {
                     <div className="bg-[#0A0F0A] border border-[#00FF88]/20 p-6 rounded-xl">
                         <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                             <Terminal className="h-5 w-5 text-[#00FF88]" />
-                            Dossier Configuration
+                            Resume Configuration
                         </h3>
                         <p className="text-[#00B37A] text-sm mb-6">
-                            This document is auto-generated from your active service record. Complete more labs and earn certificates to upgrade your clearance level and expand your dossier.
+                            This document is auto-generated from your active service record. Complete more labs and earn certificates to upgrade your clearance level and expand your resume.
                         </p>
 
                         <div className="space-y-4">

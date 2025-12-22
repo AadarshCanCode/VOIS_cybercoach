@@ -403,7 +403,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
             <FeatureCard icon={<BookOpen />} title="Intel Archives" copy="Access classified course materials and structured learning paths." />
             <FeatureCard icon={<Target />} title="Live Ranges" copy="Engage in real-time combat simulations with automated scoring." />
             <FeatureCard icon={<Brain />} title="CORTEX AI" copy="Neural-linked mentor providing instant tactical analysis and hints." />
-            <FeatureCard icon={<Award />} title="Credentials" copy="Earn verifiable badges and clearance levels for your dossier." />
+            <FeatureCard icon={<Award />} title="Credentials" copy="Earn verifiable badges and clearance levels for your resume." />
             <FeatureCard icon={<Zap />} title="Performance" copy="Real-time analytics tracking your operational efficiency." />
             <FeatureCard icon={<Globe />} title="Network" copy="Connect with other operatives in the global intelligence feed." />
           </div>
