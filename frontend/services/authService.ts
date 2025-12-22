@@ -11,6 +11,15 @@ type DBUser = {
   [key: string]: unknown;
 };
 
+// Simple UUID v4 generator
+function generateUUID(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
 function sanitizeUser(dbUser: DBUser): User {
   const copy: Record<string, unknown> = { ...dbUser };
   // remove password_hash if present
@@ -91,6 +100,12 @@ class AuthService {
 
   async register(userData: { email: string; password: string; name?: string; role: string; bio?: string; specialization?: string }): Promise<User | null> {
     try {
+      // Test connectivity first
+      await testSupabaseConnection();
+
+      // Hash the password for storage
+      const passwordHash = await bcrypt.hash(userData.password, 10);
+
       // Create account with Supabase Auth first (creates session client-side)
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: userData.email,
@@ -100,16 +115,22 @@ class AuthService {
 
       if (signUpError) {
         console.error('Supabase signUp error:', signUpError);
-        throw signUpError;
+        // If auth signup fails, still create a profile in the users table
+        console.warn('Auth signup failed, proceeding with direct profile creation...');
       }
 
-      const authUser = signUpData.user;
-      // Insert profile row into users table if not exists
+      const authUser = signUpData?.user;
+      
+      // Use auth user ID or generate a proper UUID if no auth user
+      const userId = authUser?.id ?? generateUUID();
+      
+      // Insert profile row into users table
       const profileRow = {
-        id: authUser?.id ?? undefined,
+        id: userId,
         email: userData.email,
-        name: userData.name,
+        name: userData.name || 'User',
         role: userData.role,
+        password_hash: passwordHash,
         level: 'beginner',
         completed_assessment: userData.role === 'admin',
         bio: userData.bio || '',
@@ -117,23 +138,27 @@ class AuthService {
         experience_years: userData.role === 'student' ? null : '0-1'
       } as Record<string, unknown>;
 
-      const { data: newUser, error } = await supabase
+      const { data: newUser, error: profileError } = await supabase
         .from('users')
-        .upsert([profileRow])
+        .upsert([profileRow], { onConflict: 'id' })
         .select()
         .maybeSingle();
 
-      if (error) {
-        console.error('Registration error while creating profile:', error);
-        throw error;
+      if (profileError) {
+        console.error('Registration error while creating profile:', profileError);
+        throw new Error(`Failed to create profile: ${profileError.message}`);
       }
 
-  const newUserCopy = { ...(newUser || profileRow) } as unknown as User;
-  localStorage.setItem('cyberSecUser', JSON.stringify(newUserCopy));
-  return newUserCopy;
+      const finalUser = newUser || profileRow;
+      const newUserCopy = { ...finalUser } as unknown as User;
+      // Remove password_hash from stored user
+      delete (newUserCopy as any).password_hash;
+      localStorage.setItem('cyberSecUser', JSON.stringify(newUserCopy));
+      return newUserCopy;
     } catch (error) {
       console.error('Registration error:', error);
-      throw error;
+      const errorMessage = error instanceof Error ? error.message : 'Registration failed. Please try again.';
+      throw new Error(errorMessage);
     }
   }
 

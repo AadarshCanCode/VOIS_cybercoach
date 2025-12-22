@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Shield, BookOpen, Award, Target, Zap, CheckCircle, ArrowRight, Globe, Brain, Video, Menu, X, Users, Terminal, Lock, ChevronRight, Activity } from 'lucide-react';
+import { useAuth } from '@context/AuthContext';
 import { LoginForm } from '../Auth/LoginForm';
 import { RegisterForm } from '../Auth/RegisterForm';
-import { useAuth } from '@context/AuthContext';
 
 // UI Components
 const StatCard: React.FC<{ label: string; value: string; icon: React.ReactNode }> = ({ label, value, icon }) => (
@@ -168,46 +168,33 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  if (showLogin) {
-    return (
-      <LoginForm
-        userType={userType}
-        onToggleMode={() => {
-          setShowLogin(false);
-          setShowRegister(true);
-        }}
-        onBack={() => {
-          setShowLogin(false);
-          setUserType(null);
-          setTargetTab(undefined);
-        }}
-        onSuccess={() => onLogin(targetTab)}
-      />
-    );
-  }
-
-  if (showRegister) {
-    return (
-      <RegisterForm
-        userType={userType}
-        onToggleMode={() => {
-          setShowRegister(false);
-          setShowLogin(true);
-        }}
-        onBack={() => {
-          setShowRegister(false);
-          setUserType(null);
-          setTargetTab(undefined);
-        }}
-        onSuccess={() => onLogin(targetTab)}
-      />
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-[#000000] text-[#EAEAEA] font-sans selection:bg-[#00FF88]/30">
-      {/* Grid Background */}
-      <div className="fixed inset-0 bg-[linear-gradient(to_right,#00FF8808_1px,transparent_1px),linear-gradient(to_bottom,#00FF8808_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+    <>
+      {showLogin && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 overflow-y-auto">
+          <LoginForm 
+            userType={userType}
+            onToggleMode={() => setShowRegister(true) || setShowLogin(false)}
+            onBack={() => setShowLogin(false)}
+            onSuccess={() => onLogin(targetTab)}
+          />
+        </div>
+      )}
+
+      {showRegister && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 overflow-y-auto">
+          <RegisterForm 
+            userType={userType}
+            onToggleMode={() => setShowLogin(true) || setShowRegister(false)}
+            onBack={() => setShowRegister(false)}
+            onSuccess={() => onLogin(targetTab)}
+          />
+        </div>
+      )}
+      
+      <div className="min-h-screen bg-[#000000] text-[#EAEAEA] font-sans selection:bg-[#00FF88]/30">
+        {/* Grid Background */}
+        <div className="fixed inset-0 bg-[linear-gradient(to_right,#00FF8808_1px,transparent_1px),linear-gradient(to_bottom,#00FF8808_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
 
       {/* Radial Gradient Glow */}
       <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-[#00FF88]/10 blur-[120px] rounded-full pointer-events-none" />
@@ -558,7 +545,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
           </div>
         )
       }
-    </div >
+      </div>
+    </>
   );
 };
 

@@ -15,7 +15,6 @@ import { LabsList } from './Labs/LabsList';
 import { LabViewer } from './Labs/LabViewer';
 import { Certificates } from './Certificates/Certificates';
 import { Profile } from './Profile/Profile';
-import { Chatbot } from './Chatbot/Chatbot';
 import { VideoLibrary } from './Video/VideoLibrary';
 import { TechnicalQuestions } from './TechnicalInterview/TechnicalQuestions';
 import { NotesTab } from './Notes/NotesTab';
@@ -37,7 +36,6 @@ export const StudentAppContent: React.FC<StudentAppContentProps> = ({ initialTab
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [selectedLabId, setSelectedLabId] = useState<string | null>(null);
-  const [isChatOpen, setIsChatOpen] = useState(false);
   const [currentRoute, setCurrentRoute] = useState<'home' | 'admin' | 'app'>('home');
 
   useEffect(() => {
@@ -181,12 +179,11 @@ export const StudentAppContent: React.FC<StudentAppContentProps> = ({ initialTab
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
-      <Header onChatToggle={() => setIsChatOpen(!isChatOpen)} />
+      <Header />
       <div className="flex">
         {!isFullPage && <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />}
         <main className="flex-1">{renderContent()}</main>
       </div>
-      <Chatbot isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
     </div>
   );
 };

@@ -28,7 +28,7 @@ export const Button: React.FC<ButtonProps> = ({
         outline: 'border-2 border-input bg-background hover:bg-accent hover:text-accent-foreground',
         ghost: 'hover:bg-accent hover:text-accent-foreground',
         danger: 'bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-lg shadow-destructive/20',
-        cyber: 'bg-cyber-600 text-white hover:bg-cyber-500 shadow-[0_0_20px_rgba(14,165,233,0.3)] hover:shadow-[0_0_30px_rgba(14,165,233,0.5)] border border-cyber-400/50',
+        cyber: 'bg-primary text-black hover:bg-primary/90 shadow-[0_0_20px_rgba(0,255,136,0.3)] hover:shadow-[0_0_30px_rgba(0,255,136,0.5)] border border-primary/50 font-semibold',
         success: 'bg-green-600 text-white hover:bg-green-500 shadow-lg shadow-green-500/20',
         warning: 'bg-yellow-500 text-white hover:bg-yellow-400 shadow-lg shadow-yellow-500/20',
     };

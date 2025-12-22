@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, Eye, EyeOff, Settings, ArrowLeft, Lock } from 'lucide-react';
+import { Eye, EyeOff, Settings, X, Lock } from 'lucide-react';
 import { useAuth } from '@context/AuthContext';
 import { Card, CardContent } from '../../components/Card';
 import { Button } from '../../components/Button';
@@ -50,17 +50,16 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onBack, onSuccess }) => 
           <p className="text-muted-foreground">Secure administrative portal</p>
         </div>
 
-        <Card variant="cyber" className="backdrop-blur-xl border-primary/20">
-          <CardContent className="p-8 space-y-6">
-            {onBack && (
-              <button
-                onClick={onBack}
-                className="flex items-center text-muted-foreground hover:text-foreground transition-colors mb-4 text-sm"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Home
-              </button>
-            )}
+        <Card variant="cyber" className="backdrop-blur-xl border-primary/20 relative">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors z-20"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          )}
+          <CardContent className="p-8 space-y-5">
 
             {error && (
               <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4 animate-scale-in">
@@ -68,7 +67,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onBack, onSuccess }) => 
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div className="flex justify-center mb-6">
                 <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center border border-primary/20 shadow-lg shadow-primary/10">
                   <Settings className="h-8 w-8 text-primary animate-spin-slow" />
@@ -118,7 +117,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onBack, onSuccess }) => 
                 type="submit"
                 variant="cyber"
                 isLoading={isLoading}
-                className="w-full h-12 text-lg shadow-lg shadow-primary/20"
+                className="w-full h-11 text-base font-semibold"
               >
                 {isLoading ? 'Authenticating...' : 'Access Admin Panel'}
               </Button>

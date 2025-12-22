@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
-import { Shield, Eye, EyeOff, GraduationCap, Users, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, GraduationCap, Users, X, Lock, Mail, User } from 'lucide-react';
 import { useAuth } from '@context/AuthContext';
+import { Card, CardContent } from '../../../components/Card';
+import { Button } from '../../../components/Button';
+import { Input } from '../../../components/Input';
 
 interface RegisterFormProps {
   userType?: 'student' | 'teacher' | null;
@@ -49,134 +52,107 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center p-4">
-      <div className="max-w-2xl w-full space-y-8">
-        <div className="text-center">
-          <div className="flex justify-center mb-6">
-            <div className="relative">
-              <Shield className="h-20 w-20 text-orange-500 animate-pulse" />
-              <div className="absolute inset-0 h-20 w-20 text-orange-500 animate-ping opacity-20">
-                <Shield className="h-full w-full" />
-              </div>
-            </div>
-          </div>
-          <h2 className="text-4xl font-bold bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent mb-3">
-            Join Career Connect
-          </h2>
-          <p className="text-xl text-slate-300">Start your cybersecurity journey today</p>
-        </div>
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background Effects */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/20 rounded-full blur-[100px] pointer-events-none" />
 
-  <div className="bg-white/5 backdrop-blur rounded-2xl p-8 space-y-6 border border-white/10">
+      <div className="max-w-2xl w-full relative z-10">
+        <Card variant="cyber" className="backdrop-blur-xl border-primary/20 relative">
           {onBack && (
             <button
               onClick={onBack}
-              className="flex items-center text-slate-300 hover:text-white transition-colors mb-4"
+              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors z-20"
             >
-              <ArrowLeft className="h-5 w-5 mr-2" />
-              Back to Home
+              <X className="h-5 w-5" />
             </button>
           )}
+          <CardContent className="p-8 space-y-5">
 
           {error && (
-            <div className="bg-red-500/20 border border-red-500/50 rounded-xl p-4 animate-scale-in">
-              <p className="text-red-200 text-sm text-center">{error}</p>
+            <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4 animate-scale-in">
+              <p className="text-destructive text-sm text-center font-medium">{error}</p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {!userType && (
-              <div>
-                <label htmlFor="role" className="block text-sm font-medium text-slate-200 mb-3">
+              <div className="space-y-3 mb-1">
+                <label className="block text-sm font-medium text-foreground">
                   I want to
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
                     onClick={() => setRole('student')}
-                    className={`group p-4 rounded-2xl border-2 transition-all duration-300 transform hover:scale-105 ${
+                    className={`group relative p-3 rounded-lg border-2 transition-all duration-300 ${
                       role === 'student' 
-                        ? 'border-blue-400 bg-blue-500/20 text-blue-300 shadow-lg shadow-blue-500/25' 
-                        : 'border-slate-600 hover:border-slate-500 text-slate-400 hover:text-slate-300'
+                        ? 'border-primary bg-primary/10 shadow-lg shadow-primary/20' 
+                        : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10'
                     }`}
                   >
-                    <GraduationCap className="h-8 w-8 mx-auto mb-2 group-hover:animate-bounce" />
-                    <div className="text-sm font-medium">Learn</div>
-                    <div className="text-xs text-slate-400 mt-1">Student Account</div>
+                    <GraduationCap className={`h-6 w-6 mx-auto mb-1 transition-all ${role === 'student' ? 'text-primary' : 'text-muted-foreground'}`} />
+                    <div className={`text-xs font-medium ${role === 'student' ? 'text-primary' : 'text-foreground'}`}>Learn</div>
+                    <div className="text-[10px] text-muted-foreground mt-0.5">Student</div>
                   </button>
                   <button
                     type="button"
                     onClick={() => setRole('teacher')}
-                    className={`group p-4 rounded-2xl border-2 transition-all duration-300 transform hover:scale-105 ${
+                    className={`group relative p-3 rounded-lg border-2 transition-all duration-300 ${
                       role === 'teacher' 
-                        ? 'border-green-400 bg-green-500/20 text-green-300 shadow-lg shadow-green-500/25' 
-                        : 'border-slate-600 hover:border-slate-500 text-slate-400 hover:text-slate-300'
+                        ? 'border-primary bg-primary/10 shadow-lg shadow-primary/20' 
+                        : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10'
                     }`}
                   >
-                    <Users className="h-8 w-8 mx-auto mb-2 group-hover:animate-bounce" />
-                    <div className="text-sm font-medium">Teach</div>
-                    <div className="text-xs text-slate-400 mt-1">Instructor Account</div>
+                    <Users className={`h-6 w-6 mx-auto mb-1 transition-all ${role === 'teacher' ? 'text-primary' : 'text-muted-foreground'}`} />
+                    <div className={`text-xs font-medium ${role === 'teacher' ? 'text-primary' : 'text-foreground'}`}>Teach</div>
+                    <div className="text-[10px] text-muted-foreground mt-0.5">Instructor</div>
                   </button>
                 </div>
               </div>
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-slate-200 mb-2">
-                  Full Name
-                </label>
-                <input
-                  id="name"
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-4 bg-slate-800/50 border border-slate-600 rounded-2xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300"
-                  placeholder="Enter your full name"
-                />
-              </div>
+              <Input
+                label="Full Name"
+                type="text"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter your full name"
+                leftIcon={<User className="h-4 w-4" />}
+                className="bg-background/50"
+              />
 
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-slate-200 mb-2">
-                  Email Address
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-4 bg-slate-800/50 border border-slate-600 rounded-2xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300"
-                  placeholder="Enter your email"
-                />
-              </div>
+              <Input
+                label="Email Address"
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                leftIcon={<Mail className="h-4 w-4" />}
+                className="bg-background/50"
+              />
             </div>
 
             {role === 'teacher' && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label htmlFor="specialization" className="block text-sm font-medium text-slate-200 mb-2">
-                    Specialization
-                  </label>
-                  <input
-                    id="specialization"
-                    type="text"
-                    value={specialization}
-                    onChange={(e) => setSpecialization(e.target.value)}
-                    className="w-full px-4 py-4 bg-slate-800/50 border border-slate-600 rounded-2xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300"
-                    placeholder="e.g., Web Security, Network Security"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="bio" className="block text-sm font-medium text-slate-200 mb-2">
-                    Bio
-                  </label>
+                <Input
+                  label="Specialization"
+                  type="text"
+                  value={specialization}
+                  onChange={(e) => setSpecialization(e.target.value)}
+                  placeholder="e.g., Web Security, Network Security"
+                  className="bg-background/50"
+                />
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none">Bio</label>
                   <textarea
-                    id="bio"
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
                     rows={3}
-                    className="w-full px-4 py-4 bg-slate-800/50 border border-slate-600 rounded-2xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 resize-none"
+                    className="flex w-full rounded-xl border border-input bg-background/50 px-4 py-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
                     placeholder="Brief description about yourself"
                   />
                 </div>
@@ -184,77 +160,66 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-slate-200 mb-2">
-                  Password
-                </label>
+              <div className="space-y-2">
+                <label className="text-sm font-medium leading-none">Password</label>
                 <div className="relative">
-                  <input
-                    id="password"
+                  <Input
                     type={showPassword ? 'text' : 'password'}
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-4 pr-12 bg-slate-800/50 border border-slate-600 rounded-2xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300"
                     placeholder="Enter your password"
+                    leftIcon={<Lock className="h-4 w-4" />}
+                    className="bg-background/50 pr-10"
                   />
                   <button
                     type="button"
-                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-300 transition-colors"
+                    className="absolute right-3 top-[34px] -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
-                      <EyeOff className="h-5 w-5" />
+                      <EyeOff className="h-4 w-4" />
                     ) : (
-                      <Eye className="h-5 w-5" />
+                      <Eye className="h-4 w-4" />
                     )}
                   </button>
                 </div>
               </div>
 
-              <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-200 mb-2">
-                  Confirm Password
-                </label>
-                <input
-                  id="confirmPassword"
-                  type="password"
-                  required
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-4 py-4 bg-slate-800/50 border border-slate-600 rounded-2xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300"
-                  placeholder="Confirm your password"
-                />
-              </div>
+              <Input
+                label="Confirm Password"
+                type="password"
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm your password"
+                leftIcon={<Lock className="h-4 w-4" />}
+                className="bg-background/50"
+              />
             </div>
 
-            <button
+            <Button
               type="submit"
-              disabled={isLoading}
-              className="w-full py-4 px-6 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-medium rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              variant="cyber"
+              isLoading={isLoading}
+              className="w-full h-11 text-base font-semibold"
             >
-              {isLoading ? (
-                <div className="flex items-center justify-center space-x-2">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  <span>Creating account...</span>
-                </div>
-              ) : (
-                'Create Account'
-              )}
-            </button>
+              {isLoading ? 'Creating account...' : 'Create Account'}
+            </Button>
           </form>
 
           <div className="text-center">
             <button
               type="button"
               onClick={onToggleMode}
-              className="text-orange-400 hover:text-orange-300 text-sm font-medium transition-colors duration-300 hover:underline"
+              className="text-primary hover:text-primary/80 text-sm font-medium transition-colors duration-300 hover:underline"
             >
               Already have an account? Sign in
             </button>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
+  </div>
   );
 };

@@ -1,14 +1,13 @@
 import React from 'react';
-import { Shield, User, LogOut, MessageCircle, Bell, Search } from 'lucide-react';
+import { Shield, User, LogOut, Bell, Search } from 'lucide-react';
 import { useAuth } from '@context/AuthContext';
 import { Button } from '../Button';
 
 interface HeaderProps {
-    onChatToggle: () => void;
     className?: string;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onChatToggle, className }) => {
+export const Header: React.FC<HeaderProps> = ({ className }) => {
     const { user, logout } = useAuth();
 
     return (
@@ -43,16 +42,6 @@ export const Header: React.FC<HeaderProps> = ({ onChatToggle, className }) => {
                 <div className="ml-auto flex items-center gap-3">
                     {user && (
                         <>
-                            <Button
-                                variant="cyber"
-                                size="sm"
-                                onClick={onChatToggle}
-                                leftIcon={<MessageCircle className="h-4 w-4" />}
-                                className="hidden sm:flex"
-                            >
-                                AI Assistant
-                            </Button>
-
                             <button className="relative p-2 rounded-lg hover:bg-white/5 text-muted-foreground hover:text-foreground transition-colors">
                                 <Bell className="h-5 w-5" />
                                 <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-red-500 rounded-full border border-background" />
