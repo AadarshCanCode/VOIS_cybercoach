@@ -41,7 +41,6 @@ A comprehensive education platform built with React, TypeScript, and Express for
   /context/       - React context providers
   /services/      - API service layer
   /types/         - TypeScript type definitions
-  
 /public/          - Static assets
 ```
 
