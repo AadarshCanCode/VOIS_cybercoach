@@ -75,7 +75,7 @@ export const LabViewer: React.FC<LabViewerProps> = ({ labId, onBack }) => {
             <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
             <span className="font-medium">Back to Simulations</span>
           </button>
-          
+
           {lab.completed && (
             <div className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-[#00FF88]/10 border border-[#00FF88]/20">
               <CheckCircle className="h-5 w-5 text-[#00FF88]" />
@@ -96,7 +96,7 @@ export const LabViewer: React.FC<LabViewerProps> = ({ labId, onBack }) => {
                   <h1 className="text-3xl font-bold text-white">{lab.title}</h1>
                 </div>
                 <p className="text-[#00B37A] text-lg mb-6 max-w-2xl">{lab.description}</p>
-                
+
                 <div className="flex items-center space-x-6 text-sm font-mono">
                   <span className={`px-3 py-1 rounded border ${getDifficultyColor(lab.difficulty)} uppercase font-bold tracking-wider`}>
                     {lab.difficulty}
@@ -111,7 +111,7 @@ export const LabViewer: React.FC<LabViewerProps> = ({ labId, onBack }) => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex flex-col space-y-3 ml-6">
                 <button
                   onClick={() => setShowEnvironment(true)}
@@ -149,7 +149,7 @@ export const LabViewer: React.FC<LabViewerProps> = ({ labId, onBack }) => {
 
           {/* Quick Actions */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border-t border-[#00FF88]/10">
-            <button 
+            <button
               onClick={() => setShowEnvironment(true)}
               className="p-6 hover:bg-[#00FF88]/5 transition-colors border-r border-[#00FF88]/10 group"
             >
@@ -163,7 +163,7 @@ export const LabViewer: React.FC<LabViewerProps> = ({ labId, onBack }) => {
                 </div>
               </div>
             </button>
-            
+
             <button className="p-6 hover:bg-[#00FF88]/5 transition-colors border-r border-[#00FF88]/10 group">
               <div className="flex items-center space-x-3">
                 <div className="p-2 rounded-lg bg-[#00FF88]/10 border border-[#00FF88]/20 group-hover:bg-[#00FF88]/20 transition-colors">
@@ -175,7 +175,7 @@ export const LabViewer: React.FC<LabViewerProps> = ({ labId, onBack }) => {
                 </div>
               </div>
             </button>
-            
+
             <button className="p-6 hover:bg-[#00FF88]/5 transition-colors group">
               <div className="flex items-center space-x-3">
                 <div className="p-2 rounded-lg bg-[#00FF88]/10 border border-[#00FF88]/20 group-hover:bg-[#00FF88]/20 transition-colors">
@@ -219,7 +219,7 @@ export const LabViewer: React.FC<LabViewerProps> = ({ labId, onBack }) => {
             </div>
             <div className="bg-black">
               <iframe
-                src={`http://localhost:5174/proxy?url=${encodeURIComponent(lab.liveUrl)}`}
+                src={`${window.location.protocol}//${window.location.hostname}:5174/proxy?url=${encodeURIComponent(lab.liveUrl)}`}
                 sandbox="allow-scripts allow-forms allow-same-origin allow-popups"
                 className="w-full h-[500px]"
                 title="Embedded Lab Target"
@@ -237,7 +237,7 @@ export const LabViewer: React.FC<LabViewerProps> = ({ labId, onBack }) => {
               <span>Mission Briefing</span>
             </h2>
           </div>
-          
+
           {/* Lab Demo Video */}
           <div className="p-6 border-b border-[#00FF88]/10">
             <h3 className="text-lg font-bold text-white mb-4 flex items-center space-x-2">
@@ -251,12 +251,12 @@ export const LabViewer: React.FC<LabViewerProps> = ({ labId, onBack }) => {
               onComplete={() => console.log('Lab video completed')}
             />
           </div>
-          
+
           <div className="p-6">
             <div className="prose prose-invert max-w-none">
-              <div 
+              <div
                 className="text-[#EAEAEA] leading-relaxed"
-                dangerouslySetInnerHTML={{ 
+                dangerouslySetInnerHTML={{
                   __html: (() => {
                     let s = lab.instructions.replace(/\n/g, '<br/>');
                     s = s.replace(/```([\s\S]*?)```/g, (_m, code) => `<pre class="bg-black/50 border border-[#00FF88]/20 p-4 rounded-lg mt-4 mb-4 overflow-x-auto font-mono text-sm text-[#00FF88]"><code>${code}</code></pre>`);
@@ -268,7 +268,7 @@ export const LabViewer: React.FC<LabViewerProps> = ({ labId, onBack }) => {
                     s = s.replace(/^(\d+)\. (.+)$/gm, (_m, n, item) => `<li class="ml-4 text-[#00B37A]">${n}. ${item}</li>`);
                     return s;
                   })()
-                }} 
+                }}
               />
             </div>
           </div>

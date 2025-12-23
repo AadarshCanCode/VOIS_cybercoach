@@ -19,7 +19,7 @@ import { TechnicalQuestions } from './TechnicalInterview/TechnicalQuestions';
 import { NotesTab } from './Notes/NotesTab';
 import { CommunityPage } from './Community/CommunityPage';
 import { CompanyVerification } from './Verification/CompanyVerification';
-import { BountyBoard } from './Career/BountyBoard';
+import { JobsBoard } from './Career/JobsBoard';
 import { InterviewBot } from './Career/InterviewBot';
 import { ResumeGenerator } from './Career/ResumeGenerator';
 import { PricingPage } from './Subscription/PricingPage';
@@ -116,7 +116,7 @@ export const StudentAppContent: React.FC<StudentAppContentProps> = ({ initialTab
       case 'verification':
         return <CompanyVerification />;
       case 'career':
-        return <BountyBoard />;
+        return <JobsBoard />;
       case 'interview':
         return <InterviewBot />;
       case 'resume':

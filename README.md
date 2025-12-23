@@ -2,6 +2,7 @@
 
 A comprehensive education platform built with React, TypeScript, and Express for managing courses,assessments, and proctoring.
 
+
 ## 🏗️Architecture
 
 ### Frontend (React + TypeScript + Vite)

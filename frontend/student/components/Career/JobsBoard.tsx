@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Briefcase, MapPin, DollarSign, Shield, ExternalLink, Search } from 'lucide-react';
 import { careerService, JobListing } from '../../services/careerService';
 
-export const BountyBoard: React.FC = () => {
+export const JobsBoard: React.FC = () => {
     const [jobs, setJobs] = useState<JobListing[]>([]);
     const [loading, setLoading] = useState(true);
     const [filterType, setFilterType] = useState('all');
@@ -37,9 +37,9 @@ export const BountyBoard: React.FC = () => {
             <div className="flex items-center justify-between border-b border-[#00FF88]/10 pb-6">
                 <div>
                     <h1 className="text-3xl font-black tracking-tighter text-white uppercase">
-                        Mission <span className="text-[#00FF88]">Board</span>
+                        Job <span className="text-[#00FF88]">Postings</span>
                     </h1>
-                    <p className="text-[#00B37A] font-mono text-sm mt-1">AVAILABLE CONTRACTS & BOUNTIES</p>
+                    <p className="text-[#00B37A] font-mono text-sm mt-1">AVAILABLE OPPORTUNITIES & CONTRACTS</p>
                 </div>
                 <div className="h-10 w-10 rounded bg-[#00FF88]/10 border border-[#00FF88]/20 flex items-center justify-center">
                     <Briefcase className="h-5 w-5 text-[#00FF88]" />
@@ -52,7 +52,7 @@ export const BountyBoard: React.FC = () => {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#00B37A]" />
                     <input
                         type="text"
-                        placeholder="Search missions..."
+                        placeholder="Search jobs..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="w-full bg-[#0A0F0A] border border-[#00FF88]/20 rounded-lg pl-10 pr-4 py-2 text-[#EAEAEA] focus:outline-none focus:border-[#00FF88]/50 placeholder-[#00B37A]/50"
@@ -132,13 +132,13 @@ export const BountyBoard: React.FC = () => {
                                 className="w-full bg-[#00FF88] hover:bg-[#00CC66] text-black font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-all"
                             >
                                 <ExternalLink className="h-4 w-4" />
-                                ACCEPT MISSION
+                                APPLY NOW
                             </a>
                         </div>
                     ))
                 ) : (
                     <div className="col-span-full text-center py-12 text-[#00B37A]">
-                        <p>No active missions found matching your criteria.</p>
+                        <p>No active job postings found matching your criteria.</p>
                     </div>
                 )}
             </div>
