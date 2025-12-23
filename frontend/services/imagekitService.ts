@@ -60,41 +60,16 @@ function parseVideoFilename(filename: string): { title: string; category: string
   };
 }
 
-// Fetch videos from ImageKit - directly in production, via proxy in dev
+// Fetch videos from ImageKit via backend proxy (works both locally and on Vercel)
 export async function fetchVideosFromImageKit(folderPath: string = '/cybercoach'): Promise<ImageKitVideo[]> {
   try {
-    // In production, call ImageKit directly with public key (read-only)
-    const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const response = await fetch(`/api/imagekit/videos?folder=${encodeURIComponent(folderPath)}`);
     
-    let files: ImageKitFile[];
-    
-    if (isDev) {
-      // Use backend proxy in development
-      const response = await fetch(`/api/imagekit/videos?folder=${encodeURIComponent(folderPath)}`);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch videos: ${response.status}`);
-      }
-      files = await response.json();
-    } else {
-      // Call ImageKit API directly in production using public key
-      const publicKey = import.meta.env.VITE_IMAGEKIT_PUBLIC_KEY;
-      const urlEndpoint = import.meta.env.VITE_IMAGEKIT_URL_ENDPOINT;
-      
-      if (!publicKey || !urlEndpoint) {
-        throw new Error('ImageKit credentials not configured');
-      }
-      
-      const response = await fetch(`https://api.imagekit.io/v1/files?path=${encodeURIComponent(folderPath)}&limit=100`, {
-        headers: {
-          'Authorization': `Basic ${btoa(publicKey + ':')}`
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Failed to fetch videos: ${response.status}`);
-      }
-      files = await response.json();
+    if (!response.ok) {
+      throw new Error(`Failed to fetch videos: ${response.status}`);
     }
+    
+    const files: ImageKitFile[] = await response.json();
     
     // Filter only video files
     const videoFiles = files.filter(file => 
