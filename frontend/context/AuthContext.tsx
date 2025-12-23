@@ -1,11 +1,13 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authService } from '@services/authService';
 import type { User } from '@types';
+import { supabase } from '@lib/supabase';
 
 interface AuthContextValue {
   user: (User & { role?: 'student' | 'teacher' | 'admin'; created_at?: string | Date }) | null;
   loading: boolean;
   login: (email: string, password: string, role?: 'student' | 'teacher' | 'admin') => Promise<boolean>;
+  loginWithGoogle: (role?: 'student' | 'teacher') => Promise<void>;
   register: (
     email: string,
     password: string,
@@ -28,9 +30,42 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Initial verification
     const currentUser = authService.getCurrentUser();
     setUser(currentUser);
     setLoading(false);
+
+    // Listen for auth state changes (e.g. returning from Google OAuth)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        if (session) {
+          try {
+            // If we get a session, verify/sync with our users table
+            const syncedUser = await authService.handleAuthStateChange(session);
+            if (syncedUser) {
+              setUser(syncedUser);
+            }
+          } catch (error: any) {
+            console.error('Auth sync error:', error);
+            await authService.logout();
+            setUser(null);
+
+            // Redirect to login with error
+            // We use window.location to force a full reload so the URL params are picked up by the Login component
+            // Important: Redirect to /login specifically, as the root path might render LandingPage which doesn't show errors
+            const url = new URL(window.location.origin + '/login');
+            url.searchParams.set('error_description', error.message);
+            window.location.href = url.toString();
+          }
+        }
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string, role: 'student' | 'teacher' | 'admin' = 'student') => {
@@ -45,6 +80,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       throw error;
     }
   };
+
+  const loginWithGoogle = async (role: 'student' | 'teacher' = 'student') => {
+    try {
+      await authService.loginWithGoogle(role);
+    } catch (error) {
+      console.error('Google login failed:', error);
+      throw error;
+    }
+  }
 
   const register = async (
     email: string,
@@ -65,8 +109,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const logout = () => {
-    authService.logout();
+  const logout = async () => {
+    await authService.logout();
     setUser(null);
   };
 
@@ -91,7 +135,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, updateUser, isAdmin, isTeacher, isStudent }}>
+    <AuthContext.Provider value={{ user, loading, login, loginWithGoogle, register, logout, updateUser, isAdmin, isTeacher, isStudent }}>
       {children}
     </AuthContext.Provider>
   );
