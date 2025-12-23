@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Shield, BookOpen, Award, Target, Zap, CheckCircle, ArrowRight, Globe, Brain, Video, Menu, X, Users, Terminal, Lock, ChevronRight, Activity } from 'lucide-react';
+import { Shield, BookOpen, Award, Target, Zap, ArrowRight, Globe, Brain, Video, Menu, X, Users, Terminal, Lock, Activity } from 'lucide-react';
 import { useAuth } from '@context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -24,46 +24,7 @@ const FeatureCard: React.FC<{ icon: React.ReactNode; title: string; copy: string
   </div>
 );
 
-const PathCard: React.FC<{ title: string; level: string; features: string[]; highlight?: boolean; onApply: () => void }> = ({ title, level, features, highlight, onApply }) => (
-  <div className={`relative p-8 rounded-2xl border flex flex-col justify-between transition-all hover:-translate-y-1 ${highlight
-    ? 'bg-[#00FF88]/5 border-[#00FF88] shadow-[0_0_30px_rgba(0,255,136,0.1)]'
-    : 'bg-[#0A0F0A] border-[#00FF88]/10 hover:border-[#00FF88]/30'
-    }`}>
-    {highlight && (
-      <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-[#00FF88] text-black text-xs font-bold uppercase tracking-widest rounded-full">
-        Recommended
-      </div>
-    )}
-    <div>
-      <div className="flex justify-between items-start mb-6">
-        <div>
-          <h3 className="text-2xl font-black text-white uppercase tracking-tight">{title}</h3>
-          <div className="text-xs font-mono text-[#00FF88] mt-1">{level}</div>
-        </div>
-        <Shield className={`h-6 w-6 ${highlight ? 'text-[#00FF88]' : 'text-[#00B37A]'}`} />
-      </div>
 
-      <ul className="space-y-4 mb-8">
-        {features.map((f) => (
-          <li key={f} className="flex items-start gap-3 text-sm text-[#EAEAEA]">
-            <CheckCircle className="h-4 w-4 text-[#00FF88] mt-0.5 flex-shrink-0" />
-            {f}
-          </li>
-        ))}
-      </ul>
-    </div>
-
-    <button
-      onClick={onApply}
-      className={`w-full py-3 rounded-lg font-bold uppercase tracking-wide transition-all ${highlight
-        ? 'bg-[#00FF88] text-black hover:bg-[#00CC66]'
-        : 'bg-[#00FF88]/10 text-[#00FF88] hover:bg-[#00FF88]/20'
-        }`}
-    >
-      Initialize
-    </button>
-  </div>
-);
 
 const ActionCard: React.FC<{ icon: React.ReactNode; title: string; subtitle: string; description: string; onClick: () => void }> = ({ icon, title, subtitle, description, onClick }) => (
   <button
@@ -90,8 +51,7 @@ export const LandingPage: React.FC = () => {
 
   // interactive UI state
   const [showDemo, setShowDemo] = useState(false);
-  const [email, setEmail] = useState('');
-  const [emailMsg, setEmailMsg] = useState<string | null>(null);
+
 
   // testimonials carousel
   const testimonials = useMemo(
@@ -138,16 +98,7 @@ export const LandingPage: React.FC = () => {
     navigate(`/login?type=${type}${tab ? `&tab=${tab}` : ''}`);
   };
 
-  const submitEmail = (e?: React.FormEvent) => {
-    e?.preventDefault();
-    if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,}$/.test(email)) {
-      setEmailMsg('Please enter a valid email address');
-      return;
-    }
-    setEmailMsg('Thanks! We\'ll keep you updated.');
-    setEmail('');
-    setTimeout(() => setEmailMsg(null), 4000);
-  };
+
 
   // navbar mobile state
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -188,7 +139,7 @@ export const LandingPage: React.FC = () => {
 
             {/* desktop links */}
             <nav className="hidden sm:flex items-center gap-8">
-              {['Features', 'Paths', 'Testimonials'].map((item) => (
+              {['Features', 'Testimonials'].map((item) => (
                 <a key={item} className="text-sm font-medium text-[#00B37A] hover:text-[#00FF88] transition-colors uppercase tracking-wide" href={`#${item.toLowerCase()}`}>
                   {item}
                 </a>
@@ -211,7 +162,7 @@ export const LandingPage: React.FC = () => {
           {mobileOpen && (
             <div id="mobile-menu" className="sm:hidden absolute top-full left-0 right-0 bg-[#0A0F0A] border-b border-[#00FF88]/20 p-4 animate-in slide-in-from-top-2">
               <div className="flex flex-col gap-4">
-                {['Features', 'Paths', 'Testimonials'].map((item) => (
+                {['Features', 'Testimonials'].map((item) => (
                   <a key={item} className="block px-4 py-2 text-[#00B37A] hover:text-[#00FF88] hover:bg-[#00FF88]/10 rounded-lg font-medium uppercase tracking-wide" href={`#${item.toLowerCase()}`} onClick={() => setMobileOpen(false)}>
                     {item}
                   </a>
@@ -262,22 +213,7 @@ export const LandingPage: React.FC = () => {
                 </a>
               </div>
 
-              {/* email signup */}
-              <form onSubmit={submitEmail} className="mt-12 max-w-md relative group">
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-[#00FF88] to-[#00CC66] rounded-lg blur opacity-20 group-hover:opacity-40 transition duration-500" />
-                <div className="relative flex gap-2 bg-[#0A0F0A] p-1.5 rounded-lg border border-[#00FF88]/20">
-                  <input
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter comms frequency (email)..."
-                    className="flex-1 px-4 py-2 bg-transparent text-[#EAEAEA] placeholder-[#00B37A]/50 focus:outline-none font-mono text-sm"
-                  />
-                  <button className="px-6 py-2 rounded bg-[#00FF88]/10 hover:bg-[#00FF88]/20 text-[#00FF88] font-bold text-sm uppercase tracking-wide border border-[#00FF88]/20 transition-all">
-                    Connect
-                  </button>
-                </div>
-                {emailMsg && <div className="absolute -bottom-8 left-0 text-xs font-mono text-[#00FF88]">{emailMsg}</div>}
-              </form>
+
             </div>
 
             {/* Hero visual / stats */}
@@ -370,44 +306,7 @@ export const LandingPage: React.FC = () => {
         </section>
 
 
-        {/* Learning Paths */}
-        < section id="paths" className="py-24 px-6 relative overflow-hidden" >
-          <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-              <div>
-                <h2 className="text-3xl md:text-4xl font-black text-white uppercase tracking-tight mb-2">
-                  Mission <span className="text-[#00FF88]">Tracks</span>
-                </h2>
-                <p className="text-[#00B37A]">Select your specialization and begin training.</p>
-              </div>
-              <button onClick={() => handleGetStarted('student')} className="text-[#00FF88] font-bold uppercase tracking-wide hover:underline flex items-center gap-2">
-                View All Operations <ChevronRight className="h-4 w-4" />
-              </button>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <PathCard
-                title="Recruit"
-                level="LEVEL 1"
-                features={["Security Fundamentals", "Network Basics", "Linux Command Line"]}
-                onApply={() => handleGetStarted('student')}
-              />
-              <PathCard
-                title="Operative"
-                level="LEVEL 2"
-                features={["Penetration Testing", "Vulnerability Assessment", "Web App Security"]}
-                highlight
-                onApply={() => handleGetStarted('student')}
-              />
-              <PathCard
-                title="Specialist"
-                level="LEVEL 3"
-                features={["Advanced Exploitation", "Threat Hunting", "Reverse Engineering"]}
-                onApply={() => handleGetStarted('student')}
-              />
-            </div>
-          </div>
-        </section >
 
         {/* Testimonials */}
         < section id="testimonials" className="py-24 px-6 bg-[#050505] border-t border-[#00FF88]/10" >
