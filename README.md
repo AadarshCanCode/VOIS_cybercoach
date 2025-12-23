@@ -162,7 +162,7 @@ npm run preview
 - **Lucide React** - Icon library
 - **PDF.js** - PDF rendering
 - **face-api.js** - Face detection for proctoring
-- **Supabase** - Backend as a service
+- **Supabase** - Backend as  service
 
 ### Backend
 - **Express 5** - Web framework
