@@ -11,6 +11,7 @@ router.get('/overview', (_req: Request, res: Response): void => {
 });
 
 router.get('/jobs', async (_req: Request, res: Response) => {
+  console.log('[Jobs] Received request for job listings');
   const jobs = await getScrapedJobs();
   res.json(jobs);
 });
