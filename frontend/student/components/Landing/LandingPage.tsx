@@ -334,21 +334,21 @@ export const LandingPage: React.FC = () => {
                 title="Join Network"
                 subtitle="ESTABLISH UPLINK"
                 description="Connect with elite operatives. Share intel, bounties, and strategies in the global feed."
-                onClick={() => handleGetStarted('student', 'community')}
+                onClick={() => navigate('/community')}
               />
               <ActionCard
                 icon={<Shield className="h-10 w-10 text-[#00FF88]" />}
                 title="Verify Target"
                 subtitle="SCAN DATABASE"
                 description="Validate company credentials and security clearance levels against the central registry."
-                onClick={() => handleGetStarted('student', 'verification')}
+                onClick={() => navigate('/verify-target')}
               />
               <ActionCard
                 icon={<Activity className="h-10 w-10 text-[#00FF88]" />}
                 title="Analyze Target"
                 subtitle="VULNERABILITY SCAN"
                 description="Deploy AI-driven heuristic analysis on target domains to identify potential vectors."
-                onClick={() => handleGetStarted('student', 'analyzer')}
+                onClick={() => navigate('/analyze-target')}
               />
             </div>
 

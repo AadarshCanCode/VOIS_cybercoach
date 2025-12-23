@@ -2,7 +2,11 @@ import React, { useState } from 'react';
 import { Search, Shield, CheckCircle, AlertTriangle, Building, Globe, Award, ExternalLink, ArrowLeft, Database, Clock } from 'lucide-react';
 import { verificationService, CompanyData } from '../../services/verificationService';
 
+import { useNavigate } from 'react-router-dom';
+
 export const CompanyVerification: React.FC = () => {
+    const navigate = useNavigate();
+
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResult, setSearchResult] = useState<CompanyData | null>(null);
     const [isSearching, setIsSearching] = useState(false);
@@ -63,7 +67,7 @@ export const CompanyVerification: React.FC = () => {
             <div className="max-w-3xl mx-auto space-y-8">
                 <div className="mb-6">
                     <button
-                        onClick={() => window.location.href = '/?tab=landing'}
+                        onClick={() => navigate('/')}
                         className="flex items-center text-[#00B37A] hover:text-white transition-colors font-mono uppercase tracking-wider text-sm"
                     >
                         <ArrowLeft className="h-4 w-4 mr-2" />

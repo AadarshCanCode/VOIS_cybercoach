@@ -7,6 +7,9 @@ import { LandingPage } from '@student/components/Landing/LandingPage';
 import { LoginForm } from '@student/components/Auth/LoginForm';
 import { RegisterForm } from '@student/components/Auth/RegisterForm';
 import { AdminLogin } from '@admin/components/AdminLogin';
+import { CompanyVerification } from '@student/components/Verification/CompanyVerification';
+import { CommunityPage } from '@student/components/Community/CommunityPage';
+import { VulnerabilityAnalyzer } from '@student/components/Tools/VulnerabilityAnalyzer';
 
 export const AppContent = () => {
     const { user, loading, isAdmin, isTeacher } = useAuth();
@@ -41,6 +44,11 @@ export const AppContent = () => {
             <Route path="/admin/login" element={
                 user && isAdmin() ? <Navigate to="/admin" replace /> : <AdminLogin />
             } />
+
+            {/* Public Tool Routes */}
+            <Route path="/verify-target" element={<CompanyVerification />} />
+            <Route path="/community" element={<CommunityPage />} />
+            <Route path="/analyze-target" element={<VulnerabilityAnalyzer />} />
 
             {/* Protected Student Routes */}
             <Route path="/dashboard" element={

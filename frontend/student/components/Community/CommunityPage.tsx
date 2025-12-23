@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MessageSquare, Heart, Share2, Search, User, MoreHorizontal, Hash, ArrowLeft, Zap, Send } from 'lucide-react';
 import { useAuth } from '@context/AuthContext';
 import { communityService, Post, Comment } from '../../services/communityService';
+import { useNavigate } from 'react-router-dom';
 
 interface CommunityPageProps {
     onBack?: () => void;
@@ -9,6 +10,7 @@ interface CommunityPageProps {
 
 export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack }) => {
     const { user } = useAuth();
+    const navigate = useNavigate();
     const [activeCategory, setActiveCategory] = useState<'all' | 'social' | 'technical'>('all');
     const [searchQuery, setSearchQuery] = useState('');
     const [newPostContent, setNewPostContent] = useState('');
@@ -167,7 +169,7 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ onBack }) => {
                                 if (onBack) {
                                     onBack();
                                 } else {
-                                    window.location.href = '/?tab=landing';
+                                    navigate('/');
                                 }
                             }}
                             className="group flex items-center text-[#00B37A] hover:text-[#00FF88] transition-colors mb-6 text-sm font-medium tracking-wide uppercase"
