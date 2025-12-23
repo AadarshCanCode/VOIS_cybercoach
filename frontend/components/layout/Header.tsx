@@ -2,6 +2,7 @@ import React from 'react';
 import { Shield, User, LogOut, Bell, Search } from 'lucide-react';
 import { useAuth } from '@context/AuthContext';
 import { Button } from '../Button';
+import { useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
     className?: string;
@@ -9,12 +10,26 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ className }) => {
     const { user, logout } = useAuth();
+    const navigate = useNavigate();
+
+    const handleLogoClick = () => {
+        if (user) {
+            // If logged in, dispatch event to switch to dashboard tab
+            window.dispatchEvent(new CustomEvent('navigateToTab', { detail: { tab: 'dashboard' } }));
+        } else {
+            // If not logged in, navigate to home
+            navigate('/');
+        }
+    };
 
     return (
         <header className={`sticky top-0 z-50 w-full border-b border-white/5 bg-background/80 backdrop-blur-xl ${className}`}>
             <div className="flex h-16 items-center px-6 gap-4">
                 {/* Logo */}
-                <div className="flex items-center gap-2 mr-4">
+                <button
+                    onClick={handleLogoClick}
+                    className="flex items-center gap-2 mr-4 hover:opacity-80 transition-opacity cursor-pointer"
+                >
                     <div className="relative">
                         <div className="absolute inset-0 bg-primary/50 blur-lg rounded-full animate-pulse" />
                         <Shield className="relative h-8 w-8 text-primary" />
@@ -22,7 +37,7 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
                     <span className="text-xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent hidden sm:inline-block">
                         Cyber Coach
                     </span>
-                </div>
+                </button>
 
                 {/* Search Bar */}
                 <div className="flex-1 max-w-md hidden md:block">
@@ -64,7 +79,13 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    onClick={logout}
+                                    onClick={async () => {
+                                        try {
+                                            await logout();
+                                        } catch (error) {
+                                            console.error('Logout failed:', error);
+                                        }
+                                    }}
                                     className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                                 >
                                     <LogOut className="h-5 w-5" />
