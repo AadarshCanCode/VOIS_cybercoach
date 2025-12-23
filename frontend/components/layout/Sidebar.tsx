@@ -23,18 +23,17 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
-    const { user, logout, isTeacher, isAdmin } = useAuth();
+    const { logout, isTeacher, isAdmin } = useAuth();
 
     const menuItems = [
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
         { id: 'courses', label: 'Courses', icon: BookOpen },
-        { id: 'labs', label: 'Virtual Labs', icon: Terminal },
-        { id: 'videos', label: 'Video Library', icon: Video },
+        { id: 'labs', label: 'Labs', icon: Terminal },
+        { id: 'videos', label: 'Videos', icon: Video },
         { id: 'certificates', label: 'Certificates', icon: Award },
-        { id: 'notes', label: 'My Notes', icon: FileText },
-        { id: 'profile', label: 'Profile', icon: User },
-        { id: 'career', label: 'Mission Board', icon: Briefcase },
-        { id: 'interview', label: 'Interview Bot', icon: Bot },
+        { id: 'notes', label: 'Notes', icon: FileText },
+        { id: 'career', label: 'Career', icon: Briefcase },
+        { id: 'interview', label: 'AI Interview', icon: Bot },
         { id: 'resume', label: 'Resume', icon: FileText },
         { id: 'assessment', label: 'Assessment', icon: ClipboardCheck },
     ];
@@ -91,22 +90,26 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
             </div>
 
             <div className="p-4 border-t border-[#00FF88]/10 bg-[#0A0F0A]/50 backdrop-blur-sm">
-                <div className="mb-4 px-4 py-3 bg-gradient-to-br from-[#0A0F0A] to-[#000000] rounded-xl border border-[#00FF88]/10 shadow-inner">
-                    <p className="text-xs font-medium text-[#00B37A] uppercase tracking-wider mb-2">Quick Stats</p>
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <p className="text-2xl font-bold text-[#EAEAEA]">
-                                {user?.role === 'student' ? 'Level 5' : 'Admin'}
-                            </p>
-                            <p className="text-xs text-[#00FF88]">
-                                {user?.role === 'student' ? 'Intermediate' : 'System Access'}
-                            </p>
-                        </div>
-                        <div className="h-10 w-10 rounded-full bg-[#00FF88]/10 flex items-center justify-center border border-[#00FF88]/20">
-                            <Award className="h-5 w-5 text-[#00FF88]" />
-                        </div>
+                <button
+                    onClick={() => onTabChange('profile')}
+                    className={cn(
+                        "w-full mb-3 flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 group relative overflow-hidden",
+                        activeTab === 'profile'
+                            ? 'bg-gradient-to-r from-[#00FF88]/20 to-[#00FF88]/5 text-[#00FF88] shadow-[0_0_20px_rgba(0,255,136,0.15)] border border-[#00FF88]/20'
+                            : 'text-[#00B37A] hover:text-[#EAEAEA] hover:bg-[#00FF88]/5 border border-transparent hover:shadow-lg hover:shadow-[#00FF88]/5'
+                    )}
+                >
+                    <div className={cn(
+                        "p-2 rounded-lg transition-all duration-300",
+                        activeTab === 'profile' ? "bg-[#00FF88]/10" : "bg-[#00FF88]/5 group-hover:bg-[#00FF88]/10"
+                    )}>
+                        <User className={cn(
+                            "h-5 w-5 transition-transform duration-300 group-hover:scale-110",
+                            activeTab === 'profile' ? "text-[#00FF88]" : "text-[#00B37A] group-hover:text-[#EAEAEA]"
+                        )} />
                     </div>
-                </div>
+                    <span className="font-medium tracking-wide text-sm">Profile</span>
+                </button>
 
                 <button
                     onClick={() => onTabChange('pricing')}

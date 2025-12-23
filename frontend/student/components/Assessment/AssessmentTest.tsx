@@ -594,8 +594,8 @@ export const AssessmentTest: React.FC = () => {
               <div className="mb-6">
                 <div className="flex items-center space-x-2 mb-4">
                   <span className={`px-2 py-1 rounded text-xs font-medium ${currentQuestion.difficulty === 'easy' ? 'bg-green-100 text-green-800' :
-                      currentQuestion.difficulty === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
+                    currentQuestion.difficulty === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
                     }`}>
                     {currentQuestion.difficulty.toUpperCase()}
                   </span>
@@ -609,14 +609,14 @@ export const AssessmentTest: React.FC = () => {
                     key={index}
                     onClick={() => handleAnswerSelect(index)}
                     className={`w-full text-left p-4 rounded-lg border-2 transition-all ${selectedAnswer === index
-                        ? 'border-cyan-500 bg-cyan-50 text-cyan-900'
-                        : 'border-gray-200 hover:border-gray-300 bg-white'
+                      ? 'border-cyan-500 bg-cyan-50 text-cyan-900'
+                      : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                   >
                     <div className="flex items-center space-x-3">
                       <div className={`w-4 h-4 rounded-full border-2 ${selectedAnswer === index
-                          ? 'border-cyan-500 bg-cyan-500'
-                          : 'border-gray-300'
+                        ? 'border-cyan-500 bg-cyan-500'
+                        : 'border-gray-300'
                         }`}>
                         {selectedAnswer === index && (
                           <div className="w-full h-full rounded-full bg-white scale-50"></div>

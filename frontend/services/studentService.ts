@@ -4,6 +4,7 @@ export interface StudentStats {
     coursesCompleted: number;
     assessmentScore: number | null;
     certificatesEarned: number;
+    liveLabsCompleted: number;
     studyTime: string; // This might need to be calculated or stored
 }
 
@@ -52,6 +53,7 @@ class StudentService {
                 coursesCompleted: coursesCompleted || 0,
                 assessmentScore: null, // Assessment scores tracked separately in assessment results
                 certificatesEarned: certificatesEarned || 0,
+                liveLabsCompleted: 0, // Placeholder for now, or fetch from a future labs table
                 studyTime
             };
         } catch (error) {

@@ -86,13 +86,13 @@ export const StudentAppContent: React.FC<StudentAppContentProps> = ({ initialTab
 
     switch (activeTab) {
       case 'analytics':
-        return isAdmin() ? <AssessmentAnalytics /> : <Dashboard />;
+        return isAdmin() ? <AssessmentAnalytics /> : <Dashboard onTabChange={setActiveTab} />;
       case 'my-courses':
       case 'create-course':
       case 'students':
-        return isTeacher() ? <TeacherDashboard /> : <Dashboard />;
+        return isTeacher() ? <TeacherDashboard /> : <Dashboard onTabChange={setActiveTab} />;
       case 'dashboard':
-        return <Dashboard />;
+        return <Dashboard onTabChange={setActiveTab} />;
       case 'assessment':
         return isAdmin() ? <AssessmentAnalytics /> : <AssessmentTest />;
       case 'proctor-demo':
@@ -126,7 +126,7 @@ export const StudentAppContent: React.FC<StudentAppContentProps> = ({ initialTab
       case 'analyzer':
         return <VulnerabilityAnalyzer />;
       default:
-        return <Dashboard />;
+        return <Dashboard onTabChange={setActiveTab} />;
     }
   };
 

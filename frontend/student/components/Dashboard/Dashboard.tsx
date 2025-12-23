@@ -6,12 +6,17 @@ import { studentService, StudentStats, RecentActivity } from '@services/studentS
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/Card';
 import { formatDistanceToNow } from 'date-fns';
 
-export const Dashboard: React.FC = () => {
+interface DashboardProps {
+  onTabChange?: (tab: string) => void;
+}
+
+export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
   const { user } = useAuth();
   const [statsData, setStatsData] = useState<StudentStats>({
     coursesCompleted: 0,
     assessmentScore: null,
     certificatesEarned: 0,
+    liveLabsCompleted: 0,
     studyTime: '0 hours'
   });
   const [activities, setActivities] = useState<RecentActivity[]>([]);
@@ -56,7 +61,7 @@ export const Dashboard: React.FC = () => {
       <div className="flex items-center justify-between border-b border-[#00FF88]/10 pb-6">
         <div>
           <h1 className="text-3xl font-black tracking-tighter text-white uppercase">
-            Command <span className="text-[#00FF88]">Center</span>
+            Dashboard
           </h1>
           <p className="text-[#00B37A] font-mono text-sm mt-1">OPERATOR: {user?.name?.toUpperCase()}</p>
         </div>
@@ -126,7 +131,7 @@ export const Dashboard: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               {[
-                { label: 'Live Security Labs', progress: 33, total: '2/6', color: 'text-[#00CC66]', bar: 'bg-[#00CC66]' },
+                { label: 'Live Security Labs', progress: (statsData.liveLabsCompleted / 6) * 100, total: `${statsData.liveLabsCompleted}/6`, color: 'text-[#00CC66]', bar: 'bg-[#00CC66]' },
                 { label: 'Skill Assessment', progress: user?.completedAssessment ? 100 : 0, total: user?.completedAssessment ? 'Complete' : 'Pending', color: 'text-[#00B37A]', bar: 'bg-[#00B37A]' }
               ].map((item, i) => (
                 <div key={i} className="group">
@@ -148,20 +153,20 @@ export const Dashboard: React.FC = () => {
 
           {/* Status Bar (Compact Stats) */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-[#0A0F0A] border border-[#00FF88]/10 p-4 rounded-xl">
+            <button onClick={() => onTabChange?.('courses')} className="bg-[#0A0F0A] border border-[#00FF88]/10 hover:border-[#00FF88]/30 p-4 rounded-xl cursor-pointer transition-all hover:bg-[#00FF88]/5">
               <p className="text-[10px] text-[#00B37A] uppercase tracking-wider mb-1">Courses</p>
               <p className="text-2xl font-bold text-white">{statsData.coursesCompleted}</p>
-            </div>
-            <div className="bg-[#0A0F0A] border border-[#00FF88]/10 p-4 rounded-xl">
+            </button>
+            <button onClick={() => onTabChange?.('certificates')} className="bg-[#0A0F0A] border border-[#00FF88]/10 hover:border-[#00FF88]/30 p-4 rounded-xl cursor-pointer transition-all hover:bg-[#00FF88]/5">
               <p className="text-[10px] text-[#00B37A] uppercase tracking-wider mb-1">Certificates</p>
               <p className="text-2xl font-bold text-white">{statsData.certificatesEarned}</p>
-            </div>
+            </button>
           </div>
 
           {/* Quick Commands */}
           <div className="space-y-3">
             <h3 className="text-xs font-bold text-[#00B37A] uppercase tracking-widest px-1">Quick Commands</h3>
-            <button className="w-full group bg-[#0A0F0A] hover:bg-[#00FF88]/5 border border-[#00FF88]/20 hover:border-[#00FF88]/50 p-4 rounded-xl flex items-center justify-between transition-all">
+            <button onClick={() => onTabChange?.('assessment')} className="w-full group bg-[#0A0F0A] hover:bg-[#00FF88]/5 border border-[#00FF88]/20 hover:border-[#00FF88]/50 p-4 rounded-xl flex items-center justify-between transition-all">
               <div className="flex items-center gap-3">
                 <div className="h-8 w-8 rounded bg-[#00FF88]/10 flex items-center justify-center text-[#00FF88]">
                   <Target className="h-4 w-4" />
@@ -170,7 +175,7 @@ export const Dashboard: React.FC = () => {
               </div>
               <ChevronRight className="h-4 w-4 text-[#00B37A] group-hover:translate-x-1 transition-transform" />
             </button>
-            <button className="w-full group bg-[#0A0F0A] hover:bg-[#00FF88]/5 border border-[#00FF88]/20 hover:border-[#00FF88]/50 p-4 rounded-xl flex items-center justify-between transition-all">
+            <button onClick={() => onTabChange?.('certificates')} className="w-full group bg-[#0A0F0A] hover:bg-[#00FF88]/5 border border-[#00FF88]/20 hover:border-[#00FF88]/50 p-4 rounded-xl flex items-center justify-between transition-all">
               <div className="flex items-center gap-3">
                 <div className="h-8 w-8 rounded bg-[#00FF88]/10 flex items-center justify-center text-[#00FF88]">
                   <Award className="h-4 w-4" />
