@@ -7,7 +7,6 @@ export const BountyBoard: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [filterType, setFilterType] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
-    const [applying, setApplying] = useState<string | null>(null);
 
     useEffect(() => {
         loadJobs();
@@ -24,12 +23,6 @@ export const BountyBoard: React.FC = () => {
         }
     };
 
-    const handleApply = async (jobId: string) => {
-        setApplying(jobId);
-        await careerService.applyForJob(jobId);
-        setApplying(null);
-        alert('Application transmitted securely. Good luck, Operator.');
-    };
 
     const filteredJobs = jobs.filter(job => {
         const matchesType = filterType === 'all' || job.type === filterType;
@@ -110,6 +103,7 @@ export const BountyBoard: React.FC = () => {
                                 <div className="flex items-center gap-2 text-[#00B37A] text-sm font-mono mt-1">
                                     <Shield className="h-3 w-3" />
                                     {job.company}
+                                    <span className="text-[#00B37A]/50 ml-auto">{job.source}</span>
                                 </div>
                             </div>
 
@@ -131,23 +125,15 @@ export const BountyBoard: React.FC = () => {
                                 </div>
                             </div>
 
-                            <button
-                                onClick={() => handleApply(job.id)}
-                                disabled={applying === job.id}
-                                className="w-full bg-[#00FF88] hover:bg-[#00CC66] text-black font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            <a
+                                href={job.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-full bg-[#00FF88] hover:bg-[#00CC66] text-black font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-all"
                             >
-                                {applying === job.id ? (
-                                    <>
-                                        <div className="h-4 w-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                                        TRANSMITTING...
-                                    </>
-                                ) : (
-                                    <>
-                                        <ExternalLink className="h-4 w-4" />
-                                        ACCEPT MISSION
-                                    </>
-                                )}
-                            </button>
+                                <ExternalLink className="h-4 w-4" />
+                                ACCEPT MISSION
+                            </a>
                         </div>
                     ))
                 ) : (
