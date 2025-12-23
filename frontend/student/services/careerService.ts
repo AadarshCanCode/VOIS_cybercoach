@@ -14,7 +14,7 @@ export interface JobListing {
 export const careerService = {
     async getJobListings(): Promise<JobListing[]> {
         const { data, error } = await supabase
-            .from('job_listings')
+            .from('scraped_jobs')
             .select('*')
             .order('posted_at', { ascending: false });
 
