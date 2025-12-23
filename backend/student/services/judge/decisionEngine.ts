@@ -24,7 +24,7 @@ export const makeDecision = async (
 
     // 1. Heuristic Calculation
     let riskScore = 50; // Start Neutral
-    let breakdown: string[] = [];
+    const breakdown: string[] = [];
 
     // Factor: Domain Maturity
     if (domainIntel.ageDays) {
@@ -76,7 +76,7 @@ export const makeDecision = async (
     else if (riskScore > 35) verdict = 'CAUTION';
     else verdict = 'SAFE';
 
-    let explanation = breakdown.length > 0
+    const explanation = breakdown.length > 0
         ? breakdown.join('. ') + '.'
         : `Heuristic score: ${riskScore}/100 based on standard signals.`;
 

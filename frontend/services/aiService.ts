@@ -68,7 +68,9 @@ export const generateAIResponse = async (history: ChatMessage[], prompt: string)
     const data = await response.json();
     return data.candidates[0].content.parts[0].text;
   } catch (error) {
-    throw error; // Re-throw to let caller handle fallback
+    // Standard error log is fine here if needed, but the original was just re-throwing.
+    console.error('Gemini API Error:', error);
+    throw error;
   }
 };
 
@@ -117,7 +119,7 @@ export const aiService = {
     console.log("API Key present:", !!API_KEY);
 
     // 1. Check if we can use the real API
-    if (!!API_KEY) {
+    if (API_KEY) {
       try {
         console.log("Attempting Gemini API call...");
         const prompt = `
@@ -149,12 +151,12 @@ export const aiService = {
         try {
           const cleanResponse = response.replace(/```json/g, '').replace(/```/g, '').trim();
           return JSON.parse(cleanResponse);
-        } catch (parseError) {
+        } catch {
           console.error("Failed to parse Gemini response as JSON:", response);
           throw new Error("Invalid JSON response from AI");
         }
 
-      } catch (error) {
+      } catch {
         console.warn("AI Scan unavailable, switching to offline simulation mode.");
         // Fall through to static simulation below
       }

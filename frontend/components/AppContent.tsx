@@ -2,10 +2,14 @@ import { useAuth } from '@context/AuthContext';
 import { StudentAppContent } from '@student/components/StudentAppContent';
 import { TeacherDashboard } from '@teacher/components/TeacherDashboard';
 import { AdminDashboard } from '@admin/components/AdminDashboard';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { LandingPage } from '@student/components/Landing/LandingPage';
+import { LoginForm } from '@student/components/Auth/LoginForm';
+import { RegisterForm } from '@student/components/Auth/RegisterForm';
+import { AdminLogin } from '@admin/components/AdminLogin';
 
 export const AppContent = () => {
-    const { user, loading } = useAuth();
-
+    const { user, loading, isAdmin, isTeacher } = useAuth();
 
     if (loading) {
         return (
@@ -15,13 +19,46 @@ export const AppContent = () => {
         );
     }
 
-    if (user?.role === 'teacher') {
-        return <TeacherDashboard />;
-    }
+    return (
+        <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={
+                user ? (
+                    isTeacher() ? <Navigate to="/teacher" replace /> :
+                        isAdmin() ? <Navigate to="/admin" replace /> :
+                            <StudentAppContent />
+                ) : <LandingPage />
+            } />
 
-    if (user?.role === 'admin') {
-        return <AdminDashboard />;
-    }
+            <Route path="/login" element={
+                user ? <Navigate to="/" replace /> : <LoginForm />
+            } />
 
-    return <StudentAppContent />;
+            <Route path="/signup" element={
+                user ? <Navigate to="/" replace /> : <RegisterForm />
+            } />
+
+            <Route path="/admin/login" element={
+                user && isAdmin() ? <Navigate to="/admin" replace /> : <AdminLogin />
+            } />
+
+            {/* Protected Student Routes */}
+            <Route path="/dashboard" element={
+                user ? <StudentAppContent initialTab="dashboard" /> : <Navigate to="/login" replace />
+            } />
+
+            {/* Protected Teacher Routes */}
+            <Route path="/teacher/*" element={
+                user && isTeacher() ? <TeacherDashboard /> : <Navigate to="/login" replace />
+            } />
+
+            {/* Protected Admin Routes */}
+            <Route path="/admin/*" element={
+                user && isAdmin() ? <AdminDashboard /> : <Navigate to="/admin/login" replace />
+            } />
+
+            {/* Fallback */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+    );
 };

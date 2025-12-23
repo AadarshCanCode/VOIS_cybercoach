@@ -53,13 +53,14 @@ Available Commands:
                         type: 'info'
                     };
 
-                case 'ls':
+                case 'ls': {
                     const files = this.fs.listDirectory(args[0] || '.');
                     const output = files.map(f => {
                         const color = f.type === 'directory' ? '\x1b[34m' : '\x1b[37m'; // Blue for dir, White for file
                         return `${f.permissions} ${f.owner} ${f.group} ${f.size.toString().padStart(6)} ${f.modified.toLocaleTimeString()} ${color}${f.name}\x1b[0m`;
                     }).join('\n');
                     return { output, type: 'success' };
+                }
 
                 case 'cd':
                     this.fs.changeDirectory(args[0] || '~');
@@ -80,7 +81,7 @@ Available Commands:
                 case 'whoami':
                     return { output: 'operator', type: 'success' };
 
-                case 'nmap':
+                case 'nmap': {
                     if (!args[0]) return { output: 'nmap: missing target specification', type: 'error' };
                     const scanResult = this.net.scan(args[0]);
                     if (scanResult.error) return { output: `Note: Host seems down. If it is really up, but blocking our ping probes, try -Pn\nNmap done: 1 IP address (0 hosts up) scanned in 3.02 seconds`, type: 'error' };
@@ -95,13 +96,15 @@ Available Commands:
                     });
                     nmapOutput += `\nNmap done: 1 IP address (1 host up) scanned in 1.45 seconds`;
                     return { output: nmapOutput, type: 'success' };
+                }
 
-                case 'curl':
+                case 'curl': {
                     if (!args[0]) return { output: 'curl: try \'curl --help\' for more information', type: 'error' };
                     const response = await this.net.fetch(args[0]);
                     return { output: response.data, type: 'success' };
+                }
 
-                case 'sqlmap':
+                case 'sqlmap': {
                     if (!args.includes('-u')) return { output: 'sqlmap: missing url parameter (-u)', type: 'error' };
                     const urlIndex = args.indexOf('-u') + 1;
                     const url = args[urlIndex];
@@ -136,6 +139,7 @@ Available Commands:
             `,
                         type: 'success'
                     };
+                }
 
                 default:
                     return { output: `${cmd}: command not found`, type: 'error' };

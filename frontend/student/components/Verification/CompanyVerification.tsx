@@ -6,14 +6,12 @@ export const CompanyVerification: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResult, setSearchResult] = useState<CompanyData | null>(null);
     const [isSearching, setIsSearching] = useState(false);
-    const [hasSearched, setHasSearched] = useState(false);
 
     const handleSearch = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!searchQuery.trim()) return;
 
         setIsSearching(true);
-        setHasSearched(true);
         setSearchResult(null);
 
         try {

@@ -28,8 +28,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
         setError(null);
 
         try {
-            if (!user) throw new Error('User not authenticated');
-
+            if (!user?.id) throw new Error('User not authenticated');
             const result = await subscriptionService.upgradeToPro(user.id);
 
             if (result.success) {
@@ -41,7 +40,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
             } else {
                 setError(result.error || 'Payment failed');
             }
-        } catch (err) {
+        } catch {
             setError('An unexpected error occurred');
         } finally {
             setProcessing(false);

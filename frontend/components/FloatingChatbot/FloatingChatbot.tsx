@@ -21,19 +21,19 @@ type InterviewCategory = 'technical' | 'hr' | 'aptitude';
 const parseMarkdown = (text: string): string => {
   // Convert **bold** to <strong>bold</strong>
   let parsed = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-  
+
   // Convert *italic* to <em>italic</em>
   parsed = parsed.replace(/\*(.*?)\*/g, '<em>$1</em>');
-  
+
   // Convert line breaks to <br>
   parsed = parsed.replace(/\n/g, '<br>');
-  
+
   // Convert numbered lists
   parsed = parsed.replace(/^(\d+)\.\s/gm, '<br>$1. ');
-  
+
   // Convert bullet points
   parsed = parsed.replace(/^[-•]\s/gm, '<br>• ');
-  
+
   return parsed;
 };
 
@@ -96,7 +96,7 @@ export const FloatingChatbot = () => {
   // Interview mode functions (only for logged in users)
   const startInterview = async (category: InterviewCategory) => {
     if (!isLoggedIn) return;
-    
+
     setInterviewCategory(category);
     setMessages([
       {
@@ -173,7 +173,7 @@ export const FloatingChatbot = () => {
 
   const toggleMode = () => {
     if (!isLoggedIn) return;
-    
+
     const newMode = mode === 'chat' ? 'interview' : 'chat';
     setMode(newMode);
     setInterviewCategory(null);
@@ -213,7 +213,7 @@ export const FloatingChatbot = () => {
       if (isLoggedIn) {
         // Use advanced chatbot with RAG and memory for logged in users
         const memory = user?.id ? await learnerMemoryService.getContext(user.id, 8) : '';
-        
+
         let docs = '';
         try {
           docs = await ragDocsService.retrieveContext(inputValue, 4);
@@ -227,7 +227,7 @@ export const FloatingChatbot = () => {
         // Use onboarding service for non-logged in users
         response = await onboardingChatService.sendMessage(inputValue);
       }
-      
+
       const assistantMessage: Message = {
         role: 'assistant',
         content: response,
@@ -235,10 +235,10 @@ export const FloatingChatbot = () => {
       };
 
       setMessages(prev => [...prev, assistantMessage]);
-    } catch (error) {
+    } catch {
       const errorMessage: Message = {
         role: 'assistant',
-        content: isLoggedIn 
+        content: isLoggedIn
           ? "I apologize, but I'm having trouble responding right now. Please try again in a moment."
           : "I apologize, but I'm having trouble responding right now. Please try again in a moment, or feel free to explore the platform on your own!",
         timestamp: new Date()
@@ -422,7 +422,7 @@ export const FloatingChatbot = () => {
                 key={index}
                 className={`message ${message.role === 'user' ? 'message-user' : 'message-assistant'}`}
               >
-                <div 
+                <div
                   className="message-content"
                   dangerouslySetInnerHTML={{ __html: parseMarkdown(message.content) }}
                 />

@@ -26,7 +26,7 @@ export const careerService = {
         return data || [];
     },
 
-    async applyForJob(_jobId: string): Promise<boolean> {
+    async applyForJob(): Promise<boolean> {
         // Simulate application process
         await new Promise(resolve => setTimeout(resolve, 1500));
         return true;

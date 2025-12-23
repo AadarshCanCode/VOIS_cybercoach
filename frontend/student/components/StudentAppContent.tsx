@@ -3,7 +3,6 @@ import { useAuth } from '@context/AuthContext';
 import { Header } from '../../components/layout/Header';
 import { Sidebar } from '../../components/layout/Sidebar';
 import { LandingPage } from './Landing/LandingPage';
-import { AdminLogin } from '@admin/components/AdminLogin';
 import { Dashboard } from './Dashboard/Dashboard';
 import { TeacherDashboard } from '@teacher/components/TeacherDashboard';
 import { AssessmentTest } from './Assessment/AssessmentTest';
@@ -36,47 +35,12 @@ export const StudentAppContent: React.FC<StudentAppContentProps> = ({ initialTab
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [selectedLabId, setSelectedLabId] = useState<string | null>(null);
-  const [currentRoute, setCurrentRoute] = useState<'home' | 'admin' | 'app'>('home');
 
   useEffect(() => {
-    const path = window.location.pathname;
-    const searchParams = new URLSearchParams(window.location.search);
-    const tabParam = searchParams.get('tab');
-
-    if (path === '/admin') {
-      setCurrentRoute('admin');
-      return;
-    }
-
-    // Handle deep linking for tabs
-    if (tabParam && ['community', 'verification', 'proctor-demo', 'landing', 'pricing', 'analyzer'].includes(tabParam)) {
-      setActiveTab(tabParam);
-      if (user) {
-        setCurrentRoute('app');
-      }
-      return;
-    }
-
     if (initialTab) {
       setActiveTab(initialTab);
-      if (user) {
-        setCurrentRoute('app');
-      }
-      return;
     }
-
-    if (path === '/proctor-demo') {
-      setActiveTab('proctor-demo');
-      setCurrentRoute('app');
-      return;
-    }
-
-    if (user) {
-      setCurrentRoute('app');
-    } else {
-      setCurrentRoute('home');
-    }
-  }, [user, initialTab]);
+  }, [initialTab]);
 
   // Listen for navigation events from assessment completion
   useEffect(() => {
@@ -95,34 +59,8 @@ export const StudentAppContent: React.FC<StudentAppContentProps> = ({ initialTab
     };
   }, []);
 
-  const handleLoginSuccess = (targetTab?: string) => {
-    if (targetTab) {
-      setActiveTab(targetTab);
-    }
-    setCurrentRoute('app');
-    if (window.location.pathname === '/admin') {
-      window.history.pushState({}, '', '/');
-    }
-  };
-
-  if (currentRoute === 'admin') {
-    if (user && isAdmin()) {
-      setCurrentRoute('app');
-      return null;
-    }
-    return (
-      <AdminLogin
-        onBack={() => {
-          setCurrentRoute('home');
-          window.history.pushState({}, '', '/');
-        }}
-        onSuccess={handleLoginSuccess}
-      />
-    );
-  }
-
   if (!user) {
-    return <LandingPage onLogin={handleLoginSuccess} />;
+    return <LandingPage />;
   }
 
   const handleCourseSelect = (courseId: string) => {
@@ -143,7 +81,7 @@ export const StudentAppContent: React.FC<StudentAppContentProps> = ({ initialTab
     }
 
     if (activeTab === 'landing') {
-      return <LandingPage onLogin={handleLoginSuccess} />;
+      return <LandingPage />;
     }
 
     switch (activeTab) {

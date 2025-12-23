@@ -25,7 +25,7 @@ export const checkReputation = async (companyName: string): Promise<ReputationRe
         const query = `${companyName} reviews fake legit`;
 
         const runSearch = (q: string): Promise<any> => {
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve) => {
                 const search = new Search(apiKey);
                 search.json({
                     engine: "google",

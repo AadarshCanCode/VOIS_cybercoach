@@ -42,7 +42,7 @@ export const AssessmentTest: React.FC = () => {
     } else if (timeLeft === 0 && permissionGranted) {
       handleSubmitTest();
     }
-  }, [timeLeft, showResults, permissionGranted]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [timeLeft, showResults, permissionGranted]);
 
   // block copy/paste/right-click during assessment
   useEffect(() => {
@@ -74,7 +74,7 @@ export const AssessmentTest: React.FC = () => {
       document.removeEventListener('paste', onCopyCutPaste);
       document.removeEventListener('keydown', onKeyDown);
     };
-  }, [permissionGranted, showResults]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [permissionGranted, showResults]);
 
   useEffect(() => {
     if (videoRef.current && mediaStream) {
@@ -140,7 +140,7 @@ export const AssessmentTest: React.FC = () => {
     if (selectedAnswer !== null) {
       // Save response to database
       saveAssessmentResponse();
-      
+
       const newAnswers = [...answers];
       newAnswers[currentQuestionIndex] = selectedAnswer;
       setAnswers(newAnswers);
@@ -173,7 +173,7 @@ export const AssessmentTest: React.FC = () => {
     if (selectedAnswer !== null) {
       saveAssessmentResponse();
     }
-    
+
     setSubmitting(true);
     setSubmitError('');
     try {
@@ -233,7 +233,7 @@ export const AssessmentTest: React.FC = () => {
 
   const handleProctorEndExam = () => {
     setShowTerminationModal(true);
-    
+
     // force submit and stop media
     if (mediaStream) {
       mediaStream.getTracks().forEach((t) => t.stop());
@@ -259,15 +259,15 @@ export const AssessmentTest: React.FC = () => {
     return 'advanced';
   };
 
-  
+
 
   const saveAssessmentResponse = async () => {
     if (!user || selectedAnswer === null) return;
-    
+
     try {
       const timeTaken = Math.floor((new Date().getTime() - questionStartTime.getTime()) / 1000);
       const isCorrect = selectedAnswer === currentQuestion.correctAnswer;
-      
+
       await supabase.from('assessment_responses').insert({
         attempt_id: attemptId ?? undefined,
         user_id: user.id,
@@ -383,7 +383,7 @@ export const AssessmentTest: React.FC = () => {
   if (showResults) {
     const score = calculateScore(answers);
     const level = determineLevel(score);
-    
+
     return (
       <div className="p-6">
         <div className="max-w-4xl mx-auto">
@@ -397,13 +397,13 @@ export const AssessmentTest: React.FC = () => {
                 <XCircle className="h-16 w-16 text-red-500 mx-auto" />
               )}
             </div>
-            
+
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Assessment Complete!</h2>
             <div className="text-6xl font-bold text-cyan-600 mb-2">{score}%</div>
             <p className="text-xl text-gray-600 mb-6">
               Your cybersecurity level: <span className="font-bold capitalize text-cyan-600">{level}</span>
             </p>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               <div className="bg-gray-50 p-4 rounded-lg">
                 <div className="text-2xl font-bold text-gray-900">{answers.filter((answer, index) => answer === assessmentQuestions[index].correctAnswer).length}</div>
@@ -422,7 +422,7 @@ export const AssessmentTest: React.FC = () => {
             <div className="bg-cyan-50 border border-cyan-200 rounded-lg p-4 mb-6">
               <h3 className="font-bold text-cyan-800 mb-2">What's Next?</h3>
               <p className="text-cyan-700">
-                Based on your performance, we've unlocked the appropriate OWASP Top 10 course for your level. 
+                Based on your performance, we've unlocked the appropriate OWASP Top 10 course for your level.
                 Start learning with hands-on labs and practical exercises!
               </p>
             </div>
@@ -461,7 +461,7 @@ export const AssessmentTest: React.FC = () => {
               {assessmentQuestions.map((question, index) => {
                 const userAnswer = answers[index];
                 const isCorrect = userAnswer === question.correctAnswer;
-                
+
                 return (
                   <div key={question.id} className={`border rounded-lg p-4 ${isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
                     <div className="flex items-start space-x-3">
@@ -501,7 +501,7 @@ export const AssessmentTest: React.FC = () => {
         threshold={3}
         lastViolationReason={lastViolationReason}
       />
-      
+
       {/* Exam Termination Modal */}
       <ExamTerminationModal
         isOpen={showTerminationModal}
@@ -510,7 +510,7 @@ export const AssessmentTest: React.FC = () => {
         violationReasons={violationReasons}
         onClose={() => setShowTerminationModal(false)}
       />
-      
+
       <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Video Preview Sidebar */}
@@ -591,64 +591,61 @@ export const AssessmentTest: React.FC = () => {
 
             {/* Question */}
             <div className="bg-white rounded-lg shadow-md p-8">
-          <div className="mb-6">
-            <div className="flex items-center space-x-2 mb-4">
-              <span className={`px-2 py-1 rounded text-xs font-medium ${
-                currentQuestion.difficulty === 'easy' ? 'bg-green-100 text-green-800' :
-                currentQuestion.difficulty === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                'bg-red-100 text-red-800'
-              }`}>
-                {currentQuestion.difficulty.toUpperCase()}
-              </span>
-            </div>
-            <h2 className="text-xl font-bold text-gray-900 mb-6">{currentQuestion.question}</h2>
-          </div>
-
-          <div className="space-y-3 mb-8">
-            {currentQuestion.options.map((option, index) => (
-              <button
-                key={index}
-                onClick={() => handleAnswerSelect(index)}
-                className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
-                  selectedAnswer === index
-                    ? 'border-cyan-500 bg-cyan-50 text-cyan-900'
-                    : 'border-gray-200 hover:border-gray-300 bg-white'
-                }`}
-              >
-                <div className="flex items-center space-x-3">
-                  <div className={`w-4 h-4 rounded-full border-2 ${
-                    selectedAnswer === index
-                      ? 'border-cyan-500 bg-cyan-500'
-                      : 'border-gray-300'
-                  }`}>
-                    {selectedAnswer === index && (
-                      <div className="w-full h-full rounded-full bg-white scale-50"></div>
-                    )}
-                  </div>
-                  <span className="text-gray-900">{option}</span>
+              <div className="mb-6">
+                <div className="flex items-center space-x-2 mb-4">
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${currentQuestion.difficulty === 'easy' ? 'bg-green-100 text-green-800' :
+                      currentQuestion.difficulty === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
+                    }`}>
+                    {currentQuestion.difficulty.toUpperCase()}
+                  </span>
                 </div>
-              </button>
-            ))}
-          </div>
+                <h2 className="text-xl font-bold text-gray-900 mb-6">{currentQuestion.question}</h2>
+              </div>
 
-          {/* Navigation */}
-          <div className="flex justify-between">
-            <button
-              onClick={handlePreviousQuestion}
-              disabled={currentQuestionIndex === 0}
-              className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              Previous
-            </button>
+              <div className="space-y-3 mb-8">
+                {currentQuestion.options.map((option, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleAnswerSelect(index)}
+                    className={`w-full text-left p-4 rounded-lg border-2 transition-all ${selectedAnswer === index
+                        ? 'border-cyan-500 bg-cyan-50 text-cyan-900'
+                        : 'border-gray-200 hover:border-gray-300 bg-white'
+                      }`}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-4 h-4 rounded-full border-2 ${selectedAnswer === index
+                          ? 'border-cyan-500 bg-cyan-500'
+                          : 'border-gray-300'
+                        }`}>
+                        {selectedAnswer === index && (
+                          <div className="w-full h-full rounded-full bg-white scale-50"></div>
+                        )}
+                      </div>
+                      <span className="text-gray-900">{option}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
 
-            <button
-              onClick={() => currentQuestionIndex === assessmentQuestions.length - 1 ? handleSubmitTest() : handleNextQuestion()}
-              disabled={selectedAnswer === null}
-              className="px-6 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {currentQuestionIndex === assessmentQuestions.length - 1 ? 'Submit Test' : 'Next Question'}
-            </button>
-          </div>
+              {/* Navigation */}
+              <div className="flex justify-between">
+                <button
+                  onClick={handlePreviousQuestion}
+                  disabled={currentQuestionIndex === 0}
+                  className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Previous
+                </button>
+
+                <button
+                  onClick={() => currentQuestionIndex === assessmentQuestions.length - 1 ? handleSubmitTest() : handleNextQuestion()}
+                  disabled={selectedAnswer === null}
+                  className="px-6 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {currentQuestionIndex === assessmentQuestions.length - 1 ? 'Submit Test' : 'Next Question'}
+                </button>
+              </div>
             </div>
           </div>
         </div>

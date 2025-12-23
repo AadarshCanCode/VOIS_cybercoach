@@ -1,6 +1,4 @@
 
-import nlp from 'compromise';
-import natural from 'natural';
 
 export interface AnalysisResult {
     redFlags: string[];
@@ -22,7 +20,6 @@ const GREEN_FLAG_TERMS = [
 ];
 
 export const analyzeContent = (text: string): AnalysisResult => {
-    const doc = nlp(text);
     const normalizedText = text.toLowerCase();
 
     const redFlags: string[] = [];
