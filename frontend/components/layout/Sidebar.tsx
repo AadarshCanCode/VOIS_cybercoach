@@ -33,7 +33,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
         { id: 'certificates', label: 'Certificates', icon: Award },
         { id: 'notes', label: 'My Notes', icon: FileText },
         { id: 'profile', label: 'Profile', icon: User },
-        { id: 'career', label: 'Mission Board', icon: Briefcase },
+        { id: 'career', label: 'Jobs', icon: Briefcase },
         { id: 'interview', label: 'Interview Bot', icon: Bot },
         { id: 'resume', label: 'Resume', icon: FileText },
         { id: 'assessment', label: 'Assessment', icon: ClipboardCheck },

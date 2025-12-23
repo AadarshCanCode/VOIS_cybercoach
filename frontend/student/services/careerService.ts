@@ -12,10 +12,12 @@ export interface JobListing {
     source: string;
 }
 
+const API_URL = import.meta.env.VITE_API_URL || '/api';
+
 export const careerService = {
     async getJobListings(): Promise<JobListing[]> {
         try {
-            const response = await fetch('http://localhost:4000/api/student/jobs');
+            const response = await fetch(`${API_URL}/student/jobs`);
             if (!response.ok) throw new Error('Failed to fetch jobs');
             return await response.json();
         } catch (error) {
