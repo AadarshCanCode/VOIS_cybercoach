@@ -1,9 +1,9 @@
 /* Central theme tokens for student dark-slate + amber/emerald palette */
 
 :root {
-  --color-bg: #0f172a; /* slate-900 */
-  --color-card: #0b1220; /* slightly darker */
-  --color-text: #0f172a; /* fallback */
+  --color-bg: #000000; /* black */
+  --color-card: #000000; /* black */
+  --color-text: #000000; /* fallback */
 }
 
 /* Text tokens */
@@ -12,9 +12,9 @@
 .text-accent { color: #f59e0b; } /* amber-500 */
 
 /* Background tokens */
-.bg-page { background-color: #0f172a; } /* slate-900 */
-.bg-card { background-color: #0b1220; } /* slate-800/darker */
-.bg-muted { background-color: #111827; } /* slate-900 alt */
+.bg-page { background-color: #000000; } /* black */
+.bg-card { background-color: #000000; } /* black */
+.bg-muted { background-color: #000000; } /* black */
 
 /* Button tokens */
 .btn-primary { background-color: #f59e0b; color: #0b1220; } /* amber on dark */

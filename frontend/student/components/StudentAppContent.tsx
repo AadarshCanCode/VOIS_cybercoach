@@ -133,7 +133,7 @@ export const StudentAppContent: React.FC<StudentAppContentProps> = ({ initialTab
   const isFullPage = ['community', 'verification', 'landing', 'analyzer'].includes(activeTab);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
+    <div className="min-h-screen bg-black">
       <Header />
       <div className="flex">
         {!isFullPage && <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />}

@@ -122,7 +122,7 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
   };
 
   if (loading) return (
-    <div className="p-6 min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center">
+    <div className="p-6 min-h-screen bg-black flex items-center justify-center">
       <div className="text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00FF88] mx-auto mb-4"></div>
         <p className="text-[#00B37A] font-mono">LOADING MISSION DATA...</p>
@@ -131,7 +131,7 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
   );
   if (!course) {
     return (
-      <div className="p-6 min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
+      <div className="p-6 min-h-screen bg-black">
         <div className="max-w-4xl mx-auto text-center py-20">
           <Terminal className="h-16 w-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-white mb-2">Course Not Found</h2>

@@ -90,8 +90,9 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, onTabChan
                 </div>
 
                 <button
+                    type="button"
                     onClick={logout}
-                    className="w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-xl text-[#00B37A] hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all duration-300 group"
+                    className="w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-xl text-[#00B37A] hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all duration-300 group cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-500"
                 >
                     <LogOut className="h-5 w-5 group-hover:scale-110 transition-transform" />
                     <span className="font-medium">Sign Out</span>

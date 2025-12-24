@@ -52,7 +52,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
 
   if (loading) {
     return (
-      <div className="p-6 min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center">
+      <div className="p-6 min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#00FF88] mx-auto mb-4"></div>
           <p className="text-[#00FF88] font-mono">LOADING MODULE DATA...</p>
@@ -62,7 +62,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
   }
   if (!course || !module) {
     return (
-      <div className="p-6 min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center">
+      <div className="p-6 min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
           <Terminal className="h-16 w-16 text-red-500 mx-auto mb-4" />
           <p className="text-red-400 font-mono">ERROR: MODULE NOT FOUND</p>

@@ -344,7 +344,7 @@ export const AssessmentTest: React.FC = () => {
 
   if (user?.completedAssessment && !showResults) {
     return (
-      <div className="p-6 min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
+      <div className="p-6 min-h-screen bg-black">
         <div className="max-w-2xl mx-auto text-center">
           <div className="bg-[#0A0F0A] rounded-xl border border-[#00FF88]/20 p-8">
             <CheckCircle className="h-16 w-16 text-[#00FF88] mx-auto mb-4" />

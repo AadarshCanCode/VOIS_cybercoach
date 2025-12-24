@@ -41,7 +41,7 @@ export const LabViewer: React.FC<LabViewerProps> = ({ labId, onBack }) => {
   
   if (!lab) {
     return (
-      <div className="p-6 min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
+      <div className="p-6 min-h-screen bg-black">
         <div className="max-w-4xl mx-auto text-center py-20">
           <Terminal className="h-16 w-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-white mb-2">Lab Not Found</h2>
@@ -67,7 +67,7 @@ export const LabViewer: React.FC<LabViewerProps> = ({ labId, onBack }) => {
   };
 
   return (
-    <div className="p-6 min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
+    <div className="p-6 min-h-screen bg-black">
       <div className="max-w-4xl mx-auto">
         {/* Back Button */}
         <button

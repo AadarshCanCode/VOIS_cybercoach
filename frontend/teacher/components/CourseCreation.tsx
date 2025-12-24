@@ -627,11 +627,11 @@ const CourseCreation: React.FC<CourseCreationProps> = ({ onSuccess, onCancel, co
               )}
 
               <div className="flex items-center justify-end gap-3">
-                <button type="button" onClick={() => { setShowAiModal(false); setAiPreviewModules(null); }} className="px-4 py-2 bg-transparent border border-slate-600 rounded-md">Cancel</button>
+                <button type="button" onClick={() => { setShowAiModal(false); setAiPreviewModules(null); }} className="px-4 py-2 bg-transparent border border-neutral-800 rounded-md">Cancel</button>
                 <button type="button" onClick={() => generateOutlineWithAi()} disabled={aiLoading} className="px-4 py-2 bg-indigo-600 text-white rounded-md">
                   {aiLoading ? 'Generating…' : 'Generate Outline'}
                 </button>
-                <button type="button" onClick={() => { setAiPreviewModules(null); setAiForm({ title: '', description: '', category: '', difficulty: 'beginner', estimated_hours: 0 }); setShowAiModal(false); }} className="px-4 py-2 bg-slate-700 text-white rounded-md">Reset</button>
+                <button type="button" onClick={() => { setAiPreviewModules(null); setAiForm({ title: '', description: '', category: '', difficulty: 'beginner', estimated_hours: 0 }); setShowAiModal(false); }} className="px-4 py-2 bg-neutral-900 text-white rounded-md">Reset</button>
               </div>
 
               {/* Preview generated modules (simple, visible) */}
