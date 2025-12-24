@@ -22,12 +22,24 @@ function generateUUID(): string {
 
 function sanitizeUser(dbUser: DBUser): User {
   const copy: Record<string, unknown> = { ...dbUser };
+
+  // Transform DB fields to frontend CamelCase
+  if ('completed_assessment' in copy) {
+    copy['completedAssessment'] = copy['completed_assessment'];
+    delete copy['completed_assessment'];
+  }
+
+  // Handle other potential mappings if needed
+  if ('created_at' in copy) {
+    copy['createdAt'] = copy['created_at'];
+    delete copy['created_at'];
+  }
+
   // remove password_hash if present
   if ('password_hash' in copy) {
-    // remove password_hash property in a typed-safe way
-
     delete copy['password_hash'];
   }
+
   return copy as unknown as User;
 }
 
@@ -169,7 +181,15 @@ class AuthService {
 
   getCurrentUser() {
     const userStr = localStorage.getItem('cyberSecUser');
-    return userStr ? JSON.parse(userStr) : null;
+    if (!userStr) return null;
+    try {
+      const user = JSON.parse(userStr);
+      // Ensure we sanitize/map fields even for cached data
+      return sanitizeUser(user);
+    } catch (e) {
+      console.error('Failed to parse user from local storage:', e);
+      return null;
+    }
   }
 
   isAdmin() {

@@ -2,6 +2,8 @@ import React from 'react';
 import { FlaskRound as Flask, Clock, User, CheckCircle, ArrowRight, Terminal, Activity, Lock } from 'lucide-react';
 import { labs } from '@data/labs';
 import { useAuth } from '@context/AuthContext';
+import { getCompletedLabs } from '@utils/labCompletion';
+import { labApiService, LabStats } from '@services/labApiService';
 
 interface LabsListProps {
   onLabSelect: (labId: string) => void;
@@ -9,6 +11,28 @@ interface LabsListProps {
 
 export const LabsList: React.FC<LabsListProps> = ({ onLabSelect }) => {
   const { user } = useAuth();
+  const [completedLabs, setCompletedLabs] = React.useState<string[]>([]);
+  const [labStats, setLabStats] = React.useState<LabStats | null>(null);
+
+  React.useEffect(() => {
+    // First, load from localStorage
+    setCompletedLabs(getCompletedLabs());
+
+    // Then fetch from API
+    const loadLabStats = async () => {
+      try {
+        const stats = await labApiService.getLabStats();
+        setLabStats(stats);
+        setCompletedLabs(stats.completedLabIds);
+      } catch (error) {
+        console.error('Error fetching lab stats:', error);
+        // Fall back to localStorage if API fails
+        setCompletedLabs(getCompletedLabs());
+      }
+    };
+
+    loadLabStats();
+  }, []);
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -36,10 +60,21 @@ export const LabsList: React.FC<LabsListProps> = ({ onLabSelect }) => {
           </div>
         </div>
 
+        {labs.length === 0 ? (
+          <div className="bg-[#0A0F0A] rounded-xl border border-[#00FF88]/10 p-12 text-center">
+            <Terminal className="h-16 w-16 text-[#00FF88]/30 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-white mb-2">No Labs Available</h2>
+            <p className="text-[#00B37A] max-w-md mx-auto">
+              Lab simulations are currently being prepared. Check back soon for hands-on security training exercises.
+            </p>
+          </div>
+        ) : (
+        <>
         <div className="grid gap-6">
           {labs.map((lab) => {
             const isProOnly = lab.difficulty === 'advanced';
             const isLocked = isProOnly && (user as any)?.subscription_tier !== 'pro';
+            const isCompleted = completedLabs.includes(lab.id);
 
             return (
               <div key={lab.id} className={`bg-[#0A0F0A] rounded-xl border ${isLocked ? 'border-[#00FF88]/5 opacity-75' : 'border-[#00FF88]/10 hover:border-[#00FF88]/30'} overflow-hidden transition-all duration-300 group relative`}>
@@ -54,7 +89,7 @@ export const LabsList: React.FC<LabsListProps> = ({ onLabSelect }) => {
                           {isLocked ? <Lock className="h-5 w-5 text-gray-500" /> : <Terminal className="h-5 w-5 text-[#00FF88]" />}
                         </div>
                         <h2 className={`text-xl font-bold ${isLocked ? 'text-gray-500' : 'text-white group-hover:text-[#00FF88]'} transition-colors tracking-tight`}>{lab.title}</h2>
-                        {lab.completed && (
+                        {isCompleted && (
                           <div className="px-2 py-0.5 rounded bg-[#00FF88]/10 border border-[#00FF88]/20 text-[#00FF88] text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
                             <CheckCircle className="h-3 w-3" /> Completed
                           </div>
@@ -86,7 +121,7 @@ export const LabsList: React.FC<LabsListProps> = ({ onLabSelect }) => {
                       <div className="mt-6 pt-6 border-t border-[#00FF88]/10">
                         <h3 className="text-xs font-bold text-[#00B37A] uppercase tracking-widest mb-3">Required Tools</h3>
                         <div className="flex flex-wrap gap-2">
-                          {lab.tools.map((tool, index) => (
+                          {lab.tools.map((tool: string, index: number) => (
                             <span key={index} className="bg-[#0A0F0A] text-[#EAEAEA] px-3 py-1 rounded border border-[#00FF88]/20 text-xs font-mono group-hover:border-[#00FF88]/40 transition-colors">
                               {tool}
                             </span>
@@ -100,13 +135,13 @@ export const LabsList: React.FC<LabsListProps> = ({ onLabSelect }) => {
                       disabled={isLocked}
                       className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-bold transition-all duration-300 ml-6 ${isLocked
                         ? 'bg-gray-800 text-gray-500 cursor-not-allowed border border-gray-700'
-                        : lab.completed
+                        : isCompleted
                           ? 'bg-[#00FF88]/10 text-[#00FF88] hover:bg-[#00FF88]/20 border border-[#00FF88]/20'
                           : 'bg-[#00FF88] text-black hover:bg-[#00CC66] hover:shadow-[0_0_20px_rgba(0,255,136,0.3)]'
                         }`}
                     >
                       {isLocked ? <Lock className="h-4 w-4" /> : <Terminal className="h-4 w-4" />}
-                      <span>{isLocked ? 'LOCKED' : lab.completed ? 'REVIEW LOGS' : 'DEPLOY LAB'}</span>
+                      <span>{isLocked ? 'LOCKED' : isCompleted ? 'REVIEW LOGS' : 'DEPLOY LAB'}</span>
                       {!isLocked && <ArrowRight className="h-4 w-4" />}
                     </button>
                   </div>
@@ -115,8 +150,11 @@ export const LabsList: React.FC<LabsListProps> = ({ onLabSelect }) => {
             );
           })}
         </div>
+        </>
+        )}
 
-        {/* Lab Statistics */}
+        {/* Lab Statistics - Only show if labs exist */}
+        {labs.length > 0 && (
         <div className="bg-[#0A0F0A] rounded-xl border border-[#00FF88]/10 p-6 relative overflow-hidden">
           <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(0,255,136,0.02)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%,100%_100%] animate-[shimmer_3s_infinite]" />
           <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2 relative z-10">
@@ -125,15 +163,15 @@ export const LabsList: React.FC<LabsListProps> = ({ onLabSelect }) => {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative z-10">
             <div className="text-center p-4 bg-black/40 rounded-lg border border-[#00FF88]/10">
-              <div className="text-3xl font-bold text-[#00FF88] mb-1 font-mono">{labs.filter(lab => lab.completed).length}</div>
+              <div className="text-3xl font-bold text-[#00FF88] mb-1 font-mono">{labStats?.completedLabs ?? completedLabs.length}</div>
               <div className="text-[#00B37A] text-xs uppercase tracking-wider">Completed</div>
             </div>
             <div className="text-center p-4 bg-black/40 rounded-lg border border-[#00FF88]/10">
-              <div className="text-3xl font-bold text-yellow-400 mb-1 font-mono">{labs.length - labs.filter(lab => lab.completed).length}</div>
+              <div className="text-3xl font-bold text-yellow-400 mb-1 font-mono">{labStats ? labStats.totalLabs - labStats.completedLabs : labs.length - completedLabs.length}</div>
               <div className="text-[#00B37A] text-xs uppercase tracking-wider">Pending</div>
             </div>
             <div className="text-center p-4 bg-black/40 rounded-lg border border-[#00FF88]/10">
-              <div className="text-3xl font-bold text-[#00FF88] mb-1 font-mono">{Math.round((labs.filter(lab => lab.completed).length / labs.length) * 100)}%</div>
+              <div className="text-3xl font-bold text-[#00FF88] mb-1 font-mono">{labStats ? Math.round(labStats.completionPercentage) : (labs.length > 0 ? Math.round((completedLabs.length / labs.length) * 100) : 0)}%</div>
               <div className="text-[#00B37A] text-xs uppercase tracking-wider">Success Rate</div>
             </div>
             <div className="text-center p-4 bg-black/40 rounded-lg border border-[#00FF88]/10">
@@ -142,6 +180,7 @@ export const LabsList: React.FC<LabsListProps> = ({ onLabSelect }) => {
             </div>
           </div>
         </div>
+        )}
       </div>
     </div>
   );

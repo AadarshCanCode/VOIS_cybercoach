@@ -26,6 +26,7 @@ export default defineConfig(({ mode }) => {
         '@lib': resolve(rootDir, 'frontend/lib'),
         '@styles': resolve(rootDir, 'frontend/styles'),
         '@types': resolve(rootDir, 'frontend/types'),
+        '@utils': resolve(rootDir, 'frontend/utils'),
       },
     },
     server: {

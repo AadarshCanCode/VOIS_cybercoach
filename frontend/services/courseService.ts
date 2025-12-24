@@ -6,7 +6,7 @@ class CourseService {
   async createCourse(courseData: Partial<Course>) {
     try {
       console.log('Creating course with data:', courseData);
-      
+
       const { data, error } = await supabase
         .from('courses')
         .insert([{
@@ -27,7 +27,7 @@ class CourseService {
         console.error('Supabase error:', error);
         throw new Error(`Failed to create course: ${error.message}`);
       }
-      
+
       console.log('Course created successfully:', data);
       return data;
     } catch (error) {
@@ -113,12 +113,12 @@ class CourseService {
       // Select courses and include related modules if relationship exists
       const { data, error } = await supabase
         .from('courses')
-        .select(`*, course_modules(*)`)
+        .select(`*, modules(*)`)
         .eq('is_published', true)
         .order('created_at', { ascending: false });
 
-  if (error) throw new Error(`Failed to fetch courses: ${error.message}`);
-  return (data as Course[]) || [];
+      if (error) throw new Error(`Failed to fetch courses: ${error.message}`);
+      return (data as Course[]) || [];
     } catch (error) {
       console.error('Get all courses error:', error);
       throw error;
@@ -127,14 +127,30 @@ class CourseService {
 
   async getCourseById(id: string): Promise<Course | null> {
     try {
-      const { data, error } = await supabase
+      // 1. Get Course
+      const { data: course, error: courseError } = await supabase
         .from('courses')
-        .select(`*, course_modules(*)`)
+        .select('*')
         .eq('id', id)
         .single();
 
-      if (error) throw new Error(`Failed to fetch course: ${error.message}`);
-      return (data as Course) || null;
+      if (courseError) throw new Error(`Failed to fetch course: ${courseError.message}`);
+      if (!course) return null;
+
+      // 2. Get Modules
+      const { data: modules, error: moduleError } = await supabase
+        .from('modules')
+        .select('*')
+        .eq('course_id', id)
+        .eq('is_published', true)
+        .order('order', { ascending: true });
+
+      if (moduleError) console.warn('Failed to fetch modules for course:', moduleError);
+
+      return {
+        ...course,
+        modules: modules || []
+      } as Course;
     } catch (error) {
       console.error('Get course by id error:', error);
       throw error;
@@ -144,7 +160,7 @@ class CourseService {
   async getModuleCount(courseId: string): Promise<number> {
     try {
       const { data, error } = await supabase
-        .from('course_modules')
+        .from('modules')
         .select('id')
         .eq('course_id', courseId);
 
@@ -159,13 +175,13 @@ class CourseService {
     try {
       // Check current module count
       const currentCount = await this.getModuleCount(moduleData.course_id!);
-      
+
       if (currentCount >= 10) {
         throw new Error('Maximum module limit (10) reached for this course');
       }
 
       const { data, error } = await supabase
-        .from('course_modules')
+        .from('modules')
         .insert([{
           ...moduleData,
           module_order: currentCount + 1,
@@ -185,7 +201,7 @@ class CourseService {
   async updateModule(id: string, updates: Partial<Module>) {
     try {
       const { data, error } = await supabase
-        .from('course_modules')
+        .from('modules')
         .update(updates)
         .eq('id', id)
         .select()
@@ -202,7 +218,7 @@ class CourseService {
   async getModulesByCourse(courseId: string) {
     try {
       const { data, error } = await supabase
-        .from('course_modules')
+        .from('modules')
         .select('*')
         .eq('course_id', courseId)
         .eq('is_published', true)

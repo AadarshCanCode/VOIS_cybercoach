@@ -75,6 +75,12 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
                 <p className="text-yellow-500/80 text-sm mt-1">
                   Complete the initial assessment to unlock classified training modules.
                 </p>
+                {/* Debug Info */}
+                <div className="mt-2 p-2 bg-black/50 rounded text-xs text-yellow-500/50 font-mono">
+                  User: {user?.id?.slice(0, 8)} | Role: {user?.role} |
+                  Assmt: {user?.completedAssessment ? 'TRUE' : 'FALSE'} |
+                  Access: {canAccessCourses ? 'YES' : 'NO'}
+                </div>
               </div>
             </div>
           </div>

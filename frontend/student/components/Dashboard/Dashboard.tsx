@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Shield, Target, Award, Activity, Play, ChevronRight, Terminal } from 'lucide-react';
 import { useAuth } from '@context/AuthContext';
 import { supabase } from '@lib/supabase';
-import { studentService, StudentStats, RecentActivity } from '@services/studentService';
+import { studentService, StudentStats, RecentActivity, ActiveOperation } from '@services/studentService';
+import { labApiService, LabStats } from '@services/labApiService';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/Card';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -19,19 +20,32 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
     liveLabsCompleted: 0,
     studyTime: '0 hours'
   });
+  const [labStats, setLabStats] = useState<LabStats | null>(null);
   const [activities, setActivities] = useState<RecentActivity[]>([]);
+  const [activeOperation, setActiveOperation] = useState<ActiveOperation | null>(null);
 
   const loadData = async () => {
     if (!user?.id) return;
     try {
-      const [newStats, newActivity] = await Promise.all([
+      const [newStats, newActivity, newActiveOp, newLabStats] = await Promise.all([
         studentService.getDashboardStats(user.id),
-        studentService.getRecentActivity(user.id)
+        studentService.getRecentActivity(user.id),
+        studentService.getActiveOperation(user.id),
+        labApiService.getLabStats()
       ]);
       setStatsData(newStats);
       setActivities(newActivity);
+      setActiveOperation(newActiveOp);
+      setLabStats(newLabStats);
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
+      // Fetch lab stats separately if other data fails
+      try {
+        const labs = await labApiService.getLabStats();
+        setLabStats(labs);
+      } catch (labError) {
+        console.error('Failed to load lab stats:', labError);
+      }
     }
   };
 
@@ -84,40 +98,53 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
           <div className="relative group overflow-hidden rounded-2xl border border-[#00FF88]/20 bg-[#0A0F0A]">
             <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(0,255,136,0.05)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%,100%_100%] animate-[shimmer_3s_infinite]" />
             <div className="relative p-8">
-              <div className="flex items-start justify-between mb-6">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00FF88] opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00FF88]"></span>
-                    </span>
-                    <span className="text-xs font-bold text-[#00FF88] uppercase tracking-widest">Active Operation</span>
+              {activeOperation ? (
+                <>
+                  <div className="flex items-start justify-between mb-6">
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00FF88] opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00FF88]"></span>
+                        </span>
+                        <span className="text-xs font-bold text-[#00FF88] uppercase tracking-widest">Active Operation</span>
+                      </div>
+                      <h2 className="text-3xl font-bold text-white mb-2">{activeOperation.title}</h2>
+                      <p className="text-[#00B37A] max-w-lg">{activeOperation.description}</p>
+                      <p className="text-[#00B37A] text-sm mt-2">Current module: {activeOperation.currentModule}</p>
+                    </div>
+                    <div className="hidden md:block">
+                      <div className="h-16 w-16 rounded-full border-4 border-[#00FF88]/20 flex items-center justify-center">
+                        <span className="text-xl font-bold text-[#00FF88]">{activeOperation.progress}%</span>
+                      </div>
+                    </div>
                   </div>
-                  <h2 className="text-3xl font-bold text-white mb-2">OWASP Top 10 Defense</h2>
-                  <p className="text-[#00B37A] max-w-lg">Master the critical security risks to web applications. Current module: Injection Flaws.</p>
-                </div>
-                <div className="hidden md:block">
-                  <div className="h-16 w-16 rounded-full border-4 border-[#00FF88]/20 flex items-center justify-center">
-                    <span className="text-xl font-bold text-[#00FF88]">30%</span>
+
+                  <div className="space-y-6">
+                    <div className="w-full bg-[#000000] rounded-full h-1.5 overflow-hidden border border-[#00FF88]/10">
+                      <div className="bg-[#00FF88] h-full rounded-full shadow-[0_0_10px_rgba(0,255,136,0.5)]" style={{ width: `${activeOperation.progress}%` }}></div>
+                    </div>
+
+                    <div className="flex gap-4">
+                      <button className="flex-1 bg-[#00FF88] hover:bg-[#00CC66] text-black font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition-all hover:shadow-[0_0_20px_rgba(0,255,136,0.3)]">
+                        <Play className="h-4 w-4 fill-current" />
+                        RESUME MISSION
+                      </button>
+                      <button className="px-4 py-3 rounded-lg border border-[#00FF88]/20 text-[#00FF88] hover:bg-[#00FF88]/10 transition-colors">
+                        <Terminal className="h-5 w-5" />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                <div className="w-full bg-[#000000] rounded-full h-1.5 overflow-hidden border border-[#00FF88]/10">
-                  <div className="bg-[#00FF88] h-full rounded-full shadow-[0_0_10px_rgba(0,255,136,0.5)]" style={{ width: '30%' }}></div>
-                </div>
-
-                <div className="flex gap-4">
-                  <button className="flex-1 bg-[#00FF88] hover:bg-[#00CC66] text-black font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition-all hover:shadow-[0_0_20px_rgba(0,255,136,0.3)]">
-                    <Play className="h-4 w-4 fill-current" />
-                    RESUME MISSION
-                  </button>
-                  <button className="px-4 py-3 rounded-lg border border-[#00FF88]/20 text-[#00FF88] hover:bg-[#00FF88]/10 transition-colors">
-                    <Terminal className="h-5 w-5" />
+                </>
+              ) : (
+                <div className="text-center py-8">
+                  <h2 className="text-2xl font-bold text-white mb-4">No Active Operations</h2>
+                  <p className="text-[#00B37A] mb-8">Start a new course to begin your mission.</p>
+                  <button onClick={() => onTabChange?.('courses')} className="bg-[#00FF88] hover:bg-[#00CC66] text-black font-bold py-3 px-8 rounded-lg transition-all hover:shadow-[0_0_20px_rgba(0,255,136,0.3)]">
+                    BROWSE COURSES
                   </button>
                 </div>
-              </div>
+              )}
             </div>
           </div>
 
@@ -131,7 +158,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
             </CardHeader>
             <CardContent className="space-y-6">
               {[
-                { label: 'Live Security Labs', progress: (statsData.liveLabsCompleted / 6) * 100, total: `${statsData.liveLabsCompleted}/6`, color: 'text-[#00CC66]', bar: 'bg-[#00CC66]' },
+                { 
+                  label: 'Live Security Labs', 
+                  progress: labStats ? (labStats.completedLabs / labStats.totalLabs) * 100 : (statsData.liveLabsCompleted / 6) * 100, 
+                  total: labStats ? `${labStats.completedLabs}/${labStats.totalLabs}` : `${statsData.liveLabsCompleted}/6`, 
+                  color: 'text-[#00CC66]', 
+                  bar: 'bg-[#00CC66]' 
+                },
                 { label: 'Skill Assessment', progress: user?.completedAssessment ? 100 : 0, total: user?.completedAssessment ? 'Complete' : 'Pending', color: 'text-[#00B37A]', bar: 'bg-[#00B37A]' }
               ].map((item, i) => (
                 <div key={i} className="group">

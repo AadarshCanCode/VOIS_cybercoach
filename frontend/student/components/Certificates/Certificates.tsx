@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Award, Download, Star, Calendar, CheckCircle, Shield } from 'lucide-react';
 import { useAuth } from '@context/AuthContext';
+import { studentService } from '@services/studentService';
+import { supabase } from '@lib/supabase';
 
 export const Certificates: React.FC = () => {
   const { user } = useAuth();
@@ -16,7 +18,7 @@ export const Certificates: React.FC = () => {
         'Complete at least 5 hands-on labs',
         'Pass final certification exam'
       ],
-      progress: 30,
+      progress: 0,
       earned: false,
       estimatedHours: 20
     },
@@ -30,7 +32,7 @@ export const Certificates: React.FC = () => {
         'Complete secure coding practices',
         'Demonstrate practical skills'
       ],
-      progress: 15,
+      progress: 0,
       earned: false,
       estimatedHours: 30
     },
@@ -44,13 +46,38 @@ export const Certificates: React.FC = () => {
         'Complete capstone project',
         'Pass comprehensive exam'
       ],
-      progress: 5,
+      progress: 0,
       earned: false,
       estimatedHours: 50
     }
   ];
 
   const earnedCertificates = user?.certificates || [];
+  const [courseProgress, setCourseProgress] = useState<Record<string, any>>({});
+  const [debugData, setDebugData] = useState<any>(null); // New debug state
+
+  useEffect(() => {
+    if (user?.id) {
+      // Test direct connection
+      supabase.from('courses').select('id, title').then(res => {
+        setDebugData({
+          error: res.error,
+          count: res.data?.length,
+          data: res.data
+        });
+      });
+
+      studentService.getAllCoursesProgress(user.id).then(progressList => {
+        const progressMap = progressList.reduce((acc, curr) => {
+          // Normalize title for key matching
+          const key = curr.title.toLowerCase().trim();
+          acc[key] = curr;
+          return acc;
+        }, {} as Record<string, any>);
+        setCourseProgress(progressMap);
+      });
+    }
+  }, [user?.id]);
 
   return (
     <div className="p-6 min-h-screen animate-fade-in text-[#EAEAEA]">
@@ -140,8 +167,22 @@ export const Certificates: React.FC = () => {
         <div>
           <h2 className="text-xs font-bold text-[#00B37A] uppercase tracking-widest mb-4">Available Credentials</h2>
           <div className="grid gap-6">
-            {availableCertificates.map((certificate) => {
-              const isEarned = earnedCertificates.includes(certificate.id) || earnedCertificates.some((e: string) => typeof e === 'string' && e.includes(certificate.id));
+            {availableCertificates.map((cert) => {
+              // Try to find dynamic progress by title matching
+              // Specific overrides for known hardcoded IDs to DB titles if needed
+              let dbCourse = courseProgress[cert.title.toLowerCase().trim()];
+
+              // Fallback: fuzzy match "Security Risks" -> "Defense" if needed (example)
+              if (!dbCourse && cert.id === 'owasp-top-10') {
+                // Try to find a course with "OWASP" in title
+                const key = Object.keys(courseProgress).find(k => k.includes('owasp'));
+                if (key) dbCourse = courseProgress[key];
+              }
+
+              const dynamicProgress = dbCourse ? dbCourse.progress : cert.progress;
+              const isEarned = earnedCertificates.includes(cert.id) || (dbCourse?.completed) || earnedCertificates.some((e: string) => typeof e === 'string' && e.includes(cert.id));
+
+              const certificate = { ...cert, progress: dynamicProgress };
 
               return (
                 <div key={certificate.id} className="bg-[#0A0F0A] rounded-xl border border-[#00FF88]/10 overflow-hidden hover:border-[#00FF88]/30 transition-all duration-300 group relative">
@@ -244,6 +285,41 @@ export const Certificates: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
+
+      {/* DEBUG SECTION - REMOVE BEFORE PRODUCTION */}
+      <div className="mt-8 p-4 bg-red-900/20 border border-red-500 rounded-lg">
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="text-red-500 font-bold mb-2">Debug Info</h3>
+            <pre className="text-xs text-red-300 overflow-auto max-h-40">
+              User ID: {user?.id}
+              Courses Fetched: {Object.keys(courseProgress).length}
+              Direct Query Error: {JSON.stringify(debugData?.error)}
+              Direct Query Count: {debugData?.count}
+              Direct Query Data: {JSON.stringify(debugData?.data)}
+              Keys: {JSON.stringify(Object.keys(courseProgress), null, 2)}
+            </pre>
+          </div>
+          <button
+            onClick={async () => {
+              try {
+                // Dynamic import to avoid path issues during compilation if file moved
+                const { runSeed } = await import('../../../utils/seeder');
+                const res = await runSeed();
+                alert(res.message);
+                if (res.success) window.location.reload();
+              } catch (e) {
+                console.error(e);
+                alert('Seeding failed check console');
+              }
+            }}
+            className="bg-red-500 text-white px-4 py-2 rounded text-xs font-bold hover:bg-red-600"
+          >
+            SEED DATABASE
+          </button>
+        </div>
+      </div>
+
+    </div >
   );
 };

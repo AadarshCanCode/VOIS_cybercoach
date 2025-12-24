@@ -70,6 +70,12 @@
       ],
       "@types/*": [
         "frontend/types/*"
+      ],
+      "@utils": [
+        "frontend/utils"
+      ],
+      "@utils/*": [
+        "frontend/utils/*"
       ]
     },
     /* Bundler mode */
