@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Play, CheckCircle, Clock, FileText, FlaskRound as Flask, Award, Terminal, Lock, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Play, CheckCircle, Clock, FileText, FlaskRound as Flask, Award, Terminal, Lock } from 'lucide-react';
 import { ModuleViewer } from './ModuleViewer';
 import { courseService } from '@services/courseService';
 import type { Course, Module } from '@types';
@@ -222,31 +222,7 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
                   </div>
                 </div>
 
-                <div className="bg-black/40 rounded-xl p-4 border border-[#00FF88]/10">
-                  <h3 className="font-bold text-[#00FF88] mb-3 text-sm uppercase tracking-wider">Mission Objectives</h3>
-                  <ul className="text-[#00B37A] space-y-2 text-sm">
-                    <li className="flex items-start space-x-2">
-                      <ChevronRight className="h-4 w-4 text-[#00FF88] mt-0.5 flex-shrink-0" />
-                      <span>Understand the OWASP Top 10 security vulnerabilities</span>
-                    </li>
-                    <li className="flex items-start space-x-2">
-                      <ChevronRight className="h-4 w-4 text-[#00FF88] mt-0.5 flex-shrink-0" />
-                      <span>Learn practical exploitation techniques</span>
-                    </li>
-                    <li className="flex items-start space-x-2">
-                      <ChevronRight className="h-4 w-4 text-[#00FF88] mt-0.5 flex-shrink-0" />
-                      <span>Master vulnerability prevention methods</span>
-                    </li>
-                    <li className="flex items-start space-x-2">
-                      <ChevronRight className="h-4 w-4 text-[#00FF88] mt-0.5 flex-shrink-0" />
-                      <span>Gain hands-on experience with security tools</span>
-                    </li>
-                    <li className="flex items-start space-x-2">
-                      <ChevronRight className="h-4 w-4 text-[#00FF88] mt-0.5 flex-shrink-0" />
-                      <span>Earn industry-recognized certification</span>
-                    </li>
-                  </ul>
-                </div>
+                {/* Intentional blank: mission objectives removed to avoid static content */}
               </div>
 
               <div className="space-y-6">
@@ -268,28 +244,7 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
                   </div>
                 </div>
 
-                {/* Quick Stats */}
-                <div className="bg-black/40 rounded-xl p-6 border border-[#00FF88]/10">
-                  <h3 className="font-bold text-[#00B37A] mb-4 text-xs uppercase tracking-widest">Your Stats</h3>
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-[#00B37A]">Modules Completed</span>
-                      <span className="font-medium text-[#EAEAEA] font-mono">{completedModules}/{totalModules}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-[#00B37A]">Labs Completed</span>
-                      <span className="font-medium text-[#EAEAEA] font-mono">2/6</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-[#00B37A]">Average Score</span>
-                      <span className="font-medium text-[#00FF88] font-mono">85%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-[#00B37A]">Time Spent</span>
-                      <span className="font-medium text-[#EAEAEA] font-mono">12 hrs</span>
-                    </div>
-                  </div>
-                </div>
+                {/* Intentional blank: quick stats with hardcoded values removed */}
               </div>
             </div>
           </div>

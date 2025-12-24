@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, FileText, FlaskRound as Flask, CheckCircle, Clock, Award, Terminal, Play, Shield } from 'lucide-react';
+import { ArrowLeft, FileText, CheckCircle, Award, Terminal, Play, Shield } from 'lucide-react';
 import { CertificateModal } from '../Certificates/CertificateModal';
 import { courseService } from '@services/courseService';
 import type { Module, Course } from '@types';
 import { ModuleTest } from './ModuleTest';
-import { VideoPlayer } from '../Video/VideoPlayer';
 import { learningPathService } from '@services/learningPathService';
 import { supabase } from '@lib/supabase';
 import { useAuth } from '@context/AuthContext';
@@ -18,7 +17,7 @@ interface ModuleViewerProps {
 }
 
 export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, onBack, onNavigateToModule, onModuleStatusChange }) => {
-  const [activeTab, setActiveTab] = useState<'content' | 'lab' | 'test'>('content');
+  const [activeTab, setActiveTab] = useState<'content' | 'test'>('content');
   const [showTest, setShowTest] = useState(false);
   const { user } = useAuth();
   const [showCertificate, setShowCertificate] = useState(false);
@@ -205,25 +204,9 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
           
             <div className="flex items-center flex-wrap gap-4 text-sm font-mono text-[#EAEAEA]/60">
               <div className="flex items-center space-x-2">
-                <Clock className="h-4 w-4 text-[#00FF88]" />
-                <span>~2 HOURS</span>
-              </div>
-              <div className="flex items-center space-x-2">
                 <FileText className="h-4 w-4 text-[#00FF88]" />
-                <span>READING</span>
+                <span>CONTENT</span>
               </div>
-              {module.videoUrl && (
-                <div className="flex items-center space-x-2">
-                  <Play className="h-4 w-4 text-[#00FF88]" />
-                  <span>VIDEO</span>
-                </div>
-              )}
-              {module.labUrl && (
-                <div className="flex items-center space-x-2">
-                  <Flask className="h-4 w-4 text-[#00FF88]" />
-                  <span>HANDS-ON LAB</span>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -246,21 +229,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
                 </div>
               </button>
               
-              {module.labUrl && (
-                <button
-                  onClick={() => setActiveTab('lab')}
-                  className={`py-3 px-6 rounded-lg font-medium text-sm transition-all ${
-                    activeTab === 'lab'
-                      ? 'bg-[#00FF88] text-black'
-                      : 'text-[#00B37A] hover:text-[#00FF88] hover:bg-[#00FF88]/10'
-                  }`}
-                >
-                  <div className="flex items-center space-x-2">
-                    <Flask className="h-4 w-4" />
-                    <span>Lab</span>
-                  </div>
-                </button>
-              )}
+              {/* Lab tab removed to avoid static content */}
               
               <button
                 onClick={() => setActiveTab('test')}
@@ -281,39 +250,11 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
           <div className="p-6">
             {activeTab === 'content' && (
               <div className="prose max-w-none text-[#EAEAEA]">
-                <div dangerouslySetInnerHTML={{ __html: module.content.replace(/\n/g, '<br/>').replace(/```([^`]+)```/g, '<pre class="bg-black border border-[#00FF88]/20 p-4 rounded-lg"><code class="text-[#00FF88] font-mono">$1</code></pre>').replace(/`([^`]+)`/g, '<code class="bg-black/50 px-1.5 py-0.5 rounded text-[#00FF88] font-mono">$1</code>').replace(/^# (.+)$/gm, '<h1 class="text-2xl font-bold mb-4 text-white">$1</h1>').replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold mb-3 mt-6 text-white">$1</h2>').replace(/^### (.+)$/gm, '<h3 class="text-lg font-bold mb-2 mt-4 text-[#00FF88]">$1</h3>').replace(/^- (.+)$/gm, '<li class="ml-4 text-[#00B37A]">$1</li>').replace(/^(\d+)\. (.+)$/gm, '<li class="ml-4 text-[#00B37A]">$2</li>') }} />
-                
-                {module.videoUrl && (
-                  <div className="mt-8 bg-black/40 rounded-xl p-6 border border-[#00FF88]/10">
-                    <h3 className="font-bold text-[#00FF88] mb-4 flex items-center space-x-2">
-                      <Play className="h-5 w-5" />
-                      <span>Video Lecture</span>
-                    </h3>
-                    <VideoPlayer
-                      videoUrl="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-                      title={`${module.title} - Video Lecture`}
-                      onProgress={(progress) => console.log('Video progress:', progress)}
-                      onComplete={() => console.log('Video completed')}
-                    />
-                  </div>
-                )}
+                <div dangerouslySetInnerHTML={{ __html: (module.content || '').replace(/\n/g, '<br/>').replace(/```([^`]+)```/g, '<pre class="bg-black border border-[#00FF88]/20 p-4 rounded-lg"><code class="text-[#00FF88] font-mono">$1</code></pre>').replace(/`([^`]+)`/g, '<code class="bg-black/50 px-1.5 py-0.5 rounded text-[#00FF88] font-mono">$1</code>').replace(/^# (.+)$/gm, '<h1 class="text-2xl font-bold mb-4 text-white">$1</h1>').replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold mb-3 mt-6 text-white">$1</h2>').replace(/^### (.+)$/gm, '<h3 class="text-lg font-bold mb-2 mt-4 text-[#00FF88]">$1</h3>').replace(/^- (.+)$/gm, '<li class="ml-4 text-[#00B37A]">$1</li>').replace(/^(\d+)\. (.+)$/gm, '<li class="ml-4 text-[#00B37A]">$2</li>') }} />
+                {/* Video section removed to avoid static player URL */}
               </div>
             )}
-
-            {activeTab === 'lab' && module.labUrl && (
-              <div className="text-center py-12">
-                <div className="p-4 rounded-full bg-[#00FF88]/10 border border-[#00FF88]/20 w-20 h-20 mx-auto mb-6 flex items-center justify-center">
-                  <Flask className="h-10 w-10 text-[#00FF88]" />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-4">Hands-on Lab Environment</h3>
-                <p className="text-[#00B37A] mb-6 max-w-md mx-auto">
-                  Practice what you've learned with interactive exercises and real-world scenarios in a safe sandbox environment.
-                </p>
-                <button className="bg-[#00FF88] text-black px-8 py-3 rounded-lg font-bold hover:bg-[#00CC66] hover:shadow-[0_0_20px_rgba(0,255,136,0.3)] transition-all">
-                  Launch Lab Environment
-                </button>
-              </div>
-            )}
+            {/* Lab section removed to avoid static content */}
 
             {activeTab === 'test' && (
               <div className="text-center py-12">

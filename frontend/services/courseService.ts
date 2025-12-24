@@ -109,19 +109,60 @@ class CourseService {
 
   async getAllCourses(): Promise<Course[]> {
     try {
-      // Simplified query without join to avoid relationship issues
-      // Select courses and include related modules if relationship exists
-      const { data, error } = await supabase
+      console.log('Starting getAllCourses query...');
+      console.log('Supabase client initialized:', !!supabase);
+      
+      const testStart = Date.now();
+      console.log('Testing Supabase connection...');
+      
+      // Add timeout to the query itself
+      const queryPromise = supabase
         .from('courses')
-        .select(`*, modules(*)`)
-        .eq('is_published', true)
-        .order('created_at', { ascending: false });
+        .select('*')
+        .eq('is_published', true);
 
-      if (error) throw new Error(`Failed to fetch courses: ${error.message}`);
-      return (data as Course[]) || [];
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Supabase query timeout after 5 seconds')), 5000)
+      );
+
+      const { data, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
+
+      const duration = Date.now() - testStart;
+      console.log(`Supabase query completed in ${duration}ms`);
+      console.log('Supabase response:', { data, error, dataLength: data?.length });
+
+      if (error) {
+        console.error('Supabase error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        
+        // Return empty array for common non-critical errors
+        if (error.code === 'PGRST116' || error.message.includes('relation') || error.message.includes('does not exist')) {
+          console.warn('Table may not exist or has no data, returning empty array');
+          return [];
+        }
+        
+        console.error('Returning empty array due to error');
+        return [];
+      }
+      
+      if (!data) {
+        console.warn('No courses data returned from database');
+        return [];
+      }
+
+      console.log(`Successfully fetched ${data.length} courses`);
+      return data as Course[];
     } catch (error) {
       console.error('Get all courses error:', error);
-      throw error;
+      if (error instanceof Error && error.message.includes('timeout')) {
+        console.error('NETWORK ISSUE: Cannot reach Supabase. Check your .env file and internet connection.');
+      }
+      // Don't throw - return empty array to prevent UI from breaking
+      return [];
     }
   }
 

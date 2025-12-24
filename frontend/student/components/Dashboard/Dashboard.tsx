@@ -31,7 +31,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
         studentService.getDashboardStats(user.id),
         studentService.getRecentActivity(user.id),
         studentService.getActiveOperation(user.id),
-        labApiService.getLabStats()
+        labApiService.getLabStats().catch(() => ({ totalLabs: 6, completedLabs: 0, completionPercentage: 0, completedLabIds: [] }))
       ]);
       setStatsData(newStats);
       setActivities(newActivity);
@@ -39,13 +39,20 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
       setLabStats(newLabStats);
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
-      // Fetch lab stats separately if other data fails
-      try {
-        const labs = await labApiService.getLabStats();
-        setLabStats(labs);
-      } catch (labError) {
-        console.error('Failed to load lab stats:', labError);
-      }
+      // Set default/fallback values
+      setStatsData({
+        coursesCompleted: 0,
+        assessmentScore: null,
+        certificatesEarned: 0,
+        liveLabsCompleted: 0,
+        studyTime: '0 hours'
+      });
+      setLabStats({
+        totalLabs: 6,
+        completedLabs: 0,
+        completionPercentage: 0,
+        completedLabIds: []
+      });
     }
   };
 

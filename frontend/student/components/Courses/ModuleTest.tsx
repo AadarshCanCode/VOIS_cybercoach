@@ -8,89 +8,9 @@ interface ModuleTestProps {
   onBack: () => void;
 }
 
-// Sample questions for each module (in a real app, these would come from a database)
-const getModuleQuestions = (moduleId: string) => {
-  type QA = { question: string; options: string[]; correctAnswer: number; explanation?: string };
-  const questionSets: Record<string, QA[]> = {
-    'module-1': [
-      {
-        question: 'What is the principle of least privilege?',
-        options: [
-          'Giving users maximum access to reduce support tickets',
-          'Giving users only the minimum access necessary for their role',
-          'Removing all user privileges by default',
-          'Sharing privileges among team members'
-        ],
-        correctAnswer: 1,
-        explanation: 'The principle of least privilege means providing users with only the minimum access necessary to perform their job functions.'
-      },
-      {
-        question: 'Which of the following is an example of broken access control?',
-        options: [
-          'Strong password requirements',
-          'Multi-factor authentication',
-          'Direct object reference without authorization checks',
-          'Session timeouts'
-        ],
-        correctAnswer: 2,
-        explanation: 'Direct object references without proper authorization checks allow users to access resources they should not have access to.'
-      },
-      {
-        question: 'How can horizontal privilege escalation be prevented?',
-        options: [
-          'Implementing proper session management',
-          'Using strong encryption',
-          'Validating user authorization for each resource access',
-          'Regular password changes'
-        ],
-        correctAnswer: 2,
-        explanation: 'Validating user authorization for each resource access ensures users can only access their own data.'
-      },
-      {
-        question: 'What is vertical privilege escalation?',
-        options: [
-          'Accessing data of users at the same privilege level',
-          'Gaining higher-level privileges than intended',
-          'Reducing user privileges',
-          'Sharing privileges horizontally'
-        ],
-        correctAnswer: 1,
-        explanation: 'Vertical privilege escalation occurs when a user gains access to higher-level privileges than they should have.'
-      },
-      {
-        question: 'Which HTTP method should require proper authorization checks?',
-        options: [
-          'Only POST requests',
-          'Only GET requests',
-          'Only PUT and DELETE requests',
-          'All HTTP methods'
-        ],
-        correctAnswer: 3,
-        explanation: 'All HTTP methods should have proper authorization checks, not just state-changing methods.'
-      }
-    ],
-    'module-2': [
-      {
-        question: 'Which encryption algorithm is considered secure for current use?',
-        options: ['DES', 'MD5', 'AES-256', 'SHA-1'],
-        correctAnswer: 2,
-        explanation: 'AES-256 is currently considered secure for encryption purposes.'
-      },
-      {
-        question: 'What is the main purpose of TLS?',
-        options: [
-          'Data compression',
-          'Secure communication over networks',
-          'User authentication only',
-          'Database encryption'
-        ],
-        correctAnswer: 1,
-        explanation: 'TLS (Transport Layer Security) provides secure communication over networks.'
-      }
-    ]
-  };
-
-  return questionSets[moduleId] || questionSets['module-1']; // Default to module-1 questions
+// Remove static sample questions; return empty set until backend provides data
+const getModuleQuestions = (_moduleId: string) => {
+  return [] as { question: string; options: string[]; correctAnswer: number; explanation?: string }[];
 };
 
 export const ModuleTest: React.FC<ModuleTestProps> = ({ moduleId, moduleTitle, onComplete, onBack }) => {
@@ -152,6 +72,25 @@ export const ModuleTest: React.FC<ModuleTestProps> = ({ moduleId, moduleTitle, o
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
+
+  if (questions.length === 0) {
+    return (
+      <div className="p-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white rounded-lg shadow-md p-8 text-center">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">No Test Available</h2>
+            <p className="text-gray-600 mb-6">This module currently has no assessment questions. Please check back later.</p>
+            <button
+              onClick={onBack}
+              className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+            >
+              Back to Module
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (showResults) {
     const score = calculateScore(answers);
