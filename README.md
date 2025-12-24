@@ -5,7 +5,7 @@ A comprehensive education platform built with React, TypeScript, and Express for
 
 ### Frontend (React + TypeScript + Vite)
 - **Student Module**: Course access, assessments, proctoring system
-- **Teacher Module**: Course creation, student management.
+- **Teacher Module**: Course creation, student management
 - **Admin Module**: Platform administration, proxy services
 - Built with React 18, Vite, TypeScript, and TailwindCSS
 
