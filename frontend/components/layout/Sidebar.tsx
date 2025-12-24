@@ -116,7 +116,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
                     className="w-full mb-3 bg-[#00FF88]/10 hover:bg-[#00FF88]/20 text-[#00FF88] text-xs font-bold py-2 px-3 rounded border border-[#00FF88]/20 transition-all uppercase tracking-wide flex items-center justify-center gap-2"
                 >
                     <Shield className="h-3 w-3" />
-                    Upgrade Clearance
+                    Upgrade to Pro
                 </button>
 
                 <button

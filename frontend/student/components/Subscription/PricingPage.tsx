@@ -17,7 +17,7 @@ export const PricingPage: React.FC = () => {
             <div className="max-w-5xl mx-auto">
                 <div className="text-center mb-12">
                     <h1 className="text-4xl font-black tracking-tighter text-white uppercase mb-4">
-                        Mission <span className="text-[#00FF88]">Clearance</span>
+                        Pricing<span className="text-[#00FF88]">PLans</span>
                     </h1>
                     <p className="text-[#00B37A] text-lg">Select your operational tier to unlock advanced capabilities.</p>
                 </div>
