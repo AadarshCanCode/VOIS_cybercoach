@@ -14,7 +14,7 @@ export interface CompanyData {
     last_verified_at: string;
 
     // New fields
-    verdict?: 'SAFE' | 'CAUTION' | 'dANGER' | 'UNKNOWN';
+    verdict?: 'SAFE' | 'CAUTION' | 'DANGER' | 'UNKNOWN';
     explanation?: string;
     recommendation?: string;
     scam_hits?: number;
@@ -47,7 +47,7 @@ class VerificationService {
                 name: result.scraped_data?.name || result.scraped_data?.title || query,
                 domain: query,
                 trust_score: 100 - result.risk_score,
-                status: result.verdict === 'SAFE' ? 'verified' : (result.verdict === 'dANGER' ? 'warning' : 'unverified'),
+                status: result.verdict === 'SAFE' ? 'verified' : (result.verdict === 'DANGER' ? 'warning' : 'unverified'),
                 founded_year: result.details?.domain_age_days ? `${Math.floor(result.details.domain_age_days / 365)} years ago` : 'Unknown',
                 location: result.details?.domain_registrar || 'Unknown',
                 description: result.explanation || result.scraped_data?.description || 'No description available.',

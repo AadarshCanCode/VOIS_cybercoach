@@ -2,6 +2,12 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 
+// Logging utility for web scraper
+const log = (message: string, data?: any) => {
+    const timestamp = new Date().toISOString();
+    console.log(`[${timestamp}] [Detective:Scraper] ${message}`, data !== undefined ? JSON.stringify(data) : '');
+};
+
 export interface ScrapedData {
   url: string;
   title: string;
@@ -15,7 +21,7 @@ export interface ScrapedData {
 export const scrapeCompanyWebsite = async (url: string): Promise<ScrapedData | null> => {
   try {
     const targetUrl = url.startsWith('http') ? url : `https://${url}`;
-    console.log(`[Scraper] Fetching ${targetUrl}`);
+    log('Starting website scrape', { url: targetUrl });
 
     const response = await axios.get(targetUrl, {
       headers: {
@@ -25,6 +31,8 @@ export const scrapeCompanyWebsite = async (url: string): Promise<ScrapedData | n
       },
       timeout: 15000,
     });
+
+    log('HTTP response received', { statusCode: response.status, contentLength: response.data?.length });
 
     const $ = cheerio.load(response.data);
 
@@ -52,7 +60,7 @@ export const scrapeCompanyWebsite = async (url: string): Promise<ScrapedData | n
       }
     });
 
-    console.log(`[Scraper] Success. Name: ${name}, Text Length: ${bodyText.length}`);
+    log('Scrape complete', { name, title, textLength: bodyText.length, linksFound: links.length });
 
     return {
       url: targetUrl,
@@ -65,7 +73,9 @@ export const scrapeCompanyWebsite = async (url: string): Promise<ScrapedData | n
     };
 
   } catch (error) {
-    console.error(`[Scraper] Error for ${url}:`, error instanceof Error ? error.message : error);
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    log('Scrape failed', { url, error: errorMsg });
+    console.error(`[Scraper] Error for ${url}:`, errorMsg);
     return null;
   }
 };
