@@ -34,6 +34,11 @@ export const scrapeCompanyWebsite = async (url: string): Promise<ScrapedData | n
 
     log('HTTP response received', { statusCode: response.status, contentLength: response.data?.length });
 
+    if (!response.data) {
+        log('Empty response data');
+        return null;
+    }
+
     const $ = cheerio.load(response.data);
 
     // Remove junk

@@ -1,5 +1,7 @@
 
-import whois from 'whois-json';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const whois = require('whois-json');
 import { parse } from 'tldts';
 
 // Logging utility for domain intelligence
@@ -19,7 +21,10 @@ export interface DomainIntel {
 // Timeout wrapper for WHOIS lookup (10 seconds max)
 const withTimeout = <T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> => {
     return Promise.race([
-        promise,
+        promise.catch((err) => {
+            log('WHOIS lookup promise rejected', { error: String(err) });
+            return fallback;
+        }),
         new Promise<T>((resolve) => setTimeout(() => {
             log('WHOIS lookup timed out', { timeout: ms });
             resolve(fallback);

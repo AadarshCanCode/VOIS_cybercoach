@@ -168,11 +168,15 @@ export const makeDecision = async (
             const llmVerdict = JSON.parse(text);
             log('LLM', 'Gemini AI verdict received', llmVerdict);
 
+            if (!llmVerdict.verdict || typeof llmVerdict.verdict !== 'string') {
+                throw new Error('Invalid verdict format from LLM');
+            }
+
             return {
-                riskScore: llmVerdict.risk_score,
+                riskScore: llmVerdict.risk_score ?? riskScore,
                 verdict: llmVerdict.verdict.toUpperCase() as Verdict['verdict'],
-                explanation: llmVerdict.short_explanation,
-                recommendation: llmVerdict.recommendation
+                explanation: llmVerdict.short_explanation || explanation,
+                recommendation: llmVerdict.recommendation || 'No recommendation provided'
             };
 
         } catch (error) {

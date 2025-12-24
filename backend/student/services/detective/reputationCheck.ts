@@ -1,8 +1,13 @@
 
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
-const SerpApi = require('google-search-results-nodejs');
-const Search = SerpApi.GoogleSearch;
+let Search: any = null;
+try {
+    const SerpApi = require('google-search-results-nodejs');
+    Search = SerpApi.GoogleSearch || (SerpApi.default && SerpApi.default.GoogleSearch);
+} catch (e) {
+    console.warn('Failed to load google-search-results-nodejs:', e);
+}
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -23,9 +28,8 @@ export const checkReputation = async (companyName: string): Promise<ReputationRe
     log('Starting reputation check', { companyName });
     
     const apiKey = process.env.SERPAPI_KEY;
-    if (!apiKey) {
-        log('SERPAPI_KEY not found - returning neutral (no penalty)');
-        console.warn('SERPAPI_KEY not found, skipping reputation check');
+    if (!apiKey || !Search) {
+        log('SERPAPI_KEY not found or Search engine not loaded - returning neutral');
         return { sentiment: 'neutral', scamResults: 0, snippetSignals: [] };
     }
 
@@ -47,6 +51,11 @@ export const checkReputation = async (companyName: string): Promise<ReputationRe
         };
 
         const results = await runSearch(query);
+
+        if (!results || results.error) {
+            log('SerpApi returned error or no results', { error: results?.error });
+            return { sentiment: 'neutral', scamResults: 0, snippetSignals: [] };
+        }
 
         let scamHits = 0;
         const items = results.organic_results || [];
