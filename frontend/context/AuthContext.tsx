@@ -16,7 +16,7 @@ interface AuthContextValue {
     bio?: string,
     specialization?: string
   ) => Promise<boolean>;
-  logout: () => void;
+  logout: () => Promise<void>;
   updateUser: (updates: Partial<User>) => void;
   isAdmin: () => boolean;
   isTeacher: () => boolean;
@@ -110,8 +110,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = async () => {
-    await authService.logout();
     setUser(null);
+    localStorage.removeItem('cyberSecUser');
+    try {
+      await authService.logout();
+    } catch (error) {
+      console.error('AuthService logout error:', error);
+    }
   };
 
   const updateUser = (updates: Partial<User>) => {

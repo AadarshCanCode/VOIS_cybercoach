@@ -47,7 +47,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
     }
 
     return (
-        <div className="w-72 bg-[#0A0F0A] border-r border-[#00FF88]/10 h-[calc(100vh-4rem)] flex flex-col sticky top-16">
+        <div className="w-72 bg-[#0A0F0A] border-r border-[#00FF88]/10 h-[calc(100vh-4rem)] flex flex-col sticky top-16 z-30">
             <div className="p-4 flex-1 overflow-y-auto custom-scrollbar">
                 <div className="space-y-2">
                     {menuItems.map((item) => {
@@ -57,6 +57,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
                         return (
                             <button
                                 key={item.id}
+                                type="button"
                                 onClick={() => onTabChange(item.id)}
                                 className={cn(
                                     "w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all duration-300 group relative overflow-hidden",
@@ -89,8 +90,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
                 </div>
             </div>
 
-            <div className="p-4 border-t border-[#00FF88]/10 bg-[#0A0F0A]/50 backdrop-blur-sm">
+            <div className="p-4 border-t border-[#00FF88]/10 bg-[#0A0F0A]/50 backdrop-blur-sm relative z-10">
                 <button
+                    type="button"
                     onClick={() => onTabChange('profile')}
                     className={cn(
                         "w-full mb-3 flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 group relative overflow-hidden",
@@ -112,6 +114,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
                 </button>
 
                 <button
+                    type="button"
                     onClick={() => onTabChange('pricing')}
                     className="w-full mb-3 bg-[#00FF88]/10 hover:bg-[#00FF88]/20 text-[#00FF88] text-xs font-bold py-2 px-3 rounded border border-[#00FF88]/20 transition-all uppercase tracking-wide flex items-center justify-center gap-2"
                 >
@@ -120,6 +123,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
                 </button>
 
                 <button
+                    type="button"
                     onClick={async () => {
                         try {
                             await logout();
@@ -127,7 +131,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
                             console.error('Logout failed:', error);
                         }
                     }}
-                    className="w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-xl text-[#00B37A] hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all duration-300 group"
+                    className="w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-xl text-[#00B37A] hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all duration-300 group cursor-pointer"
                 >
                     <LogOut className="h-5 w-5 group-hover:scale-110 transition-transform" />
                     <span className="font-medium">Sign Out</span>

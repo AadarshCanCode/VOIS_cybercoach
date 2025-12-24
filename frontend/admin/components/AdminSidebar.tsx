@@ -29,7 +29,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, onTabChan
     ];
 
     return (
-        <div className="w-72 bg-[#0A0F0A] border-r border-[#00FF88]/10 h-[calc(100vh-4rem)] flex flex-col sticky top-16">
+        <div className="w-72 bg-[#0A0F0A] border-r border-[#00FF88]/10 h-[calc(100vh-4rem)] flex flex-col sticky top-16 z-30">
             <div className="p-4 flex-1 overflow-y-auto custom-scrollbar">
                 <div className="space-y-2">
                     {menuItems.map((item) => {
@@ -39,6 +39,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, onTabChan
                         return (
                             <button
                                 key={item.id}
+                                type="button"
                                 onClick={() => onTabChange(item.id)}
                                 className={cn(
                                     "w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all duration-300 group relative overflow-hidden",
@@ -71,7 +72,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, onTabChan
                 </div>
             </div>
 
-            <div className="p-4 border-t border-[#00FF88]/10 bg-[#0A0F0A]/50 backdrop-blur-sm">
+            <div className="p-4 border-t border-[#00FF88]/10 bg-[#0A0F0A]/50 backdrop-blur-sm relative z-10">
                 <div className="mb-4 px-4 py-3 bg-gradient-to-br from-[#0A0F0A] to-[#000000] rounded-xl border border-[#00FF88]/10 shadow-inner">
                     <p className="text-xs font-medium text-[#00B37A] uppercase tracking-wider mb-2">Clearance Level</p>
                     <div className="flex justify-between items-center">
@@ -91,7 +92,13 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, onTabChan
 
                 <button
                     type="button"
-                    onClick={logout}
+                    onClick={async () => {
+                        try {
+                            await logout();
+                        } catch (error) {
+                            console.error('Logout failed:', error);
+                        }
+                    }}
                     className="w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-xl text-[#00B37A] hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all duration-300 group cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-500"
                 >
                     <LogOut className="h-5 w-5 group-hover:scale-110 transition-transform" />

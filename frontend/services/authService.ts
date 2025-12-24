@@ -176,7 +176,11 @@ class AuthService {
 
   async logout() {
     localStorage.removeItem('cyberSecUser');
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error('Supabase signOut error:', error);
+    }
   }
 
   getCurrentUser() {
