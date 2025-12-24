@@ -19,7 +19,7 @@ export const InterviewBot: React.FC = () => {
         {
             id: '1',
             sender: 'bot',
-            text: "Greetings, Operator. I am CORTEX, your tactical interview simulation unit. Select a protocol to begin your assessment.",
+            text: "Welcome! This is your AI interview practice. Select a category to begin.",
             timestamp: new Date()
         }
     ]);
@@ -113,7 +113,7 @@ export const InterviewBot: React.FC = () => {
             {
                 id: Date.now().toString(),
                 sender: 'bot',
-                text: `Initializing ${selectedCategory.toUpperCase()} PROTOCOL... Target Position: ${position || 'General Cybersecurity'}. Resume analysis complete.`,
+                text: `Starting ${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} interview. Position: ${position || 'General'}. Resume analysis complete.`,
                 timestamp: new Date()
             }
         ]);
@@ -202,7 +202,7 @@ export const InterviewBot: React.FC = () => {
         setMessages([{
             id: Date.now().toString(),
             sender: 'bot',
-            text: "Simulation reset. Update your configuration or select a protocol to begin.",
+            text: "Interview reset. Update your details or select a category to begin.",
             timestamp: new Date()
         }]);
     };
@@ -211,26 +211,17 @@ export const InterviewBot: React.FC = () => {
         <div className="flex flex-col h-[calc(100vh-100px)] max-w-4xl mx-auto bg-[#0A0F0A] border border-[#00FF88]/20 rounded-xl overflow-hidden shadow-2xl font-mono">
             {/* Header */}
             <div className="bg-[#0A0F0A] border-b border-[#00FF88]/10 p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-[#00FF88]/10 border border-[#00FF88]/20 flex items-center justify-center relative">
-                        <Bot className="h-6 w-6 text-[#00FF88]" />
-                        <div className="absolute inset-0 bg-[#00FF88]/20 rounded-full animate-pulse"></div>
-                    </div>
-                    <div>
-                        <h2 className="text-lg font-bold text-white tracking-wider">CORTEX UNIT</h2>
-                        <p className="text-xs text-[#00B37A]">STATUS: {category ? `${category.toUpperCase()} MODE ACTIVE` : 'AWAITING INPUT'}</p>
-                    </div>
+                <div>
+                    <h2 className="text-lg font-bold text-white tracking-wider">AI Interview Practice</h2>
+                    <p className="text-xs text-[#00B37A]">{category ? `${category.charAt(0).toUpperCase() + category.slice(1)} interview active` : 'Select a category to begin'}</p>
                 </div>
-                <div className="flex gap-2">
-                    <button className="p-2 hover:bg-[#00FF88]/10 rounded-lg transition-colors text-[#00B37A]">
-                        <Volume2 className="h-5 w-5" />
-                    </button>
+                <div>
                     <button
                         onClick={resetSimulation}
                         className="p-2 hover:bg-[#00FF88]/10 rounded-lg transition-colors text-[#00B37A]"
-                        title="Reset Simulation"
+                        title="Reset Interview"
                     >
-                        <RefreshCw className="h-5 w-5" />
+                        Reset
                     </button>
                 </div>
             </div>
@@ -241,24 +232,24 @@ export const InterviewBot: React.FC = () => {
                 {!category && showConfig && (
                     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 mb-8">
                         <div className="bg-[#0A0F0A] border border-[#00FF88]/20 p-6 rounded-xl space-y-6">
-                            <h3 className="text-[#00FF88] font-bold flex items-center gap-2 tracking-widest text-sm text-center justify-center">
-                                <Shield className="h-4 w-4" /> INTERVIEW PARAMETERS
+                            <h3 className="text-[#00FF88] font-bold tracking-widest text-sm text-center justify-center">
+                                Interview Setup
                             </h3>
 
                             <div className="space-y-4">
                                 <div>
-                                    <label className="text-[10px] text-[#00B37A] uppercase font-bold mb-2 block">Target Position</label>
+                                    <label className="text-[10px] text-[#00B37A] uppercase font-bold mb-2 block">Position</label>
                                     <input
                                         type="text"
                                         value={position}
                                         onChange={(e) => setPosition(e.target.value)}
-                                        placeholder="e.g. SOC Analyst, Penetration Tester..."
+                                        placeholder="e.g. Software Engineer, Data Analyst..."
                                         className="w-full bg-black border border-[#00FF88]/20 rounded-lg px-4 py-3 text-white focus:border-[#00FF88]/50 outline-none placeholder-[#00B37A]/30 transition-all"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="text-[10px] text-[#00B37A] uppercase font-bold mb-2 block">Resume Upload (PDF/TXT)</label>
+                                    <label className="text-[10px] text-[#00B37A] uppercase font-bold mb-2 block">Resume (PDF/TXT, optional)</label>
                                     {!resumeFile ? (
                                         <div className="relative group">
                                             <input
@@ -268,9 +259,8 @@ export const InterviewBot: React.FC = () => {
                                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                             />
                                             <div className="w-full border-2 border-dashed border-[#00FF88]/20 group-hover:border-[#00FF88]/50 rounded-lg p-8 flex flex-col items-center justify-center transition-all bg-black/50">
-                                                <Upload className="h-8 w-8 text-[#00B37A] mb-3 group-hover:scale-110 transition-transform" />
-                                                <p className="text-xs text-[#00B37A] font-mono">DRAG & DROP OR CLICK TO UPLOAD</p>
-                                                <p className="text-[10px] text-[#00B37A]/50 mt-2 italic">SECURE ENCRYPTED PARSING ACTIVE</p>
+                                                <p className="text-xs text-[#00B37A] font-mono">Drag & drop or click to upload</p>
+                                                <p className="text-[10px] text-[#00B37A]/50 mt-2 italic">Resume parsing is private and secure</p>
                                             </div>
                                         </div>
                                     ) : (
@@ -282,7 +272,7 @@ export const InterviewBot: React.FC = () => {
                                                 <div>
                                                     <p className="text-xs font-bold text-white truncate max-w-[200px]">{resumeFile.name}</p>
                                                     <p className="text-[10px] text-[#00B37A]">
-                                                        {isParsing ? 'ANALYZING NEURAL PATTERNS...' : 'DATA EXTRACTED & VERIFIED'}
+                                                        {isParsing ? 'Analyzing resume...' : 'Resume processed'}
                                                     </p>
                                                 </div>
                                             </div>
@@ -310,8 +300,8 @@ export const InterviewBot: React.FC = () => {
                                 <div className="h-10 w-10 rounded-lg bg-[#00FF88]/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                                     <Terminal className="h-6 w-6 text-[#00FF88]" />
                                 </div>
-                                <h3 className="text-[#EAEAEA] font-bold mb-1">TECHNICAL</h3>
-                                <p className="text-xs text-[#00B37A]">Cybersecurity protocols & coding assessments.</p>
+                                <h3 className="text-[#EAEAEA] font-bold mb-1">Technical</h3>
+                                <p className="text-xs text-[#00B37A]">Technical and coding questions.</p>
                             </button>
 
                             <button
@@ -322,8 +312,8 @@ export const InterviewBot: React.FC = () => {
                                 <div className="h-10 w-10 rounded-lg bg-[#FF00FF]/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                                     <Users className="h-6 w-6 text-[#FF00FF]" />
                                 </div>
-                                <h3 className="text-[#EAEAEA] font-bold mb-1">BEHAVIORAL</h3>
-                                <p className="text-xs text-[#FF00FF]/80">Culture fit & situational analysis.</p>
+                                <h3 className="text-[#EAEAEA] font-bold mb-1">HR</h3>
+                                <p className="text-xs text-[#FF00FF]/80">HR and behavioral questions.</p>
                             </button>
 
                             <button
@@ -334,8 +324,8 @@ export const InterviewBot: React.FC = () => {
                                 <div className="h-10 w-10 rounded-lg bg-[#00FFFF]/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                                     <Brain className="h-6 w-6 text-[#00FFFF]" />
                                 </div>
-                                <h3 className="text-[#EAEAEA] font-bold mb-1">APTITUDE</h3>
-                                <p className="text-xs text-[#00FFFF]/80">Logic puzzles & cognitive testing.</p>
+                                <h3 className="text-[#EAEAEA] font-bold mb-1">Aptitude</h3>
+                                <p className="text-xs text-[#00FFFF]/80">Aptitude and logic questions.</p>
                             </button>
                         </div>
                     </div>
@@ -356,8 +346,7 @@ export const InterviewBot: React.FC = () => {
                                         : 'bg-[#0A0F0A] border border-[#00B37A]/30 text-[#00B37A] rounded-tl-none shadow-[0_0_15px_rgba(0,255,136,0.05)]'
                                 }`}>
                                 <div className="flex items-center gap-2 mb-1 opacity-50 text-[10px] uppercase tracking-wider font-bold">
-                                    {msg.sender === 'user' ? <User className="h-3 w-3" /> : <Bot className="h-3 w-3" />}
-                                    {msg.sender === 'user' ? 'OPERATOR' : 'CORTEX'}
+                                    {msg.sender === 'user' ? 'You' : 'AI'}
                                 </div>
                                 <p className="whitespace-pre-wrap leading-relaxed">{msg.text}</p>
                                 <p className="text-[10px] opacity-30 mt-2 text-right">
@@ -374,8 +363,7 @@ export const InterviewBot: React.FC = () => {
                                         onClick={() => loadNextQuestion(category)}
                                         className="px-6 py-2 bg-[#00FF88]/10 hover:bg-[#00FF88]/20 border border-[#00FF88]/50 text-[#00FF88] text-xs font-bold rounded-full transition-all"
                                     >
-                                        <RefreshCw className="h-3 w-3 inline-block mr-2" />
-                                        NEXT MODULE NOW
+                                        Next Question
                                     </button>
                                     <span className="text-[10px] text-[#00B37A] animate-pulse">
                                         Auto-advancing in 5s...
@@ -389,10 +377,7 @@ export const InterviewBot: React.FC = () => {
                 {isTyping && (
                     <div className="flex justify-start">
                         <div className="bg-[#0A0F0A] border border-[#00B37A]/30 rounded-2xl rounded-tl-none p-4 flex items-center gap-2">
-                            <div className="w-2 h-2 bg-[#00FF88] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                            <div className="w-2 h-2 bg-[#00FF88] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                            <div className="w-2 h-2 bg-[#00FF88] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                            <span className="text-xs text-[#00B37A] ml-2 font-mono">ANALYZING NEURAL PATTERNS...</span>
+                            <span className="text-xs text-[#00B37A] ml-2 font-mono">AI is thinking...</span>
                         </div>
                     </div>
                 )}
@@ -408,13 +393,10 @@ export const InterviewBot: React.FC = () => {
                             value={inputText}
                             onChange={(e) => setInputText(e.target.value)}
                             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                            placeholder={category ? "Enter response..." : "Select a protocol above..."}
+                            placeholder={category ? "Type your answer..." : "Select a category above..."}
                             disabled={!category || isTyping}
                             className="w-full bg-[#000000] border border-[#00FF88]/20 rounded-xl pl-4 pr-12 py-4 text-[#EAEAEA] focus:outline-none focus:border-[#00FF88]/50 focus:ring-1 focus:ring-[#00FF88]/20 placeholder-[#00B37A]/30 disabled:opacity-50 disabled:cursor-not-allowed"
                         />
-                        <button className="absolute right-3 top-1/2 -translate-y-1/2 text-[#00B37A] hover:text-[#00FF88] transition-colors">
-                            <Mic className="h-5 w-5" />
-                        </button>
                     </div>
                     <button
                         onClick={handleSend}

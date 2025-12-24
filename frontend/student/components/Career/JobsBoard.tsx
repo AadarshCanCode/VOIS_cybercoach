@@ -36,13 +36,10 @@ export const JobsBoard: React.FC = () => {
             {/* Header */}
             <div className="flex items-center justify-between border-b border-[#00FF88]/10 pb-6">
                 <div>
-                    <h1 className="text-3xl font-black tracking-tighter text-white uppercase">
-                        Job <span className="text-[#00FF88]">Postings</span>
+                    <h1 className="text-3xl font-black tracking-tighter text-white">
+                        Job Board
                     </h1>
-                    <p className="text-[#00B37A] font-mono text-sm mt-1">AVAILABLE OPPORTUNITIES & CONTRACTS</p>
-                </div>
-                <div className="h-10 w-10 rounded bg-[#00FF88]/10 border border-[#00FF88]/20 flex items-center justify-center">
-                    <Briefcase className="h-5 w-5 text-[#00FF88]" />
+                    <p className="text-[#00B37A] font-mono text-sm mt-1">Find your next opportunity</p>
                 </div>
             </div>
 
@@ -59,16 +56,16 @@ export const JobsBoard: React.FC = () => {
                     />
                 </div>
                 <div className="flex gap-2">
-                    {['all', 'Full-time', 'Contract', 'Bounty'].map((type) => (
+                    {['all', 'Full-time', 'Contract', 'Internship'].map((type) => (
                         <button
                             key={type}
                             onClick={() => setFilterType(type)}
-                            className={`px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-wider border transition-all ${filterType === type
+                            className={`px-4 py-2 rounded-lg text-sm font-bold tracking-wider border transition-all ${filterType === type
                                 ? 'bg-[#00FF88]/10 border-[#00FF88] text-[#00FF88]'
                                 : 'bg-[#0A0F0A] border-[#00FF88]/10 text-[#00B37A] hover:border-[#00FF88]/30'
                                 }`}
                         >
-                            {type}
+                            {type.charAt(0).toUpperCase() + type.slice(1)}
                         </button>
                     ))}
                 </div>
@@ -87,21 +84,13 @@ export const JobsBoard: React.FC = () => {
                             key={job.id}
                             className="group relative bg-[#0A0F0A] border border-[#00FF88]/20 rounded-xl p-6 hover:border-[#00FF88]/50 transition-all duration-300 hover:shadow-[0_0_20px_rgba(0,255,136,0.1)] flex flex-col"
                         >
-                            <div className="absolute top-4 right-4">
-                                <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider border ${job.type === 'Bounty'
-                                    ? 'bg-red-500/10 text-red-400 border-red-500/20'
-                                    : 'bg-[#00FF88]/10 text-[#00FF88] border-[#00FF88]/20'
-                                    }`}>
-                                    {job.type}
-                                </span>
-                            </div>
+                            {/* Job type badge removed from top right for simplicity */}
 
                             <div className="mb-4">
                                 <h3 className="text-xl font-bold text-white group-hover:text-[#00FF88] transition-colors line-clamp-1">
                                     {job.title}
                                 </h3>
                                 <div className="flex items-center gap-2 text-[#00B37A] text-sm font-mono mt-1">
-                                    <Shield className="h-3 w-3" />
                                     {job.company}
                                     <span className="text-[#00B37A]/50 ml-auto">{job.source}</span>
                                 </div>
@@ -109,11 +98,9 @@ export const JobsBoard: React.FC = () => {
 
                             <div className="space-y-3 mb-6 flex-1">
                                 <div className="flex items-center gap-2 text-sm text-[#EAEAEA]">
-                                    <MapPin className="h-4 w-4 text-[#00B37A]" />
                                     {job.location}
                                 </div>
                                 <div className="flex items-center gap-2 text-sm text-[#EAEAEA]">
-                                    <DollarSign className="h-4 w-4 text-[#00B37A]" />
                                     {job.salary_range}
                                 </div>
                                 <div className="flex flex-wrap gap-2 mt-4">
@@ -131,14 +118,13 @@ export const JobsBoard: React.FC = () => {
                                 rel="noopener noreferrer"
                                 className="w-full bg-[#00FF88] hover:bg-[#00CC66] text-black font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-all"
                             >
-                                <ExternalLink className="h-4 w-4" />
-                                APPLY NOW
+                                Apply Now
                             </a>
                         </div>
                     ))
                 ) : (
                     <div className="col-span-full text-center py-12 text-[#00B37A]">
-                        <p>No active job postings found matching your criteria.</p>
+                        <p>No jobs found. Try changing your search or filters.</p>
                     </div>
                 )}
             </div>
