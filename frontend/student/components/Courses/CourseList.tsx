@@ -25,29 +25,29 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
       const fetchCourses = async () => {
         setLoading(true);
         setError(null);
-        
+
         // Shorter timeout since we handle errors gracefully now
         const timeoutId = setTimeout(() => {
           setLoading(false);
           setDbCourses([]);
-          console.warn('Course fetch timed out after 8 seconds');
-        }, 8000);
+          console.warn('Course fetch timed out after 20 seconds');
+        }, 20000);
 
         try {
           console.log('Fetching courses from database...');
           const courses = await courseService.getAllCourses();
           clearTimeout(timeoutId);
-          
+
           console.log('Courses fetched:', courses);
           setDbCourses(courses || []);
-          
+
           if (!courses || courses.length === 0) {
             console.log('No courses found in database');
           }
-        } catch (error) {
+        } catch (error: any) {
           clearTimeout(timeoutId);
           console.error('Failed to fetch courses:', error);
-          // Just show empty state instead of error for database issues
+          setError(error.message || 'Failed to load courses');
           setDbCourses([]);
         } finally {
           setLoading(false);
@@ -64,7 +64,7 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
       setSelectedCourse(null);
       return null;
     }
-    
+
     return (
       <div className="p-6 min-h-screen animate-fade-in text-[#EAEAEA]">
         <div className="max-w-4xl mx-auto space-y-6">
@@ -86,11 +86,10 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
                     {selectedCourse.title}
                   </h1>
                   <div className="flex items-center space-x-3 text-sm">
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-                      selectedCourse.difficulty === 'Beginner' ? 'bg-green-500/10 text-green-500 border border-green-500/20' :
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${selectedCourse.difficulty === 'Beginner' ? 'bg-green-500/10 text-green-500 border border-green-500/20' :
                       selectedCourse.difficulty === 'Intermediate' ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20' :
-                      'bg-red-500/10 text-red-500 border border-red-500/20'
-                    }`}>
+                        'bg-red-500/10 text-red-500 border border-red-500/20'
+                      }`}>
                       {selectedCourse.difficulty}
                     </span>
                     <div className="flex items-center space-x-1 text-[#00B37A]">
@@ -242,7 +241,7 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
                       <div className="mt-4 pt-4 border-t border-[#00FF88]/10">
                         <div className="flex items-center space-x-2 text-sm text-[#EAEAEA]/60">
                           <CheckCircle className="h-4 w-4 text-[#00FF88]" />
-                          <span>{(course.modules?.length || course.course_modules?.length || 0)} Modules</span>
+                          <span>{(course.module_count || course.modules?.length || course.course_modules?.length || 0)} Modules</span>
                         </div>
                       </div>
                     </div>
@@ -286,9 +285,8 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
               <div
                 key={course.id}
                 onClick={() => canAccessCourses && setSelectedCourse(course)}
-                className={`bg-[#0A0F0A] rounded-xl border border-[#00FF88]/10 overflow-hidden group transition-all duration-300 relative ${
-                  canAccessCourses ? 'cursor-pointer hover:border-[#00FF88]/30' : 'opacity-40 cursor-not-allowed'
-                }`}
+                className={`bg-[#0A0F0A] rounded-xl border border-[#00FF88]/10 overflow-hidden group transition-all duration-300 relative ${canAccessCourses ? 'cursor-pointer hover:border-[#00FF88]/30' : 'opacity-40 cursor-not-allowed'
+                  }`}
               >
                 {/* Lock Overlay for individual courses */}
                 {!canAccessCourses && (
@@ -313,11 +311,10 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3 text-xs text-[#EAEAEA]/60">
-                      <span className={`px-2 py-1 rounded ${
-                        course.difficulty === 'Beginner' ? 'bg-green-500/10 text-green-500' :
+                      <span className={`px-2 py-1 rounded ${course.difficulty === 'Beginner' ? 'bg-green-500/10 text-green-500' :
                         course.difficulty === 'Intermediate' ? 'bg-yellow-500/10 text-yellow-500' :
-                        'bg-red-500/10 text-red-500'
-                      }`}>
+                          'bg-red-500/10 text-red-500'
+                        }`}>
                         {course.difficulty}
                       </span>
                       <div className="flex items-center space-x-1">
@@ -397,14 +394,13 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {courseCategories.map((category) => {
             const courses = getCoursesByCategory(category.id);
-            
+
             return (
               <div
                 key={category.id}
                 onClick={() => canAccessCourses && setSelectedCategory(category.id)}
-                className={`bg-gradient-to-br ${category.color} rounded-xl border border-[#00FF88]/10 overflow-hidden group transition-all duration-300 relative ${
-                  canAccessCourses ? 'cursor-pointer hover:border-[#00FF88]/30' : 'opacity-40 cursor-not-allowed'
-                }`}
+                className={`bg-gradient-to-br ${category.color} rounded-xl border border-[#00FF88]/10 overflow-hidden group transition-all duration-300 relative ${canAccessCourses ? 'cursor-pointer hover:border-[#00FF88]/30' : 'opacity-40 cursor-not-allowed'
+                  }`}
               >
                 {/* Lock Overlay */}
                 {!canAccessCourses && (

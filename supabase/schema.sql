@@ -12,6 +12,7 @@ create table if not exists public.courses (
   id uuid default uuid_generate_v4() primary key,
   title text not null,
   description text not null,
+  content_json_url text,
   teacher_id uuid references auth.users(id),
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null

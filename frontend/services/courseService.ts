@@ -3,9 +3,38 @@ import type { Course, Module } from '@types';
 
 class CourseService {
   // Course Management
-  async createCourse(courseData: Partial<Course>) {
+  async createCourse(courseData: Omit<Partial<Course>, 'modules'> & { modules?: Partial<Module>[] }) {
     try {
       console.log('Creating course with data:', courseData);
+
+      let contentJsonUrl = null;
+
+      // Hybrid Storage: Upload content to bucket if modules exist
+      if (courseData.modules && courseData.modules.length > 0) {
+        const courseContent = {
+          title: courseData.title,
+          description: courseData.description,
+          modules: courseData.modules,
+          generatedAt: new Date().toISOString()
+        };
+
+        const blob = new Blob([JSON.stringify(courseContent)], { type: 'application/json' });
+        const fileName = `course_${Date.now()}_${Math.random().toString(36).substring(7)}.json`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('course-content')
+          .upload(fileName, blob);
+
+        if (uploadError) {
+          console.error('Failed to upload course content:', uploadError);
+          // Continue with DB creation, but warn
+        } else {
+          const { data: { publicUrl } } = supabase.storage
+            .from('course-content')
+            .getPublicUrl(fileName);
+          contentJsonUrl = publicUrl;
+        }
+      }
 
       const { data, error } = await supabase
         .from('courses')
@@ -16,9 +45,11 @@ class CourseService {
           difficulty: courseData.difficulty,
           estimated_hours: courseData.estimated_hours || 0,
           teacher_id: courseData.teacher_id,
-          is_published: courseData.is_published || false,
+          teacher_id: courseData.teacher_id,
+          // is_published: removed
           enrollment_count: 0,
-          rating: 0
+          rating: 0,
+          content_json_url: contentJsonUrl
         }])
         .select()
         .single();
@@ -29,15 +60,48 @@ class CourseService {
       }
 
       console.log('Course created successfully:', data);
-      return data;
+
+      // Return full course object with modules
+      return {
+        ...data,
+        modules: courseData.modules || []
+      };
     } catch (error) {
       console.error('Create course error:', error);
       throw error;
     }
   }
 
-  async updateCourse(id: string, updates: Partial<Course>) {
+  async updateCourse(id: string, updates: Omit<Partial<Course>, 'modules'> & { modules?: Partial<Module>[] }) {
     try {
+      // Hybrid Storage Update: Re-upload content if modules are provided
+      if (updates.modules && updates.modules.length > 0) {
+        const courseContent = {
+          title: updates.title, // Note: might need to fetch existing title if not in updates, but assuming full update usually
+          description: updates.description,
+          modules: updates.modules,
+          updatedAt: new Date().toISOString()
+        };
+
+        const blob = new Blob([JSON.stringify(courseContent)], { type: 'application/json' });
+        const fileName = `course_${id}_${Date.now()}.json`; // Use ID to keep it related? Or just new file. New file avoids cache.
+
+        const { error: uploadError } = await supabase.storage
+          .from('course-content')
+          .upload(fileName, blob);
+
+        if (!uploadError) {
+          const { data: { publicUrl } } = supabase.storage
+            .from('course-content')
+            .getPublicUrl(fileName);
+
+          // Add the new URL to the updates object for the DB update
+          (updates as any).content_json_url = publicUrl;
+        } else {
+          console.error('Failed to upload updated course content:', uploadError);
+        }
+      }
+
       const { data, error } = await supabase
         .from('courses')
         .update(updates)
@@ -46,7 +110,12 @@ class CourseService {
         .single();
 
       if (error) throw new Error(`Failed to update course: ${error.message}`);
-      return data;
+
+      // Return full course object with modules (if updated)
+      return {
+        ...data,
+        modules: updates.modules || [] // Note: might need existing modules if not updated, but for now this is safer than nothing
+      };
     } catch (error) {
       console.error('Update course error:', error);
       throw error;
@@ -70,6 +139,11 @@ class CourseService {
 
   async getCoursesByTeacher(teacherId: string) {
     try {
+      if (!teacherId) {
+        console.warn('getCoursesByTeacher called without teacherId');
+        return [];
+      }
+
       // First get courses without join to avoid relationship issues
       const { data: coursesData, error: coursesError } = await supabase
         .from('courses')
@@ -110,58 +184,47 @@ class CourseService {
   async getAllCourses(): Promise<Course[]> {
     try {
       console.log('Starting getAllCourses query...');
-      console.log('Supabase client initialized:', !!supabase);
-      
-      const testStart = Date.now();
-      console.log('Testing Supabase connection...');
-      
-      // Add timeout to the query itself
-      const queryPromise = supabase
+
+      // 1. Fetch all published courses
+      const { data: courses, error: coursesError } = await supabase
         .from('courses')
         .select('*')
-        .eq('is_published', true);
+        .order('created_at', { ascending: false });
 
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Supabase query timeout after 5 seconds')), 5000)
-      );
-
-      const { data, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
-
-      const duration = Date.now() - testStart;
-      console.log(`Supabase query completed in ${duration}ms`);
-      console.log('Supabase response:', { data, error, dataLength: data?.length });
-
-      if (error) {
-        console.error('Supabase error details:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        });
-        
-        // Return empty array for common non-critical errors
-        if (error.code === 'PGRST116' || error.message.includes('relation') || error.message.includes('does not exist')) {
-          console.warn('Table may not exist or has no data, returning empty array');
-          return [];
-        }
-        
-        console.error('Returning empty array due to error');
-        return [];
-      }
-      
-      if (!data) {
-        console.warn('No courses data returned from database');
-        return [];
+      if (coursesError) {
+        console.error('Supabase error fetching courses:', coursesError);
+        throw new Error(coursesError.message);
       }
 
-      console.log(`Successfully fetched ${data.length} courses`);
-      return data as Course[];
+      if (!courses || courses.length === 0) return [];
+
+      // 2. Fetch all published modules (lightweight, just IDs and course_ids) to count them
+      // We purposefully avoid a JOIN here to prevent timeouts if RLS policies are complex
+      const { data: rawModules, error: modulesError } = await supabase
+        .from('modules')
+        .select('course_id')
+        .select('course_id');
+      // .eq('is_published', true); // Removed
+
+      if (modulesError) {
+        console.warn('Error fetching modules for count (non-fatal):', modulesError);
+      }
+
+      // 3. Calculate counts locally
+      const moduleCounts = (rawModules || []).reduce((acc: Record<string, number>, mod: any) => {
+        acc[mod.course_id] = (acc[mod.course_id] || 0) + 1;
+        return acc;
+      }, {});
+
+      console.log(`Successfully fetched ${courses.length} courses`);
+
+      return courses.map((course: any) => ({
+        ...course,
+        module_count: moduleCounts[course.id] || 0,
+        modules: [] // Clear partial modules
+      })) as Course[];
     } catch (error) {
       console.error('Get all courses error:', error);
-      if (error instanceof Error && error.message.includes('timeout')) {
-        console.error('NETWORK ISSUE: Cannot reach Supabase. Check your .env file and internet connection.');
-      }
-      // Don't throw - return empty array to prevent UI from breaking
       return [];
     }
   }
@@ -178,19 +241,41 @@ class CourseService {
       if (courseError) throw new Error(`Failed to fetch course: ${courseError.message}`);
       if (!course) return null;
 
-      // 2. Get Modules
-      const { data: modules, error: moduleError } = await supabase
-        .from('modules')
-        .select('*')
-        .eq('course_id', id)
-        .eq('is_published', true)
-        .order('order', { ascending: true });
+      let modules = [];
 
-      if (moduleError) console.warn('Failed to fetch modules for course:', moduleError);
+      // 2. Hybrid Storage Retrieval
+      if (course.content_json_url) {
+        try {
+          const response = await fetch(course.content_json_url);
+          if (response.ok) {
+            const jsonContent = await response.json();
+            if (jsonContent.modules && Array.isArray(jsonContent.modules)) {
+              modules = jsonContent.modules;
+            }
+          }
+        } catch (fetchErr) {
+          console.error('Failed to fetch hybrid content:', fetchErr);
+        }
+      }
+
+      // 3. Fallback to SQL modules if JSON failed or was empty (and not empty intentionally)
+      if (modules.length === 0) {
+        const { data: sqlModules, error: moduleError } = await supabase
+          .from('modules')
+          .select('*')
+          .eq('course_id', id)
+          .eq('course_id', id)
+          // .eq('is_published', true) // Removed
+          .order('order', { ascending: true });
+
+        if (!moduleError && sqlModules) {
+          modules = sqlModules;
+        }
+      }
 
       return {
         ...course,
-        modules: modules || []
+        modules: modules
       } as Course;
     } catch (error) {
       console.error('Get course by id error:', error);
@@ -225,8 +310,8 @@ class CourseService {
         .from('modules')
         .insert([{
           ...moduleData,
-          module_order: currentCount + 1,
-          is_published: false
+          module_order: currentCount + 1
+          // is_published: false // Removed
         }])
         .select()
         .single();
@@ -262,7 +347,7 @@ class CourseService {
         .from('modules')
         .select('*')
         .eq('course_id', courseId)
-        .eq('is_published', true)
+        // .eq('is_published', true) // Removed
         .order('module_order', { ascending: true });
 
       if (error) throw new Error(`Failed to fetch modules: ${error.message}`);
