@@ -24,7 +24,9 @@ const GREEN_FLAG_TERMS = [
     'career', 'job description', 'requirements', 'responsibilities', 'perks',
     'allowance', 'paid leave', 'benefits', 'team', 'office', 'interview process',
     'work culture', 'about us', 'our company', 'founded', 'headquarters',
-    'linkedin', 'glassdoor', 'experience required', 'skills required'
+    'linkedin', 'glassdoor', 'experience required', 'skills required',
+    'privacy policy', 'terms of service', 'contact us', 'support', 'help center',
+    'copyright', 'all rights reserved', 'official website'
 ];
 
 export const analyzeContent = (text: string): AnalysisResult => {
@@ -52,9 +54,9 @@ export const analyzeContent = (text: string): AnalysisResult => {
     log('Flags detected', { redFlags, greenFlags });
 
     // Calculate score - balanced weights
-    // Green flags: +15 each (increased from 10)
-    // Red flags: -20 each (reduced from 25)
-    const score = (greenFlags.length * 15) - (redFlags.length * 20);
+    // Green flags: +20 each (increased from 15)
+    // Red flags: -25 each (increased from 20)
+    const score = (greenFlags.length * 20) - (redFlags.length * 25);
 
     let category: AnalysisResult['category'] = 'NEUTRAL';
     if (redFlags.length > 0 || score < -10) category = 'SUSPICIOUS';

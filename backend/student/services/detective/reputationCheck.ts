@@ -73,12 +73,12 @@ export const checkReputation = async (companyName: string): Promise<ReputationRe
 
         log('Search results analyzed', { totalResults: items.length, scamHits });
 
-        // Adjusted thresholds:
-        // negative: > 7 hits (was > 5) - less harsh
-        // positive: <= 1 hit (was === 0) - more lenient
+        // Adjusted thresholds for big brands:
+        // negative: > 12 hits (was > 7) - much more lenient for popular brands
+        // positive: <= 3 hits (was <= 1) - more reward for low scam mentions
         let sentiment: 'positive' | 'negative' | 'neutral' = 'neutral';
-        if (scamHits > 7) sentiment = 'negative';
-        else if (scamHits <= 1) sentiment = 'positive';
+        if (scamHits > 12) sentiment = 'negative';
+        else if (scamHits <= 3) sentiment = 'positive';
 
         const result = {
             sentiment,

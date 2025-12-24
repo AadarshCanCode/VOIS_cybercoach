@@ -34,9 +34,9 @@ export const CompanyVerification: React.FC = () => {
     };
 
     const getScoreColor = (score: number) => {
-        if (score >= 90) return 'text-emerald-400';
-        if (score >= 70) return 'text-amber-400';
-        return 'text-red-400';
+        if (score >= 60) return 'text-emerald-400'; // 0-40 risk
+        if (score >= 35) return 'text-amber-400';   // 41-65 risk
+        return 'text-red-400';                      // 66+ risk
     };
 
     const getStatusBadge = (status: string) => {

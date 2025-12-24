@@ -37,8 +37,8 @@ export const makeDecision = async (
     });
 
     // 1. Heuristic Calculation
-    // Starting at 30 (assumes companies are legitimate by default)
-    let riskScore = 30;
+    // Starting at 15 (assumes companies are legitimate by default)
+    let riskScore = 15;
     const breakdown: string[] = [];
     log('Scoring', 'Initial risk score', { riskScore });
 
@@ -46,16 +46,16 @@ export const makeDecision = async (
     if (domainIntel.ageDays !== null && domainIntel.ageDays !== undefined) {
         const prevScore = riskScore;
         if (domainIntel.ageDays < 60) {
-            riskScore += 20; // Reduced from 25
+            riskScore += 25; 
             breakdown.push('Very recent domain registration (< 60 days)');
         } else if (domainIntel.ageDays < 365) {
-            riskScore += 8; // Reduced from 10
+            riskScore += 10;
             breakdown.push('Relatively new domain (< 1 year)');
         } else if (domainIntel.ageDays > 1000) {
-            riskScore -= 15; // Established domain bonus
+            riskScore -= 20; // Increased bonus for established domains
             breakdown.push('Well-established domain (> 3 years)');
         } else if (domainIntel.ageDays > 365) {
-            riskScore -= 10; // NEW: Mid-range domain bonus (1-3 years)
+            riskScore -= 10;
             breakdown.push('Moderately established domain (1-3 years)');
         }
         log('Scoring', 'Domain age factor applied', { ageDays: domainIntel.ageDays, scoreDelta: riskScore - prevScore, newScore: riskScore });
@@ -102,9 +102,18 @@ export const makeDecision = async (
 
     // Factor: Scraper Failure
     if (!scraperData) {
-        riskScore += 8; // Reduced from 10 - less harsh for scraper issues
+        riskScore += 5; // Reduced from 8 - even less harsh
         breakdown.push('Unable to scrape website content for deeper analysis');
-        log('Scoring', 'Scraper failure penalty applied', { penalty: 8, newScore: riskScore });
+        log('Scoring', 'Scraper failure penalty applied', { penalty: 5, newScore: riskScore });
+    }
+
+    // NEW: Big Brand / Common Domain Bonus
+    const commonTlds = ['.com', '.org', '.net', '.edu', '.gov', '.in', '.co.uk'];
+    const isCommonTld = commonTlds.some(tld => domainIntel.domain.endsWith(tld));
+    if (isCommonTld && domainIntel.domain.split('.')[0].length <= 8) {
+        riskScore -= 10;
+        breakdown.push('Domain structure suggests an established entity');
+        log('Scoring', 'Common domain bonus applied', { domain: domainIntel.domain, newScore: riskScore });
     }
 
     // Final Clamp
