@@ -6,6 +6,8 @@ import {
     BarChart,
     LogOut,
     ChevronRight,
+    ChevronLeft,
+    Menu,
     Settings,
     Shield
 } from 'lucide-react';
@@ -19,6 +21,7 @@ interface AdminSidebarProps {
 
 export const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, onTabChange }) => {
     const { logout } = useAuth();
+    const [isCollapsed, setIsCollapsed] = React.useState(false);
 
     const menuItems = [
         { id: 'overview', label: 'Overview', icon: LayoutDashboard },
@@ -29,8 +32,20 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, onTabChan
     ];
 
     return (
-        <div className="w-72 bg-[#0A0F0A] border-r border-[#00FF88]/10 h-[calc(100vh-4rem)] flex flex-col sticky top-16 z-30">
+        <div className={cn(
+            "bg-[#0A0F0A] border-r border-[#00FF88]/10 h-[calc(100vh-4rem)] flex flex-col sticky top-16 z-30 transition-all duration-300 ease-in-out",
+            isCollapsed ? "w-20" : "w-72"
+        )}>
             <div className="p-4 flex-1 overflow-y-auto custom-scrollbar">
+                <div className="flex justify-end mb-4">
+                    <button
+                        onClick={() => setIsCollapsed(!isCollapsed)}
+                        className="p-2 rounded-lg bg-[#00FF88]/5 text-[#00B37A] hover:text-[#00FF88] hover:bg-[#00FF88]/10 transition-all"
+                        title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+                    >
+                        {isCollapsed ? <Menu className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+                    </button>
+                </div>
                 <div className="space-y-2">
                     {menuItems.map((item) => {
                         const Icon = item.icon;
@@ -59,9 +74,9 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, onTabChan
                                     )} />
                                 </div>
 
-                                <span className="font-medium tracking-wide text-sm">{item.label}</span>
+                                {!isCollapsed && <span className="font-medium tracking-wide text-sm whitespace-nowrap overflow-hidden">{item.label}</span>}
 
-                                {isActive && (
+                                {isActive && !isCollapsed && (
                                     <div className="absolute right-3 animate-fade-in">
                                         <ChevronRight className="h-4 w-4 text-primary" />
                                     </div>
@@ -73,22 +88,24 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, onTabChan
             </div>
 
             <div className="p-4 border-t border-[#00FF88]/10 bg-[#0A0F0A]/50 backdrop-blur-sm relative z-10">
-                <div className="mb-4 px-4 py-3 bg-gradient-to-br from-[#0A0F0A] to-[#000000] rounded-xl border border-[#00FF88]/10 shadow-inner">
-                    <p className="text-xs font-medium text-[#00B37A] uppercase tracking-wider mb-2">Clearance Level</p>
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <p className="text-2xl font-bold text-[#EAEAEA]">
-                                Administrator
-                            </p>
-                            <p className="text-xs text-[#00FF88]">
-                                Level 5 Access
-                            </p>
-                        </div>
-                        <div className="h-10 w-10 rounded-full bg-red-500/10 flex items-center justify-center border border-red-500/20">
-                            <Shield className="h-5 w-5 text-red-400" />
+                {!isCollapsed && (
+                    <div className="mb-4 px-4 py-3 bg-gradient-to-br from-[#0A0F0A] to-[#000000] rounded-xl border border-[#00FF88]/10 shadow-inner">
+                        <p className="text-xs font-medium text-[#00B37A] uppercase tracking-wider mb-2">Clearance Level</p>
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <p className="text-2xl font-bold text-[#EAEAEA]">
+                                    Administrator
+                                </p>
+                                <p className="text-xs text-[#00FF88]">
+                                    Level 5 Access
+                                </p>
+                            </div>
+                            <div className="h-10 w-10 rounded-full bg-red-500/10 flex items-center justify-center border border-red-500/20">
+                                <Shield className="h-5 w-5 text-red-400" />
+                            </div>
                         </div>
                     </div>
-                </div>
+                )}
 
                 <button
                     type="button"
@@ -99,10 +116,13 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, onTabChan
                             console.error('Logout failed:', error);
                         }
                     }}
-                    className="w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-xl text-[#00B37A] hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all duration-300 group cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-500"
+                    className={cn(
+                        "w-full flex items-center space-x-2 px-4 py-3 rounded-xl text-[#00B37A] hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all duration-300 group cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-500",
+                        isCollapsed ? "justify-center" : "justify-center"
+                    )}
                 >
                     <LogOut className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                    <span className="font-medium">Sign Out</span>
+                    {!isCollapsed && <span className="font-medium">Sign Out</span>}
                 </button>
             </div>
         </div>

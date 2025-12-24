@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AlertTriangle, X, Eye, Users, Monitor } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface ViolationNotificationProps {
   violations: number;
@@ -66,43 +67,57 @@ export const ViolationNotification: React.FC<ViolationNotificationProps> = ({
     return 'info';
   };
 
-  const severityClasses = {
-    critical: 'bg-red-50 border-red-200 text-red-800',
-    warning: 'bg-yellow-50 border-yellow-200 text-yellow-800',
-    info: 'bg-blue-50 border-blue-200 text-blue-800'
-  };
 
   if (!isVisible || violations === 0) return null;
 
   const severity = getSeverityLevel();
 
   return (
-    <div className="fixed top-4 right-4 z-50 max-w-sm">
-      <div className={`rounded-lg border p-4 shadow-lg ${severityClasses[severity]}`}>
+    <div className="fixed top-20 right-4 z-[100] max-w-sm animate-in fade-in slide-in-from-right duration-500">
+      <div className={cn(
+        "rounded-2xl border backdrop-blur-xl p-5 shadow-[0_0_30px_rgba(0,0,0,0.5)] relative overflow-hidden group",
+        severity === 'critical' ? "bg-red-500/10 border-red-500/30 shadow-red-500/10" :
+          severity === 'warning' ? "bg-yellow-500/10 border-yellow-500/30 shadow-yellow-500/10" :
+            "bg-[#00FF88]/10 border-[#00FF88]/30 shadow-[#00FF88]/10"
+      )}>
+        <div className="absolute top-0 left-0 w-1 h-full bg-current opacity-50" style={{ color: severity === 'critical' ? '#ef4444' : severity === 'warning' ? '#eab308' : '#00FF88' }} />
+
         <div className="flex items-start">
-          <div className="flex-shrink-0">
+          <div className={cn(
+            "flex-shrink-0 p-2 rounded-lg",
+            severity === 'critical' ? "bg-red-500/20 text-red-400" :
+              severity === 'warning' ? "bg-yellow-500/20 text-yellow-400" :
+                "bg-[#00FF88]/20 text-[#00FF88]"
+          )}>
             {getViolationIcon(lastViolationReason)}
           </div>
-          <div className="ml-3 flex-1">
-            <h3 className="text-sm font-medium">
-              Proctoring Alert
+          <div className="ml-4 flex-1">
+            <h3 className={cn(
+              "text-xs font-black uppercase tracking-[0.2em]",
+              severity === 'critical' ? "text-red-400" :
+                severity === 'warning' ? "text-yellow-400" :
+                  "text-[#00FF88]"
+            )}>
+              Security Alert
             </h3>
-            <div className="mt-1 text-sm">
-              <p>{getViolationMessage(lastViolationReason)}</p>
-              <p className="mt-1 font-medium">
-                Violations: {violations}/{threshold}
+            <div className="mt-2">
+              <p className="text-white text-sm font-bold leading-tight">{getViolationMessage(lastViolationReason)}</p>
+              <div className="mt-3 flex items-center justify-between">
+                <span className="text-[10px] font-mono text-[#00B37A] uppercase tracking-widest">
+                  Integrity Level: {violations}/{threshold}
+                </span>
                 {violations >= threshold - 1 && (
-                  <span className="ml-2 text-red-600 font-bold">
-                    (Final Warning)
+                  <span className="text-[10px] bg-red-500 text-white px-2 py-0.5 rounded font-black animate-pulse">
+                    CRITICAL
                   </span>
                 )}
-              </p>
+              </div>
             </div>
           </div>
           <div className="ml-4 flex-shrink-0">
             <button
               onClick={handleDismiss}
-              className="inline-flex text-gray-400 hover:text-gray-600 focus:outline-none"
+              className="text-[#00B37A] hover:text-white transition-colors p-1"
             >
               <X className="h-4 w-4" />
             </button>

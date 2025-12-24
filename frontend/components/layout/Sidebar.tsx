@@ -9,6 +9,8 @@ import {
     User,
     LogOut,
     ChevronRight,
+    ChevronLeft,
+    Menu,
     Briefcase,
     Bot,
     ClipboardCheck,
@@ -23,7 +25,8 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
-    const { logout, isTeacher, isAdmin } = useAuth();
+    const { logout } = useAuth();
+    const [isCollapsed, setIsCollapsed] = React.useState(false);
 
     const menuItems = [
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -38,17 +41,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
         { id: 'assessment', label: 'Assessment', icon: ClipboardCheck },
     ];
 
-    if (isTeacher()) {
-        // Add teacher specific items
-    }
-
-    if (isAdmin()) {
-        // Add admin specific items
-    }
 
     return (
-        <div className="w-72 bg-[#0A0F0A] border-r border-[#00FF88]/10 h-[calc(100vh-4rem)] flex flex-col sticky top-16 z-30">
+        <div className={cn(
+            "bg-[#0A0F0A] border-r border-[#00FF88]/10 h-[calc(100vh-4rem)] flex flex-col sticky top-16 z-30 transition-all duration-300 ease-in-out",
+            isCollapsed ? "w-20" : "w-72"
+        )}>
             <div className="p-4 flex-1 overflow-y-auto custom-scrollbar">
+                <div className="flex justify-end mb-4">
+                    <button
+                        onClick={() => setIsCollapsed(!isCollapsed)}
+                        className="p-2 rounded-lg bg-[#00FF88]/5 text-[#00B37A] hover:text-[#00FF88] hover:bg-[#00FF88]/10 transition-all"
+                        title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+                    >
+                        {isCollapsed ? <Menu className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+                    </button>
+                </div>
                 <div className="space-y-2">
                     {menuItems.map((item) => {
                         const Icon = item.icon;
@@ -77,9 +85,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
                                     )} />
                                 </div>
 
-                                <span className="font-medium tracking-wide text-sm">{item.label}</span>
+                                {!isCollapsed && <span className="font-medium tracking-wide text-sm whitespace-nowrap overflow-hidden">{item.label}</span>}
 
-                                {isActive && (
+                                {isActive && !isCollapsed && (
                                     <div className="absolute right-3 animate-fade-in">
                                         <ChevronRight className="h-4 w-4 text-primary" />
                                     </div>
@@ -110,17 +118,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
                             activeTab === 'profile' ? "text-[#00FF88]" : "text-[#00B37A] group-hover:text-[#EAEAEA]"
                         )} />
                     </div>
-                    <span className="font-medium tracking-wide text-sm">Profile</span>
+                    {!isCollapsed && <span className="font-medium tracking-wide text-sm whitespace-nowrap overflow-hidden">Profile</span>}
                 </button>
 
-                <button
-                    type="button"
-                    onClick={() => onTabChange('pricing')}
-                    className="w-full mb-3 bg-[#00FF88]/10 hover:bg-[#00FF88]/20 text-[#00FF88] text-xs font-bold py-2 px-3 rounded border border-[#00FF88]/20 transition-all uppercase tracking-wide flex items-center justify-center gap-2"
-                >
-                    <Shield className="h-3 w-3" />
-                    Upgrade to Pro
-                </button>
+                {!isCollapsed && (
+                    <button
+                        type="button"
+                        onClick={() => onTabChange('pricing')}
+                        className="w-full mb-3 bg-[#00FF88]/10 hover:bg-[#00FF88]/20 text-[#00FF88] text-xs font-bold py-2 px-3 rounded border border-[#00FF88]/20 transition-all uppercase tracking-wide flex items-center justify-center gap-2"
+                    >
+                        <Shield className="h-3 w-3" />
+                        Upgrade to Pro
+                    </button>
+                )}
 
                 <button
                     type="button"
@@ -131,10 +141,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
                             console.error('Logout failed:', error);
                         }
                     }}
-                    className="w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-xl text-[#00B37A] hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all duration-300 group cursor-pointer"
+                    className={cn(
+                        "w-full flex items-center space-x-2 px-4 py-3 rounded-xl text-[#00B37A] hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all duration-300 group cursor-pointer",
+                        isCollapsed ? "justify-center" : "justify-center"
+                    )}
                 >
                     <LogOut className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                    <span className="font-medium">Sign Out</span>
+                    {!isCollapsed && <span className="font-medium">Sign Out</span>}
                 </button>
             </div>
         </div>
