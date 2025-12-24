@@ -7,6 +7,12 @@ const Search = SerpApi.GoogleSearch;
 import dotenv from 'dotenv';
 dotenv.config();
 
+// Logging utility for reputation check
+const log = (message: string, data?: any) => {
+    const timestamp = new Date().toISOString();
+    console.log(`[${timestamp}] [Detective:Reputation] ${message}`, data !== undefined ? JSON.stringify(data) : '');
+};
+
 export interface ReputationResult {
     sentiment: 'positive' | 'negative' | 'neutral';
     scamResults: number;
@@ -14,8 +20,11 @@ export interface ReputationResult {
 }
 
 export const checkReputation = async (companyName: string): Promise<ReputationResult> => {
+    log('Starting reputation check', { companyName });
+    
     const apiKey = process.env.SERPAPI_KEY;
     if (!apiKey) {
+        log('SERPAPI_KEY not found - returning neutral (no penalty)');
         console.warn('SERPAPI_KEY not found, skipping reputation check');
         return { sentiment: 'neutral', scamResults: 0, snippetSignals: [] };
     }
@@ -51,17 +60,26 @@ export const checkReputation = async (companyName: string): Promise<ReputationRe
             }
         });
 
-        let sentiment: 'positive' | 'negative' | 'neutral' = 'neutral';
-        if (scamHits > 5) sentiment = 'negative';
-        else if (scamHits === 0) sentiment = 'positive';
+        log('Search results analyzed', { totalResults: items.length, scamHits });
 
-        return {
+        // Adjusted thresholds:
+        // negative: > 7 hits (was > 5) - less harsh
+        // positive: <= 1 hit (was === 0) - more lenient
+        let sentiment: 'positive' | 'negative' | 'neutral' = 'neutral';
+        if (scamHits > 7) sentiment = 'negative';
+        else if (scamHits <= 1) sentiment = 'positive';
+
+        const result = {
             sentiment,
             scamResults: scamHits,
             snippetSignals: snippetSignals.slice(0, 3)
         };
+        
+        log('Reputation check complete', result);
+        return result;
 
     } catch (error) {
+        log('Reputation check failed', { error: String(error) });
         console.warn('Reputation check failed:', error);
         return { sentiment: 'neutral', scamResults: 0, snippetSignals: [] };
     }

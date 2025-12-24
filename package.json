@@ -8,6 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "preview:full": "concurrently \"npm:proxy\" \"npm:preview\"",
     "fetch-faceapi": "node ./scripts/fetch-faceapi.js",
     "proxy": "tsx backend/server.ts",
     "dev:full": "concurrently \"npm:proxy\" \"npm:dev\"",

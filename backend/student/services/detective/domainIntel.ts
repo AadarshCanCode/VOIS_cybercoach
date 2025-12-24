@@ -2,6 +2,12 @@
 import whois from 'whois-json';
 import { parse } from 'tldts';
 
+// Logging utility for domain intelligence
+const log = (message: string, data?: any) => {
+    const timestamp = new Date().toISOString();
+    console.log(`[${timestamp}] [Detective:Domain] ${message}`, data !== undefined ? JSON.stringify(data) : '');
+};
+
 export interface DomainIntel {
     domain: string;
     registrar: string | null;
@@ -11,15 +17,18 @@ export interface DomainIntel {
 }
 
 export const analyzeDomain = async (url: string): Promise<DomainIntel> => {
+    log('Starting domain analysis', { url });
+    
     try {
         const parsed = parse(url);
         const domain = parsed.domain;
 
         if (!domain) {
+            log('Invalid domain - unable to parse', { url });
             throw new Error('Invalid domain');
         }
 
-        console.log(`[DomainIntel] Checking WHOIS for ${domain}`);
+        log('Performing WHOIS lookup', { domain });
         const result = (await whois(domain)) as any; // Type casting because whois-json types are unreliable
 
         // Normalize whois response
@@ -41,7 +50,7 @@ export const analyzeDomain = async (url: string): Promise<DomainIntel> => {
             }
         }
 
-        console.log(`[DomainIntel] Result for ${domain}: Age ${ageDays} days`);
+        log('Domain analysis complete', { domain, ageDays, registrar, country });
 
         return {
             domain,
@@ -52,6 +61,8 @@ export const analyzeDomain = async (url: string): Promise<DomainIntel> => {
         };
 
     } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        log('Domain analysis failed', { url, error: errorMsg });
         console.warn(`[DomainIntel] Failed for ${url}:`, error);
         return {
             domain: parse(url).domain || url,

@@ -8,9 +8,15 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+// Logging utility for decision engine
+const log = (phase: string, message: string, data?: any) => {
+    const timestamp = new Date().toISOString();
+    console.log(`[${timestamp}] [Judge:${phase}] ${message}`, data !== undefined ? JSON.stringify(data) : '');
+};
+
 export interface Verdict {
     riskScore: number;
-    verdict: 'SAFE' | 'CAUTION' | 'dANGER' | 'UNKNOWN';
+    verdict: 'SAFE' | 'CAUTION' | 'DANGER' | 'UNKNOWN';
     explanation: string;
     recommendation: string;
 }
@@ -21,60 +27,100 @@ export const makeDecision = async (
     reputation: ReputationResult,
     analysis: AnalysisResult
 ): Promise<Verdict> => {
+    log('Init', 'Starting company verification decision process');
+    log('Init', 'Input data received', {
+        hasScraperData: !!scraperData,
+        domainAgeDays: domainIntel.ageDays,
+        reputation: reputation.sentiment,
+        redFlagsCount: analysis.redFlags.length,
+        greenFlagsCount: analysis.greenFlags.length
+    });
 
     // 1. Heuristic Calculation
-    let riskScore = 50; // Start Neutral
+    // Starting at 30 (assumes companies are legitimate by default)
+    let riskScore = 30;
     const breakdown: string[] = [];
+    log('Scoring', 'Initial risk score', { riskScore });
 
     // Factor: Domain Maturity
-    if (domainIntel.ageDays) {
+    if (domainIntel.ageDays !== null && domainIntel.ageDays !== undefined) {
+        const prevScore = riskScore;
         if (domainIntel.ageDays < 60) {
-            riskScore += 25;
-            breakdown.push('Very recent domain registration');
+            riskScore += 20; // Reduced from 25
+            breakdown.push('Very recent domain registration (< 60 days)');
         } else if (domainIntel.ageDays < 365) {
-            riskScore += 10;
-            breakdown.push('Relatively new domain');
+            riskScore += 8; // Reduced from 10
+            breakdown.push('Relatively new domain (< 1 year)');
         } else if (domainIntel.ageDays > 1000) {
-            riskScore -= 15;
-            breakdown.push('Well-established domain');
+            riskScore -= 15; // Established domain bonus
+            breakdown.push('Well-established domain (> 3 years)');
+        } else if (domainIntel.ageDays > 365) {
+            riskScore -= 10; // NEW: Mid-range domain bonus (1-3 years)
+            breakdown.push('Moderately established domain (1-3 years)');
         }
+        log('Scoring', 'Domain age factor applied', { ageDays: domainIntel.ageDays, scoreDelta: riskScore - prevScore, newScore: riskScore });
+    } else {
+        log('Scoring', 'Domain age unknown - no penalty applied', { ageDays: domainIntel.ageDays });
     }
 
     // Factor: Reputation
+    const prevRepScore = riskScore;
     if (reputation.sentiment === 'negative') {
-        riskScore += 40;
-        breakdown.push('Negative online reputation detected');
+        riskScore += 25; // Reduced from 40 - less harsh penalty
+        breakdown.push(`Negative online reputation detected (${reputation.scamResults} concerning results)`);
     } else if (reputation.sentiment === 'positive') {
-        riskScore -= 10;
+        riskScore -= 15; // Increased from -10 - better reward for good reputation
         breakdown.push('Positive online reputation');
+    } else {
+        // Neutral - no change, but log it
+        log('Scoring', 'Reputation is neutral - no score change');
+    }
+    if (reputation.sentiment !== 'neutral') {
+        log('Scoring', 'Reputation factor applied', { sentiment: reputation.sentiment, scamResults: reputation.scamResults, scoreDelta: riskScore - prevRepScore, newScore: riskScore });
     }
 
-    // Factor: Content Signals
-    // flagScore is positive (good) or negative (bad)
-    // Higher analysis.flagScore means safer.
+    // Factor: Content Signals - BALANCED WEIGHTS
+    // Red flags: +10 each (reduced from +15)
+    // Green flags: -10 each (increased from -5) - now equal weight!
+    const prevFlagScore = riskScore;
+    
     if (analysis.redFlags.length > 0) {
-        riskScore += (analysis.redFlags.length * 15);
-        breakdown.push(`Detected red flag terms: ${analysis.redFlags.join(', ')}`);
+        const redPenalty = analysis.redFlags.length * 10; // Reduced from 15
+        riskScore += redPenalty;
+        breakdown.push(`Detected ${analysis.redFlags.length} red flag term(s): ${analysis.redFlags.join(', ')}`);
+        log('Scoring', 'Red flags penalty applied', { flags: analysis.redFlags, penalty: redPenalty });
     }
 
     if (analysis.greenFlags.length > 0) {
-        riskScore -= (analysis.greenFlags.length * 5);
-        // Don't log green flags as reasons for "risk" but they help the score
+        const greenBonus = analysis.greenFlags.length * 10; // Increased from 5 - now balanced!
+        riskScore -= greenBonus;
+        breakdown.push(`Found ${analysis.greenFlags.length} positive indicator(s): ${analysis.greenFlags.join(', ')}`);
+        log('Scoring', 'Green flags bonus applied', { flags: analysis.greenFlags, bonus: greenBonus });
     }
+    
+    log('Scoring', 'Content signals total impact', { totalDelta: riskScore - prevFlagScore, newScore: riskScore });
 
     // Factor: Scraper Failure
     if (!scraperData) {
-        riskScore += 10;
+        riskScore += 8; // Reduced from 10 - less harsh for scraper issues
         breakdown.push('Unable to scrape website content for deeper analysis');
+        log('Scoring', 'Scraper failure penalty applied', { penalty: 8, newScore: riskScore });
     }
 
     // Final Clamp
     riskScore = Math.max(0, Math.min(100, riskScore));
+    log('Scoring', 'Final risk score after clamping', { riskScore });
 
+    // Adjusted thresholds for fairer verdicts:
+    // SAFE: 0-45 (was 0-35)
+    // CAUTION: 46-65 (was 36-70)
+    // DANGER: 66-100 (was 71-100)
     let verdict: Verdict['verdict'] = 'UNKNOWN';
-    if (riskScore > 70) verdict = 'dANGER';
-    else if (riskScore > 35) verdict = 'CAUTION';
+    if (riskScore > 65) verdict = 'DANGER'; // Fixed typo: was 'dANGER'
+    else if (riskScore > 45) verdict = 'CAUTION'; // Raised from 35 to 45
     else verdict = 'SAFE';
+    
+    log('Verdict', 'Heuristic verdict determined', { riskScore, verdict, thresholds: { safe: '0-45', caution: '46-65', danger: '66-100' } });
 
     const explanation = breakdown.length > 0
         ? breakdown.join('. ') + '.'
@@ -83,6 +129,7 @@ export const makeDecision = async (
     // 2. LLM Enhancement (if API key exists)
     const geminiKey = process.env.GEMINI_API_KEY;
     if (geminiKey && scraperData) {
+        log('LLM', 'Attempting Gemini AI enhancement');
         try {
             const genAI = new GoogleGenerativeAI(geminiKey);
             const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
@@ -119,25 +166,32 @@ export const makeDecision = async (
             }
 
             const llmVerdict = JSON.parse(text);
+            log('LLM', 'Gemini AI verdict received', llmVerdict);
 
             return {
                 riskScore: llmVerdict.risk_score,
-                verdict: llmVerdict.verdict.toUpperCase() as any,
+                verdict: llmVerdict.verdict.toUpperCase() as Verdict['verdict'],
                 explanation: llmVerdict.short_explanation,
                 recommendation: llmVerdict.recommendation
             };
 
         } catch (error) {
+            log('LLM', 'Gemini AI failed, falling back to heuristic', { error: String(error) });
             console.error('[Judge] LLM failed, using heuristic:', error);
         }
+    } else {
+        log('LLM', 'Skipping LLM enhancement', { hasApiKey: !!geminiKey, hasScraperData: !!scraperData });
     }
 
-    return {
+    const finalResult = {
         riskScore,
         verdict,
         explanation,
-        recommendation: verdict === 'dANGER' ? 'Avoid this company. Highly suspicious signals.' :
+        recommendation: verdict === 'DANGER' ? 'Avoid this company. Highly suspicious signals.' :
             verdict === 'CAUTION' ? 'Research further. Ask about fees or stipends before sharing data.' :
                 'Seems legitimate. Standard due diligence recommended.'
     };
+    
+    log('Final', 'Decision complete', finalResult);
+    return finalResult;
 };

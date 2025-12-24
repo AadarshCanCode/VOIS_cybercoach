@@ -141,16 +141,16 @@ export const CompanyVerification: React.FC = () => {
                             {/* Verdict Banner */}
                             {searchResult.verdict && (
                                 <div className={`mt-6 p-4 rounded-xl border ${searchResult.verdict === 'SAFE' ? 'bg-emerald-500/10 border-emerald-500/20' :
-                                    searchResult.verdict === 'dANGER' ? 'bg-red-500/10 border-red-500/20' :
+                                    searchResult.verdict === 'DANGER' ? 'bg-red-500/10 border-red-500/20' :
                                         'bg-amber-500/10 border-amber-500/20'
                                     }`}>
                                     <div className="flex items-start gap-3">
                                         {searchResult.verdict === 'SAFE' ? <CheckCircle className="h-6 w-6 text-emerald-400" /> :
-                                            searchResult.verdict === 'dANGER' ? <AlertTriangle className="h-6 w-6 text-red-400" /> :
+                                            searchResult.verdict === 'DANGER' ? <AlertTriangle className="h-6 w-6 text-red-400" /> :
                                                 <AlertTriangle className="h-6 w-6 text-amber-400" />}
                                         <div>
                                             <h3 className={`font-bold uppercase tracking-wide mb-1 ${searchResult.verdict === 'SAFE' ? 'text-emerald-400' :
-                                                searchResult.verdict === 'dANGER' ? 'text-red-400' : 'text-amber-400'
+                                                searchResult.verdict === 'DANGER' ? 'text-red-400' : 'text-amber-400'
                                                 }`}>
                                                 Verdict: {searchResult.verdict}
                                             </h3>
