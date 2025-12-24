@@ -59,7 +59,7 @@ export const VideoLibrary: React.FC = () => {
       <div className="p-6 min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#00FF88] mx-auto mb-4"></div>
-          <p className="text-[#00FF88] font-mono">LOADING VIDEO ARCHIVES...</p>
+          <p className="text-[#00FF88] font-mono">Loading videos...</p>
         </div>
       </div>
     );
@@ -119,9 +119,9 @@ export const VideoLibrary: React.FC = () => {
         <div className="flex items-center justify-between border-b border-[#00FF88]/10 pb-6">
           <div>
             <h1 className="text-3xl font-black tracking-tighter text-white uppercase">
-              Intel <span className="text-[#00FF88]">Archives</span>
+              Video <span className="text-[#00FF88]">Library</span>
             </h1>
-            <p className="text-[#00B37A] font-mono text-sm mt-1">CLASSIFIED VIDEO DATABASE • {videos.length} FILES</p>
+            <p className="text-[#00B37A] font-mono text-sm mt-1">Browse and watch videos • {videos.length} files</p>
           </div>
           <div className="flex items-center space-x-3">
             <button
@@ -239,8 +239,8 @@ export const VideoLibrary: React.FC = () => {
             <div className="text-[#00FF88]/20 mb-6">
               <Search className="h-16 w-16 mx-auto" />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2 uppercase tracking-widest">No Intel Found</h3>
-            <p className="text-[#00B37A]">Adjust search parameters to locate classified files.</p>
+            <h3 className="text-xl font-bold text-white mb-2 uppercase tracking-widest">No Videos Found</h3>
+            <p className="text-[#00B37A]">Try adjusting your search or filter options.</p>
           </div>
         )}
 
@@ -250,7 +250,7 @@ export const VideoLibrary: React.FC = () => {
             <div className="text-[#00FF88]/20 mb-6">
               <Film className="h-16 w-16 mx-auto" />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2 uppercase tracking-widest">No Videos Yet</h3>
+            <h3 className="text-xl font-bold text-white mb-2 uppercase tracking-widest">No Videos Available</h3>
             <p className="text-[#00B37A] mb-4">Upload videos to your ImageKit folder to see them here.</p>
             <p className="text-[#EAEAEA]/50 text-sm font-mono">Folder: /cybercoach</p>
             <p className="text-[#EAEAEA]/40 text-xs font-mono mt-2">Naming format: Category_Difficulty_Title.mp4</p>
