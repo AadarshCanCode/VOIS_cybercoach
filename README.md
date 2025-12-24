@@ -16,7 +16,6 @@ A comprehensive education platform built with React, TypeScript, and Express for
 - Compiled with TypeScript for production
 
 ## 📦 Project Structure
-
 ```
 /backend/
   /admin/
