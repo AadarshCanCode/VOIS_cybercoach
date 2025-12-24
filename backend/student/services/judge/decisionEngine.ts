@@ -128,7 +128,7 @@ export const makeDecision = async (
 
     // 2. LLM Enhancement (if API key exists)
     const geminiKey = process.env.GEMINI_API_KEY;
-    if (geminiKey && scraperData) {
+    if (geminiKey && scraperData && GoogleGenerativeAI) {
         log('LLM', 'Attempting Gemini AI enhancement');
         try {
             const genAI = new GoogleGenerativeAI(geminiKey);

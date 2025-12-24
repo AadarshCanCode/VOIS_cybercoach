@@ -4,7 +4,9 @@ const require = createRequire(import.meta.url);
 let Search: any = null;
 try {
     const SerpApi = require('google-search-results-nodejs');
-    Search = SerpApi.GoogleSearch || (SerpApi.default && SerpApi.default.GoogleSearch);
+    if (SerpApi) {
+        Search = SerpApi.GoogleSearch || (SerpApi.default && SerpApi.default.GoogleSearch);
+    }
 } catch (e) {
     console.warn('Failed to load google-search-results-nodejs:', e);
 }

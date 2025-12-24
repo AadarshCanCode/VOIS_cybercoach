@@ -36,8 +36,9 @@ class VerificationService {
             });
 
             if (!response.ok) {
-                console.error('API Verification failed');
-                throw new Error('Verification failed');
+                const errorData = await response.json().catch(() => ({}));
+                console.error('API Verification failed:', errorData);
+                throw new Error(errorData.details || errorData.error || 'Verification failed');
             }
 
             const result = await response.json();

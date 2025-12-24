@@ -1,14 +1,22 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { scrapeCompanyWebsite } from '../../backend/student/services/detective/webScraper.js';
-import { analyzeDomain } from '../../backend/student/services/detective/domainIntel.js';
-import { checkReputation } from '../../backend/student/services/detective/reputationCheck.js';
+import { analyzeDomain, type DomainIntel } from '../../backend/student/services/detective/domainIntel.js';
+import { checkReputation, type ReputationResult } from '../../backend/student/services/detective/reputationCheck.js';
 import { analyzeContent } from '../../backend/student/services/analyst/contentAnalyzer.js';
 import { makeDecision } from '../../backend/student/services/judge/decisionEngine.js';
 
 // Logging utility for Vercel serverless function
 const log = (phase: string, message: string, data?: any) => {
     const timestamp = new Date().toISOString();
-    console.log(`[${timestamp}] [Vercel:${phase}] ${message}`, data !== undefined ? JSON.stringify(data, null, 2) : '');
+    let dataStr = '';
+    if (data !== undefined) {
+        try {
+            dataStr = JSON.stringify(data, null, 2);
+        } catch (e) {
+            dataStr = '[Circular or Unstringifiable Data]';
+        }
+    }
+    console.log(`[${timestamp}] [Vercel:${phase}] ${message}`, dataStr);
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -22,9 +30,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     try {
         const { query } = req.body;
 
-        if (!query) {
-            log('Error', 'Missing query parameter');
-            return res.status(400).json({ error: 'Query is required' });
+        if (!query || typeof query !== 'string') {
+            log('Error', 'Invalid query parameter', { query });
+            return res.status(400).json({ error: 'Query is required and must be a string' });
         }
 
         log('Start', `Starting verification for: ${query}`);
@@ -32,9 +40,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         // 2. Parallel Detective Work - with individual error handling
         log('Detective', 'Starting parallel detective work (scraper, domain, reputation)');
         
-        let scraperData = null;
-        let domainIntel = { domain: query, registrar: null, creationDate: null, ageDays: null, country: null };
-        let reputation = { sentiment: 'neutral' as const, scamResults: 0, snippetSignals: [] };
+        let scraperData: any = null;
+        let domainIntel: any = { domain: query, registrar: null, creationDate: null, ageDays: null, country: null };
+        let reputation: any = { sentiment: 'neutral', scamResults: 0, snippetSignals: [] };
 
         try {
             scraperData = await scrapeCompanyWebsite(query);
@@ -120,8 +128,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     } catch (error: any) {
         const duration = Date.now() - startTime;
-        log('Error', `Verification failed after ${duration}ms`, { error: error.message });
+        log('Error', `Verification failed after ${duration}ms`, { error: error.message, stack: error.stack });
         console.error('[Verification] controller error:', error);
-        res.status(500).json({ error: 'Internal verification failed', details: error.message });
+        res.status(500).json({ 
+            error: 'Internal verification failed', 
+            details: error.message,
+            stack: error.stack,
+            duration: `${duration}ms`
+        });
     }
 }

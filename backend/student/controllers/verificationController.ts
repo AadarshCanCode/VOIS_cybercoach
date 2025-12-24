@@ -19,9 +19,9 @@ export const verifyCompanyController = async (req: Request, res: Response): Prom
     try {
         const { query } = req.body;
 
-        if (!query) {
-            log('Error', 'Missing query parameter');
-            res.status(400).json({ error: 'Query is required' });
+        if (!query || typeof query !== 'string') {
+            log('Error', 'Invalid query parameter', { query });
+            res.status(400).json({ error: 'Query is required and must be a string' });
             return;
         }
 
@@ -30,13 +30,33 @@ export const verifyCompanyController = async (req: Request, res: Response): Prom
 
         log('Start', `Starting verification for: ${query}`);
 
-        // 2. Parallel Detective Work
+        // 2. Parallel Detective Work - with individual error handling for maximum robustness
         log('Detective', 'Starting parallel detective work (scraper, domain, reputation)');
-        const [scraperData, domainIntel, reputation] = await Promise.all([
-            scrapeCompanyWebsite(query),
-            analyzeDomain(query),
-            checkReputation(query)
-        ]);
+        
+        let scraperData: any = null;
+        let domainIntel: any = { domain: query, registrar: null, creationDate: null, ageDays: null, country: null };
+        let reputation: any = { sentiment: 'neutral', scamResults: 0, snippetSignals: [] };
+
+        try {
+            scraperData = await scrapeCompanyWebsite(query);
+            log('Detective', 'Scraper completed', { success: !!scraperData });
+        } catch (scrapeError: any) {
+            log('Detective', 'Scraper failed (continuing)', { error: scrapeError.message });
+        }
+
+        try {
+            domainIntel = await analyzeDomain(query);
+            log('Detective', 'Domain analysis completed', { ageDays: domainIntel.ageDays });
+        } catch (domainError: any) {
+            log('Detective', 'Domain analysis failed (continuing)', { error: domainError.message });
+        }
+
+        try {
+            reputation = await checkReputation(query);
+            log('Detective', 'Reputation check completed', { sentiment: reputation.sentiment });
+        } catch (repError: any) {
+            log('Detective', 'Reputation check failed (continuing)', { error: repError.message });
+        }
 
         log('Detective', 'Detective phase complete', {
             scraperSuccess: !!scraperData,
@@ -100,10 +120,14 @@ export const verifyCompanyController = async (req: Request, res: Response): Prom
 
         res.json(result);
 
-    } catch (error) {
+    } catch (error: any) {
         const duration = Date.now() - startTime;
-        log('Error', `Verification failed after ${duration}ms`, { error: String(error) });
+        log('Error', `Verification failed after ${duration}ms`, { error: error.message, stack: error.stack });
         console.error('Verification controller error:', error);
-        res.status(500).json({ error: 'Internal verification failed' });
+        res.status(500).json({ 
+            error: 'Internal verification failed', 
+            details: error.message,
+            stack: error.stack
+        });
     }
 };

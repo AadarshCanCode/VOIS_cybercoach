@@ -1,7 +1,12 @@
 
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
-const whois = require('whois-json');
+let whois: any = null;
+try {
+    whois = require('whois-json');
+} catch (e) {
+    console.warn('Failed to load whois-json:', e);
+}
 import { parse } from 'tldts';
 
 // Logging utility for domain intelligence
@@ -54,12 +59,17 @@ export const analyzeDomain = async (url: string): Promise<DomainIntel> => {
 
         log('Performing WHOIS lookup (10s timeout)', { domain });
         
-        // WHOIS can hang in serverless environments, so we add a timeout
-        const result = await withTimeout(
-            whois(domain) as Promise<any>,
-            10000,
-            null
-        );
+        let result = null;
+        if (whois) {
+            // WHOIS can hang in serverless environments, so we add a timeout
+            result = await withTimeout(
+                whois(domain) as Promise<any>,
+                10000,
+                null
+            );
+        } else {
+            log('WHOIS library not available, skipping lookup');
+        }
         
         if (!result) {
             log('WHOIS returned no result or timed out', { domain });
