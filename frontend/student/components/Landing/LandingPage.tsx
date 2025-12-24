@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Shield, BookOpen, Award, Target, Zap, ArrowRight, Globe, Brain, Video, Menu, X, Users, Terminal, Activity, Bot, Briefcase, FileText, ClipboardCheck, LayoutDashboard } from 'lucide-react';
+import { Shield, BookOpen, Award, Target, Zap, ArrowRight, Brain, Video, Menu, X, Users, Terminal, Activity, Bot, Briefcase, FileText, ClipboardCheck, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '@context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -236,15 +236,6 @@ export const LandingPage: React.FC = () => {
                   <ArrowRight className="h-6 w-6 group-hover:translate-x-2 transition-transform relative z-10" />
                 </button>
 
-                <a
-                  className="flex items-center gap-4 px-8 py-4 text-white bg-white/5 border border-white/10 hover:border-[#00FF88]/40 rounded-[2rem] font-bold text-base transition-all hover:bg-[#00FF88]/5 backdrop-blur-md group"
-                  href="https://cybergame.sparkstudio.co.in/"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <Globe className="h-6 w-6 text-[#00FF88] group-hover:rotate-12 transition-transform" />
-                  LIVE OPS
-                </a>
               </div>
 
               <div className="pt-6 grid grid-cols-3 gap-6 border-t border-white/10 max-w-lg">
@@ -492,7 +483,7 @@ export const LandingPage: React.FC = () => {
                 <div className="flex items-center justify-between mb-8">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-black border border-[#00FF88]/20 flex items-center justify-center">
-                      <Globe className="h-5 w-5 text-[#00FF88] animate-spin-slow" />
+                      <Zap className="h-5 w-5 text-[#00FF88]" />
                     </div>
                     <span className="text-xs font-mono text-white tracking-widest uppercase">Global Node Map</span>
                   </div>
@@ -712,5 +703,3 @@ export const LandingPage: React.FC = () => {
     </>
   );
 };
-
-
