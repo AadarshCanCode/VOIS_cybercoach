@@ -84,7 +84,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
           <h1 className="text-3xl font-black tracking-tighter text-white uppercase">
             Dashboard
           </h1>
-          <p className="text-[#00B37A] font-mono text-sm mt-1">OPERATOR: {user?.name?.toUpperCase()}</p>
         </div>
         <div className="flex items-center gap-4">
           <div className="text-right hidden md:block">

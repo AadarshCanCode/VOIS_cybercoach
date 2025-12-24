@@ -111,7 +111,6 @@ export const AdminDashboard = () => {
                   <h1 className="text-4xl font-bold bg-gradient-to-r from-white via-white/80 to-white/60 bg-clip-text text-transparent">Admin Dashboard</h1>
                   <Badge variant="destructive" className="animate-pulse">Live</Badge>
                 </div>
-                <p className="text-muted-foreground text-lg">Manage users, courses, and platform analytics</p>
               </div>
             </div>
 
