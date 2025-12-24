@@ -39,8 +39,8 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
 
   return (
     <AuthLayout
-      title="Restricted Access"
-      subtitle="Admin Command Center"
+      title="Admin Login"
+      subtitle="Sign in as Admin"
       className="max-w-md"
     >
       <div className="bg-[#0A0F0A] border border-red-500/20 rounded-2xl p-8 shadow-[0_0_50px_rgba(239,68,68,0.05)] backdrop-blur-xl relative overflow-hidden group">
@@ -67,25 +67,23 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
         <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
           <div className="space-y-4">
             <Input
-              label="Admin Frequency"
+              label="Email"
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@central.cmd"
+              placeholder="admin@email.com"
               leftIcon={<Shield className="h-4 w-4" />}
-              cyber
             />
 
             <Input
-              label="Security Key"
+              label="Password"
               type="password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               leftIcon={<Lock className="h-4 w-4" />}
-              cyber
               showPasswordToggle={true}
             />
           </div>
@@ -93,11 +91,11 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
           <Button
             type="submit"
             isLoading={isLoading}
-            className="w-full h-12 bg-red-600 text-white hover:bg-red-500 font-black uppercase tracking-widest rounded-xl transition-all hover:shadow-[0_0_30px_rgba(239,68,68,0.4)] group border border-red-500/50"
+            className="w-full h-12 bg-red-600 text-white hover:bg-red-500 font-black rounded-xl transition-all group border border-red-500/50"
           >
-            {isLoading ? 'Authenticating...' : (
+            {isLoading ? 'Logging in...' : (
               <span className="flex items-center justify-center gap-2">
-                Override & Access <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                Login <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </span>
             )}
           </Button>
@@ -106,8 +104,8 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
         <div className="mt-8 p-4 bg-red-500/5 border border-red-500/10 rounded-xl">
           <div className="flex items-start gap-3">
             <Shield className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
-            <p className="text-[9px] text-red-500/60 font-mono leading-tight uppercase tracking-wider">
-              Authorized personnel only. All access attempts are monitored by central intelligence. Unauthorized entry is a protocol violation.
+            <p className="text-[10px] text-red-500/60 font-mono leading-tight">
+              Admin access only.
             </p>
           </div>
         </div>

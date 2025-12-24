@@ -52,8 +52,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
 
   return (
     <AuthLayout
-      title="Create Identity"
-      subtitle={`Enlist as ${role}`}
+      title="Sign Up"
+      subtitle={role === 'teacher' ? 'Teacher Registration' : 'Student Registration'}
       className="max-w-2xl"
     >
       <div className="bg-[#0A0F0A] border border-[#00FF88]/20 rounded-2xl p-8 shadow-[0_0_50px_rgba(0,255,136,0.05)] backdrop-blur-xl relative overflow-hidden group w-full">
@@ -68,8 +68,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
           {!userType && (
             <div className="space-y-3">
-              <label className="text-[10px] font-mono text-[#00B37A] uppercase tracking-[0.2em] ml-1">
-                Choose Branch
+              <label className="text-xs font-semibold ml-1">
+                Select Role
               </label>
               <div className="grid grid-cols-2 gap-4">
                 <button
@@ -81,7 +81,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
                     }`}
                 >
                   <GraduationCap className="h-6 w-6" />
-                  <span className="text-xs font-bold uppercase tracking-widest">Learner</span>
+                  <span className="text-xs font-bold">Student</span>
                 </button>
                 <button
                   type="button"
@@ -92,7 +92,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
                     }`}
                 >
                   <Users className="h-6 w-6" />
-                  <span className="text-xs font-bold uppercase tracking-widest">Instructor</span>
+                  <span className="text-xs font-bold">Teacher</span>
                 </button>
               </div>
             </div>
@@ -100,50 +100,46 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Input
-              label="Codename (Full Name)"
+              label="Full Name"
               type="text"
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="John Doe"
               leftIcon={<User className="h-4 w-4" />}
-              cyber
             />
 
             <Input
-              label="Comms Frequency (Email)"
+              label="Email"
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="operator@network.cmd"
+              placeholder="your@email.com"
               leftIcon={<Mail className="h-4 w-4" />}
-              cyber
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Input
-              label="Access Key"
+              label="Password"
               type="password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               leftIcon={<Lock className="h-4 w-4" />}
-              cyber
               showPasswordToggle={true}
             />
 
             <Input
-              label="Verify Key"
+              label="Confirm Password"
               type="password"
               required
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="••••••••"
               leftIcon={<Lock className="h-4 w-4" />}
-              cyber
               showPasswordToggle={true}
             />
           </div>
@@ -151,24 +147,24 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           <Button
             type="submit"
             isLoading={isLoading}
-            className="w-full h-12 bg-[#00FF88] text-black hover:bg-[#00CC66] font-black uppercase tracking-widest rounded-xl transition-all hover:shadow-[0_0_30px_rgba(0,255,136,0.4)] group"
+            className="w-full h-12 bg-[#00FF88] text-black hover:bg-[#00CC66] font-black rounded-xl transition-all group"
           >
-            {isLoading ? 'Encrypting...' : (
+            {isLoading ? 'Signing up...' : (
               <span className="flex items-center justify-center gap-2">
-                Establish Uplink <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                Sign Up <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </span>
             )}
           </Button>
         </form>
 
         <div className="mt-8 pt-6 border-t border-[#00FF88]/10 flex flex-col items-center gap-4">
-          <p className="text-[#00B37A] text-[10px] font-mono uppercase tracking-[0.2em]">Already have an identity?</p>
+          <p className="text-[#00B37A] text-xs">Already have an account?</p>
           <Link to="/login" className="w-full relative z-20">
             <Button
               variant="outline"
-              className="w-full border-[#00FF88]/20 text-[#00FF88] hover:bg-[#00FF88]/10 font-bold uppercase tracking-widest rounded-xl transition-all"
+              className="w-full border-[#00FF88]/20 text-[#00FF88] hover:bg-[#00FF88]/10 font-bold rounded-xl transition-all"
             >
-              Initialize Sign In_
+              Login
             </Button>
           </Link>
         </div>
