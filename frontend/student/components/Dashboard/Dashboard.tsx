@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Shield, Target, Award, Activity, Play, ChevronRight, Terminal } from 'lucide-react';
+import { Shield, Target, Award, Activity, Play, ChevronRight, Terminal, FileText } from 'lucide-react';
 import { useAuth } from '@context/AuthContext';
 import { supabase } from '@lib/supabase';
 import { studentService, StudentStats, RecentActivity, ActiveOperation } from '@services/studentService';
@@ -165,12 +165,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
             </CardHeader>
             <CardContent className="space-y-6">
               {[
-                { 
-                  label: 'Live Security Labs', 
-                  progress: labStats ? (labStats.completedLabs / labStats.totalLabs) * 100 : (statsData.liveLabsCompleted / 6) * 100, 
-                  total: labStats ? `${labStats.completedLabs}/${labStats.totalLabs}` : `${statsData.liveLabsCompleted}/6`, 
-                  color: 'text-[#00CC66]', 
-                  bar: 'bg-[#00CC66]' 
+                {
+                  label: 'Live Security Labs',
+                  progress: labStats ? (labStats.completedLabs / labStats.totalLabs) * 100 : (statsData.liveLabsCompleted / 6) * 100,
+                  total: labStats ? `${labStats.completedLabs}/${labStats.totalLabs}` : `${statsData.liveLabsCompleted}/6`,
+                  color: 'text-[#00CC66]',
+                  bar: 'bg-[#00CC66]'
                 },
                 { label: 'Skill Assessment', progress: user?.completedAssessment ? 100 : 0, total: user?.completedAssessment ? 'Complete' : 'Pending', color: 'text-[#00B37A]', bar: 'bg-[#00B37A]' }
               ].map((item, i) => (
@@ -221,6 +221,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
                   <Award className="h-4 w-4" />
                 </div>
                 <span className="font-bold text-[#EAEAEA] group-hover:text-white">View Certificates</span>
+              </div>
+              <ChevronRight className="h-4 w-4 text-[#00B37A] group-hover:translate-x-1 transition-transform" />
+            </button>
+            <button onClick={() => onTabChange?.('notes')} className="w-full group bg-[#0A0F0A] hover:bg-[#00FF88]/5 border border-[#00FF88]/20 hover:border-[#00FF88]/50 p-4 rounded-xl flex items-center justify-between transition-all">
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded bg-[#00FF88]/10 flex items-center justify-center text-[#00FF88]">
+                  <FileText className="h-4 w-4" />
+                </div>
+                <span className="font-bold text-[#EAEAEA] group-hover:text-white">Personal Notes</span>
               </div>
               <ChevronRight className="h-4 w-4 text-[#00B37A] group-hover:translate-x-1 transition-transform" />
             </button>
