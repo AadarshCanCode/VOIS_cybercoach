@@ -29,13 +29,33 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         log('Start', `Starting verification for: ${query}`);
 
-        // 2. Parallel Detective Work
+        // 2. Parallel Detective Work - with individual error handling
         log('Detective', 'Starting parallel detective work (scraper, domain, reputation)');
-        const [scraperData, domainIntel, reputation] = await Promise.all([
-            scrapeCompanyWebsite(query),
-            analyzeDomain(query),
-            checkReputation(query)
-        ]);
+        
+        let scraperData = null;
+        let domainIntel = { domain: query, registrar: null, creationDate: null, ageDays: null, country: null };
+        let reputation = { sentiment: 'neutral' as const, scamResults: 0, snippetSignals: [] };
+
+        try {
+            scraperData = await scrapeCompanyWebsite(query);
+            log('Detective', 'Scraper completed', { success: !!scraperData });
+        } catch (scrapeError: any) {
+            log('Detective', 'Scraper failed (continuing)', { error: scrapeError.message });
+        }
+
+        try {
+            domainIntel = await analyzeDomain(query);
+            log('Detective', 'Domain analysis completed', { ageDays: domainIntel.ageDays });
+        } catch (domainError: any) {
+            log('Detective', 'Domain analysis failed (continuing)', { error: domainError.message });
+        }
+
+        try {
+            reputation = await checkReputation(query);
+            log('Detective', 'Reputation check completed', { sentiment: reputation.sentiment });
+        } catch (repError: any) {
+            log('Detective', 'Reputation check failed (continuing)', { error: repError.message });
+        }
 
         log('Detective', 'Detective phase complete', {
             scraperSuccess: !!scraperData,

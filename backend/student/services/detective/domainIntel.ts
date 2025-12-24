@@ -16,8 +16,27 @@ export interface DomainIntel {
     country: string | null;
 }
 
+// Timeout wrapper for WHOIS lookup (10 seconds max)
+const withTimeout = <T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> => {
+    return Promise.race([
+        promise,
+        new Promise<T>((resolve) => setTimeout(() => {
+            log('WHOIS lookup timed out', { timeout: ms });
+            resolve(fallback);
+        }, ms))
+    ]);
+};
+
 export const analyzeDomain = async (url: string): Promise<DomainIntel> => {
     log('Starting domain analysis', { url });
+    
+    const defaultResult: DomainIntel = {
+        domain: parse(url).domain || url,
+        registrar: null,
+        creationDate: null,
+        ageDays: null,
+        country: null
+    };
     
     try {
         const parsed = parse(url);
@@ -25,11 +44,22 @@ export const analyzeDomain = async (url: string): Promise<DomainIntel> => {
 
         if (!domain) {
             log('Invalid domain - unable to parse', { url });
-            throw new Error('Invalid domain');
+            return defaultResult;
         }
 
-        log('Performing WHOIS lookup', { domain });
-        const result = (await whois(domain)) as any; // Type casting because whois-json types are unreliable
+        log('Performing WHOIS lookup (10s timeout)', { domain });
+        
+        // WHOIS can hang in serverless environments, so we add a timeout
+        const result = await withTimeout(
+            whois(domain) as Promise<any>,
+            10000,
+            null
+        );
+        
+        if (!result) {
+            log('WHOIS returned no result or timed out', { domain });
+            return { ...defaultResult, domain };
+        }
 
         // Normalize whois response
         const creationDateStr = result.creationDate || result.creation_date || result['Creation Date'] || result.created || null;
