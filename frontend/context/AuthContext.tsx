@@ -30,17 +30,43 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Initial verification
-    const currentUser = authService.getCurrentUser();
-    setUser(currentUser);
-    setLoading(false);
+    let mounted = true;
 
-    // Listen for auth state changes (e.g. returning from Google OAuth)
+    async function initializeAuth() {
+      try {
+        // 1. Check for existing session from Supabase first
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (session) {
+          // If we have a session, sync with our DB to get role/profile
+          const syncedUser = await authService.handleAuthStateChange(session);
+          if (mounted && syncedUser) {
+            setUser(syncedUser);
+          }
+        } else {
+          // Fallback: Check localStorage if no Supabase session (though usually they sync)
+          // or just clear it if we trust Supabase as single source of truth
+          const localUser = authService.getCurrentUser();
+          if (mounted && localUser) {
+            // Optional: Validate local user? For now, trust it but maybe background re-verify
+            setUser(localUser);
+          }
+        }
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+        if (mounted) setUser(null);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+
+    initializeAuth();
+
+    // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         if (session) {
           try {
-            // If we get a session, verify/sync with our users table
             const syncedUser = await authService.handleAuthStateChange(session);
             if (syncedUser) {
               setUser(syncedUser);
@@ -49,21 +75,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             console.error('Auth sync error:', error);
             await authService.logout();
             setUser(null);
-
-            // Redirect to login with error
-            // We use window.location to force a full reload so the URL params are picked up by the Login component
-            // Important: Redirect to /login specifically, as the root path might render LandingPage which doesn't show errors
-            const url = new URL(window.location.origin + '/login');
-            url.searchParams.set('error_description', error.message);
-            window.location.href = url.toString();
           }
         }
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
+        setLoading(false);
       }
     });
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, []);
