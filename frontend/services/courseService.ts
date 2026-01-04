@@ -45,7 +45,6 @@ class CourseService {
           difficulty: courseData.difficulty,
           estimated_hours: courseData.estimated_hours || 0,
           teacher_id: courseData.teacher_id,
-          teacher_id: courseData.teacher_id,
           // is_published: removed
           enrollment_count: 0,
           rating: 0,

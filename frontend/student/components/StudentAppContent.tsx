@@ -112,7 +112,7 @@ export const StudentAppContent: React.FC<StudentAppContentProps> = ({ initialTab
       case 'profile':
         return <Profile />;
       case 'community':
-        return <CommunityPage onBack={() => setActiveTab('landing')} />;
+        return <CommunityPage onBack={() => setActiveTab('dashboard')} />;
       case 'verification':
         return <CompanyVerification />;
       case 'career':
