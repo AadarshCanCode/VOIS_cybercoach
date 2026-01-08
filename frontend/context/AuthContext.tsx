@@ -31,6 +31,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     let mounted = true;
+    // Watchdog: ensure we never stay stuck in loading state due to network/cookie issues
+    const watchdog = setTimeout(() => {
+      if (mounted) {
+        setLoading(false);
+      }
+    }, 3500);
 
     async function initializeAuth() {
       try {
@@ -57,6 +63,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (mounted) setUser(null);
       } finally {
         if (mounted) setLoading(false);
+        clearTimeout(watchdog);
       }
     }
 
