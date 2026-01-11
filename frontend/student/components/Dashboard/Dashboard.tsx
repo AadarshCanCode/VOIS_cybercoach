@@ -4,7 +4,7 @@ import { useAuth } from '@context/AuthContext';
 import { supabase } from '@lib/supabase';
 import { studentService, StudentStats, RecentActivity, ActiveOperation } from '@services/studentService';
 import { labApiService, LabStats } from '@services/labApiService';
-import { Card, CardContent, CardHeader, CardTitle } from '../../../components/Card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatDistanceToNow } from 'date-fns';
 
 interface DashboardProps {
@@ -102,7 +102,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
 
           {/* Active Operation (Hero) */}
           <div className="relative group overflow-hidden rounded-2xl border border-[#00FF88]/20 bg-[#0A0F0A]">
-            <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(0,255,136,0.05)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%,100%_100%] animate-[shimmer_3s_infinite]" />
+            <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(0,255,136,0.05)_50%,transparent_75%,transparent_100%)] bg-size-[250%_250%,100%_100%] animate-[shimmer_3s_infinite]" />
             <div className="relative p-8">
               {activeOperation ? (
                 <>
@@ -244,7 +244,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
                 {activities.length > 0 ? (
                   activities.map((activity, index) => (
                     <div key={index} className="relative pl-6 pb-1 last:pb-0 border-l border-[#00FF88]/10 last:border-0">
-                      <div className={`absolute left-[-5px] top-1.5 h-2.5 w-2.5 rounded-full ring-4 ring-black ${activity.type === 'completion' ? 'bg-[#00FF88]' :
+                      <div className={`absolute -left-1.25 top-1.5 h-2.5 w-2.5 rounded-full ring-4 ring-black ${activity.type === 'completion' ? 'bg-[#00FF88]' :
                         activity.type === 'start' ? 'bg-[#00CC66]' :
                           'bg-[#00B37A]'
                         }`} />

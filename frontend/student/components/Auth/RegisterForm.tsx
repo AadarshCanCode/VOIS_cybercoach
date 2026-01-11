@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { GraduationCap, Users, Lock, Mail, User, ArrowRight } from 'lucide-react';
 import { useAuth } from '@context/AuthContext';
-import { Button } from '../../../components/Button';
-import { Input } from '../../../components/Input';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { AuthLayout } from '../../../components/auth/AuthLayout';
 import { useNavigate, Link } from 'react-router-dom';
 
@@ -57,7 +57,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
       className="max-w-2xl"
     >
       <div className="bg-[#0A0F0A] border border-[#00FF88]/20 rounded-2xl p-8 shadow-[0_0_50px_rgba(0,255,136,0.05)] backdrop-blur-xl relative overflow-hidden group w-full">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#00FF88]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+        <div className="absolute inset-0 bg-linear-to-b from-[#00FF88]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
         {error && (
           <div className="mb-6 bg-red-500/10 border border-red-500/20 rounded-lg p-4 animate-in fade-in slide-in-from-top-2">

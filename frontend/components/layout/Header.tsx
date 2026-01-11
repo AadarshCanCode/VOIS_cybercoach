@@ -1,7 +1,7 @@
 import React from 'react';
 import { User, LogOut, Search } from 'lucide-react';
 import { useAuth } from '@context/AuthContext';
-import { Button } from '../Button';
+import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
@@ -23,71 +23,63 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
     };
 
     return (
-        <header className={`sticky top-0 z-50 w-full border-b border-white/5 bg-background/80 backdrop-blur-xl ${className}`}>
-            <div className="flex h-16 items-center px-6 gap-4">
-                {/* Logo */}
-                <button
-                    onClick={handleLogoClick}
-                    className="flex items-center gap-3 mr-4 hover:opacity-80 transition-opacity cursor-pointer"
-                >
-                    <img src="/cybercoach.png" alt="Cybercoach" className="h-14 w-14" />
-                    <span className="text-2xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent hidden sm:inline-block">
-                        Cybercoach
-                    </span>
-                </button>
+            <header className={`sticky top-0 z-50 w-full border-b border-[#00FF88]/30 bg-black backdrop-blur-xl shadow-lg shadow-[#00FF88]/10 ${className}`}>
+                <div className="flex h-16 items-center px-6 gap-4">
+                    {/* Logo */}
+                    <button
+                        onClick={handleLogoClick}
+                        className="flex items-center gap-3 mr-6 hover:opacity-80 transition-opacity cursor-pointer"
+                    >
+                        <img src="/cybercoach.png" alt="Cybercoach" className="h-10 w-10" />
+                        <span className="text-xl font-bold bg-linear-to-r from-white to-[#00FF88] bg-clip-text text-transparent hidden sm:inline-block">
+                            Cybercoach
+                        </span>
+                    </button>
 
-                {/* Search Bar */}
-                <div className="flex-1 max-w-md hidden md:block">
-                    <div className="relative group">
-                        <div className="absolute inset-0 bg-primary/20 blur-md rounded-lg opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
-                        <div className="relative flex items-center bg-white/5 rounded-lg border border-white/10 focus-within:border-primary/50 focus-within:bg-white/10 transition-all duration-300">
-                            <Search className="h-4 w-4 text-muted-foreground ml-3" />
-                            <input
-                                type="text"
-                                placeholder="Search courses, labs, or students..."
-                                className="w-full bg-transparent border-none focus:ring-0 text-sm px-3 py-2 text-foreground placeholder:text-muted-foreground"
-                            />
+                    {/* Search Bar Full Width */}
+                    <div className="flex-1 flex items-center">
+                        <div className="w-full max-w-2xl">
+                            <div className="relative group">
+                                <div className="absolute inset-0 bg-[#00FF88]/10 blur-md rounded-lg opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+                                <div className="relative flex items-center bg-black/80 rounded-xl border border-[#00FF88]/20 focus-within:border-[#00FF88]/40 focus-within:bg-black/90 transition-all duration-300">
+                                    <Search className="h-5 w-5 text-[#00FF88] ml-4" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search courses, labs, or students..."
+                                        className="w-full bg-transparent border-none focus:ring-0 text-base px-4 py-3 text-[#00FF88] placeholder:text-[#00FF88]/60"
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div className="ml-auto flex items-center gap-3">
+                    {/* User Info & Logout */}
                     {user && (
-                        <>
-
-                            <div className="h-8 w-[1px] bg-white/10 mx-1" />
-
-                            <div className="flex items-center gap-3 pl-1">
-                                <div className="flex-col items-end hidden sm:flex">
-                                    <span className="text-sm font-medium text-foreground">{user.name}</span>
-                                    <span className="text-xs text-muted-foreground capitalize">{user.role}</span>
-                                </div>
-
-                                <div className="h-9 w-9 rounded-full bg-gradient-to-tr from-primary to-purple-500 p-[1px]">
-                                    <div className="h-full w-full rounded-full bg-background flex items-center justify-center">
-                                        <User className="h-5 w-5 text-primary" />
-                                    </div>
-                                </div>
-
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={async () => {
-                                        try {
-                                            await logout();
-                                        } catch (error) {
-                                            console.error('Logout failed:', error);
-                                        }
-                                    }}
-                                    className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                                >
-                                    <LogOut className="h-5 w-5" />
-                                </Button>
+                        <div className="flex items-center gap-4">
+                            <div className="flex flex-col items-end mr-2">
+                                <span className="text-base font-semibold text-[#00FF88]">{user.name}</span>
+                                <span className="text-xs text-[#00FF88]/70 capitalize">{user.role}</span>
                             </div>
-                        </>
+                            <div className="h-9 w-9 rounded-full border-2 border-[#00FF88]/40 flex items-center justify-center bg-black/80">
+                                <User className="h-5 w-5 text-[#00FF88]" />
+                            </div>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={async () => {
+                                    try {
+                                        await logout();
+                                    } catch (error) {
+                                        console.error('Logout failed:', error);
+                                    }
+                                }}
+                                className="text-[#00FF88] hover:text-destructive hover:bg-destructive/10"
+                            >
+                                <LogOut className="h-5 w-5" />
+                            </Button>
+                        </div>
                     )}
                 </div>
-            </div>
-        </header>
+            </header>
     );
 };

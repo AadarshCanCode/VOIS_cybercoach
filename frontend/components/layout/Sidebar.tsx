@@ -76,7 +76,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
                                     "w-full flex items-center rounded-xl transition-all duration-300 group relative overflow-hidden",
                                     isCollapsed ? "justify-center px-0 py-3" : "space-x-3 px-4 py-3.5",
                                     isActive
-                                        ? 'bg-gradient-to-r from-[#00FF88]/20 to-[#00FF88]/5 text-[#00FF88] shadow-[0_0_20px_rgba(0,255,136,0.15)] border border-[#00FF88]/20'
+                                        ? 'bg-linear-to-r from-[#00FF88]/20 to-[#00FF88]/5 text-[#00FF88] shadow-[0_0_20px_rgba(0,255,136,0.15)] border border-[#00FF88]/20'
                                         : 'text-[#00B37A] hover:text-[#EAEAEA] hover:bg-[#00FF88]/5 border border-transparent hover:shadow-lg hover:shadow-[#00FF88]/5'
                                 )}
                                 title={isCollapsed ? item.label : ""}
@@ -112,7 +112,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
                         "w-full mb-3 flex items-center rounded-xl transition-all duration-300 group relative overflow-hidden",
                         isCollapsed ? "justify-center px-0 py-3" : "space-x-3 px-4 py-3",
                         activeTab === 'profile'
-                            ? 'bg-gradient-to-r from-[#00FF88]/20 to-[#00FF88]/5 text-[#00FF88] shadow-[0_0_20px_rgba(0,255,136,0.15)] border border-[#00FF88]/20'
+                            ? 'bg-linear-to-r from-[#00FF88]/20 to-[#00FF88]/5 text-[#00FF88] shadow-[0_0_20px_rgba(0,255,136,0.15)] border border-[#00FF88]/20'
                             : 'text-[#00B37A] hover:text-[#EAEAEA] hover:bg-[#00FF88]/5 border border-transparent hover:shadow-lg hover:shadow-[#00FF88]/5'
                     )}
                     title={isCollapsed ? "Profile" : ""}

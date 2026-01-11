@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Lock, Shield, ArrowRight, Settings } from 'lucide-react';
 import { useAuth } from '@context/AuthContext';
-import { Button } from '../../components/Button';
-import { Input } from '../../components/Input';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { AuthLayout } from '../../components/auth/AuthLayout';
 import { useNavigate } from 'react-router-dom';
 
@@ -44,7 +44,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
       className="max-w-md"
     >
       <div className="bg-[#0A0F0A] border border-red-500/20 rounded-2xl p-8 shadow-[0_0_50px_rgba(239,68,68,0.05)] backdrop-blur-xl relative overflow-hidden group">
-        <div className="absolute inset-0 bg-gradient-to-b from-red-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+        <div className="absolute inset-0 bg-linear-to-b from-red-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
         <div className="flex justify-center mb-8">
           <div className="relative">
@@ -103,7 +103,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
 
         <div className="mt-8 p-4 bg-red-500/5 border border-red-500/10 rounded-xl">
           <div className="flex items-start gap-3">
-            <Shield className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
+            <Shield className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
             <p className="text-[10px] text-red-500/60 font-mono leading-tight">
               Admin access only.
             </p>

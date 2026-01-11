@@ -12,10 +12,10 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, subtitl
   return (
     <div className="min-h-screen bg-[#000000] text-[#EAEAEA] font-sans selection:bg-[#00FF88]/30 flex flex-col items-center justify-center p-4 relative overflow-hidden">
       {/* Grid Background */}
-      <div className="fixed inset-0 bg-[linear-gradient(to_right,#00FF8808_1px,transparent_1px),linear-gradient(to_bottom,#00FF8808_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+      <div className="fixed inset-0 bg-[linear-gradient(to_right,#00FF8808_1px,transparent_1px),linear-gradient(to_bottom,#00FF8808_1px,transparent_1px)] bg-size-[24px_24px] pointer-events-none" />
 
       {/* Radial Gradient Glow */}
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-[#00FF88]/10 blur-[120px] rounded-full pointer-events-none" />
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-200 h-125 bg-[#00FF88]/10 blur-[120px] rounded-full pointer-events-none" />
 
       <div className={`w-full relative z-10 ${className}`}>
         <div className="text-center mb-8">

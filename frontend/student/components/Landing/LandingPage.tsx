@@ -22,7 +22,7 @@ const ActionCard: React.FC<{ icon: React.ReactNode; title: string; subtitle: str
     onClick={onClick}
     className="group relative flex flex-col items-center text-center p-8 bg-[#0A0F0A] border border-[#00FF88]/20 hover:border-[#00FF88] rounded-2xl transition-all hover:bg-[#00FF88]/5 hover:shadow-[0_0_50px_rgba(0,255,136,0.1)] hover:-translate-y-2 w-full"
   >
-    <div className="absolute inset-0 bg-gradient-to-b from-[#00FF88]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
+    <div className="absolute inset-0 bg-linear-to-b from-[#00FF88]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
     <div className="mb-6 p-6 bg-[#00FF88]/10 rounded-full border border-[#00FF88]/20 group-hover:scale-110 transition-transform duration-300 shadow-[0_0_20px_rgba(0,255,136,0.1)]">
       {icon}
     </div>
@@ -119,7 +119,7 @@ export const LandingPage: React.FC = () => {
 
       <div className="min-h-screen bg-[#000000] text-[#EAEAEA] font-sans selection:bg-[#00FF88]/30">
         {/* Grid Background */}
-        <div className="fixed inset-0 bg-[linear-gradient(to_right,#00FF8805_1px,transparent_1px),linear-gradient(to_bottom,#00FF8805_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" />
+        <div className="fixed inset-0 bg-[linear-gradient(to_right,#00FF8805_1px,transparent_1px),linear-gradient(to_bottom,#00FF8805_1px,transparent_1px)] bg-size-[32px_32px] pointer-events-none" />
 
         {/* Animated Blobs */}
         <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
@@ -129,7 +129,7 @@ export const LandingPage: React.FC = () => {
         </div>
 
         {/* Radial Gradient Glow */}
-        <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-gradient-to-b from-[#00FF88]/15 to-transparent blur-[120px] rounded-full pointer-events-none" />
+        <div className="fixed top-0 left-1/2 -translate-x-1/2 w-250 h-150 bg-linear-to-b from-[#00FF88]/15 to-transparent blur-[120px] rounded-full pointer-events-none" />
 
         {/* Nav */}
         <header className="py-5 px-6 sticky top-0 z-50 transition-all duration-300 backdrop-blur-md bg-black/60 border-b border-white/5">
@@ -198,8 +198,8 @@ export const LandingPage: React.FC = () => {
         {/* Hero */}
         <section className="relative pt-20 pb-12 px-6 overflow-hidden flex items-center">
           {/* Background Decorative Elements */}
-          <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#00FF88]/5 blur-[150px] rounded-full pointer-events-none animate-pulse" />
-          <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#00CC66]/5 blur-[150px] rounded-full pointer-events-none animate-pulse delay-1000" />
+          <div className="absolute top-1/4 left-1/4 w-125 h-125 bg-[#00FF88]/5 blur-[150px] rounded-full pointer-events-none animate-pulse" />
+          <div className="absolute bottom-1/4 right-1/4 w-125 h-125 bg-[#00CC66]/5 blur-[150px] rounded-full pointer-events-none animate-pulse delay-1000" />
 
           <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16 items-center relative z-10 w-full">
             <div className="lg:col-span-7 space-y-8">
@@ -214,7 +214,7 @@ export const LandingPage: React.FC = () => {
               <div className="space-y-4">
                 <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-white leading-[0.85] uppercase">
                   MASTER THE <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00FF88] via-[#00FF88] to-[#00CC66] filter drop-shadow-[0_0_20px_rgba(0,255,136,0.5)]">
+                  <span className="text-transparent bg-clip-text bg-linear-to-r from-[#00FF88] via-[#00FF88] to-[#00CC66] filter drop-shadow-[0_0_20px_rgba(0,255,136,0.5)]">
                     DEFENSE
                   </span>
                 </h1>
@@ -254,7 +254,7 @@ export const LandingPage: React.FC = () => {
               <div className="absolute -inset-10 bg-[#00FF88]/10 blur-[100px] rounded-full opacity-40 animate-pulse pointer-events-none" />
 
               <div className="relative bg-[#0A0F0A] border border-[#00FF88]/20 rounded-[3rem] p-2 shadow-2xl backdrop-blur-3xl overflow-hidden group">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#00FF88] to-transparent opacity-50" />
+                <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-[#00FF88] to-transparent opacity-50" />
                 <div className="bg-black/40 p-8 rounded-[2.5rem] border border-white/5">
                   <div className="flex items-center justify-between mb-8">
                     <div className="space-y-1">
@@ -311,7 +311,7 @@ export const LandingPage: React.FC = () => {
 
         {/* Features */}
         < section id="features" className="py-24 px-6 bg-[#050505] relative" >
-          <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#00FF88]/20 to-transparent" />
+          <div className="absolute top-0 left-0 w-full h-px bg-linear-to-r from-transparent via-[#00FF88]/20 to-transparent" />
 
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
@@ -378,7 +378,7 @@ export const LandingPage: React.FC = () => {
             <div className="relative order-2 lg:order-1">
               <div className="absolute -inset-10 bg-[#00FF88]/10 blur-[100px] rounded-full opacity-50" />
               <div className="relative bg-[#0A0F0A] border border-[#00FF88]/20 rounded-3xl p-8 overflow-hidden group">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#00FF88] to-transparent opacity-50" />
+                <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-[#00FF88] to-transparent opacity-50" />
                 <div className="flex items-start gap-6 mb-8 mt-4">
                   <div className="p-4 bg-[#00FF88]/10 rounded-2xl border border-[#00FF88]/20">
                     <Brain className="h-10 w-10 text-[#00FF88]" />
@@ -440,7 +440,7 @@ export const LandingPage: React.FC = () => {
 
         {/* Global Cyber Forge Section */}
         < section className="py-24 px-6 bg-[#050505] relative overflow-hidden" >
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#00FF88]/20 to-transparent" />
+          <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-[#00FF88]/20 to-transparent" />
           <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
             <div className="space-y-8">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[#00FF88]/5 border border-[#00FF88]/20 text-[#00FF88] text-[10px] font-mono uppercase tracking-[0.2em]">
@@ -504,7 +504,7 @@ export const LandingPage: React.FC = () => {
                       <span className="text-[10px] font-mono text-white">94%</span>
                     </div>
                     <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-[#00FF88] to-[#00CC66] w-[94%]" />
+                      <div className="h-full bg-linear-to-r from-[#00FF88] to-[#00CC66] w-[94%]" />
                     </div>
                   </div>
                   <button className="w-full py-4 bg-black border border-[#00FF88]/30 rounded-2xl text-[11px] font-mono text-[#00FF88] uppercase tracking-[0.3em] hover:bg-[#00FF88]/10 transition-all">
@@ -518,7 +518,7 @@ export const LandingPage: React.FC = () => {
 
         {/* Testimonials */}
         <section id="testimonials" className="py-20 px-6 relative overflow-hidden">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-[#00FF88]/20 to-transparent" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-linear-to-r from-transparent via-[#00FF88]/20 to-transparent" />
 
           <div className="max-w-5xl mx-auto relative z-10">
             <div className="text-center mb-12 space-y-3">
@@ -544,7 +544,7 @@ export const LandingPage: React.FC = () => {
                   </blockquote>
 
                   <div className="flex flex-col md:flex-row items-center justify-center gap-6 pt-8 border-t border-white/5">
-                    <div className="w-16 h-16 bg-gradient-to-br from-[#00FF88]/20 to-[#00FF88]/5 rounded-2xl border border-[#00FF88]/20 flex items-center justify-center text-xl font-black text-[#00FF88]">
+                    <div className="w-16 h-16 bg-linear-to-br from-[#00FF88]/20 to-[#00FF88]/5 rounded-2xl border border-[#00FF88]/20 flex items-center justify-center text-xl font-black text-[#00FF88]">
                       {testimonials[activeTestimonial].initials}
                     </div>
                     <div className="text-center md:text-left">
@@ -577,7 +577,7 @@ export const LandingPage: React.FC = () => {
           <div className="max-w-5xl mx-auto text-center relative z-10 space-y-12">
             <h2 className="text-6xl md:text-9xl font-black text-white uppercase tracking-tighter leading-none">
               READY FOR <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00FF88] to-[#00CC66] filter drop-shadow-[0_0_30px_rgba(0,255,136,0.3)]">DEPLOYMENT?</span>
+              <span className="text-transparent bg-clip-text bg-linear-to-r from-[#00FF88] to-[#00CC66] filter drop-shadow-[0_0_30px_rgba(0,255,136,0.3)]">DEPLOYMENT?</span>
             </h2>
             <p className="text-[#00B37A] text-xl md:text-2xl mb-12 max-w-2xl mx-auto leading-relaxed font-light">
               The frontlines are waiting. Initialize your mission protocols and secure your place among the world's most elite defenders.

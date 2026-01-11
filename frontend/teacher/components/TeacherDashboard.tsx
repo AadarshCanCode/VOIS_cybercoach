@@ -7,9 +7,9 @@ import { TeacherSidebar } from './TeacherSidebar';
 import { courseService } from '@services/courseService';
 import type { Course } from '../../types';
 import { useAuth } from '@context/AuthContext';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/Card';
-import { Button } from '../../components/Button';
-import { Badge } from '../../components/Badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Header } from '../../components/layout/Header';
 
 type ViewMode = 'dashboard' | 'lab-builder' | 'course-editor' | 'profile';
@@ -95,7 +95,7 @@ export const TeacherDashboard: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-white via-white/80 to-white/60 bg-clip-text text-transparent">Teacher Dashboard</h1>
+            <h1 className="text-4xl font-bold bg-linear-to-r from-white via-white/80 to-white/60 bg-clip-text text-transparent">Teacher Dashboard</h1>
           </div>
           <div className="flex gap-3">
             <Button
@@ -168,7 +168,7 @@ export const TeacherDashboard: React.FC = () => {
         </div>
 
         {/* Courses Grid */}
-        <Card variant="glass" className="border-white/5 bg-white/[0.02]">
+        <Card variant="glass" className="border-white/5 bg-white/2">
           <CardHeader>
             <CardTitle>My Courses</CardTitle>
           </CardHeader>

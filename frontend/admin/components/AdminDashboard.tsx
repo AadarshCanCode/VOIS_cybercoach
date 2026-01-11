@@ -3,9 +3,9 @@ import { Users, BookOpen, Eye, Crown, GraduationCap, TrendingUp, Activity } from
 import { adminService } from '@services/adminService';
 import { supabase } from '@lib/supabase';
 import type { User } from '../../types';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/Card';
-import { Button } from '../../components/Button';
-import { Badge } from '../../components/Badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Header } from '../../components/layout/Header';
 import { AdminSidebar } from './AdminSidebar';
 
@@ -108,7 +108,7 @@ export const AdminDashboard = () => {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-3 mb-2">
-                  <h1 className="text-4xl font-bold bg-gradient-to-r from-white via-white/80 to-white/60 bg-clip-text text-transparent">Admin Dashboard</h1>
+                  <h1 className="text-4xl font-bold bg-linear-to-r from-white via-white/80 to-white/60 bg-clip-text text-transparent">Admin Dashboard</h1>
                   <Badge variant="destructive" className="animate-pulse">Live</Badge>
                 </div>
               </div>
@@ -173,7 +173,7 @@ export const AdminDashboard = () => {
                 </div>
 
                 {/* Recent Activity */}
-                <Card variant="glass" className="border-white/5 bg-white/[0.02]">
+                <Card variant="glass" className="border-white/5 bg-white/2">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Activity className="h-5 w-5 text-primary" />
@@ -209,7 +209,7 @@ export const AdminDashboard = () => {
 
             {/* Users Management */}
             {activeView === 'users' && (
-              <Card variant="glass" className="border-white/5 bg-white/[0.02]">
+              <Card variant="glass" className="border-white/5 bg-white/2">
                 <CardHeader>
                   <CardTitle>User Management</CardTitle>
                 </CardHeader>
@@ -281,7 +281,7 @@ export const AdminDashboard = () => {
 
             {/* Courses Management */}
             {activeView === 'courses' && (
-              <Card variant="glass" className="border-white/5 bg-white/[0.02]">
+              <Card variant="glass" className="border-white/5 bg-white/2">
                 <CardHeader>
                   <CardTitle>Course Management</CardTitle>
                 </CardHeader>
@@ -329,7 +329,7 @@ export const AdminDashboard = () => {
             {/* Analytics */}
             {activeView === 'analytics' && (
               <div className="space-y-8">
-                <Card variant="glass" className="border-white/5 bg-white/[0.02]">
+                <Card variant="glass" className="border-white/5 bg-white/2">
                   <CardHeader>
                     <CardTitle>Platform Analytics</CardTitle>
                   </CardHeader>
@@ -370,7 +370,7 @@ export const AdminDashboard = () => {
             {/* Settings */}
             {activeView === 'settings' && (
               <div className="space-y-8">
-                <Card variant="glass" className="border-white/5 bg-white/[0.02]">
+                <Card variant="glass" className="border-white/5 bg-white/2">
                   <CardHeader>
                     <CardTitle>Platform Settings</CardTitle>
                   </CardHeader>
