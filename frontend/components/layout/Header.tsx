@@ -1,5 +1,5 @@
 import React from 'react';
-import { Shield, User, LogOut, Search } from 'lucide-react';
+import { User, LogOut, Search } from 'lucide-react';
 import { useAuth } from '@context/AuthContext';
 import { Button } from '../Button';
 import { useNavigate } from 'react-router-dom';
@@ -28,14 +28,11 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
                 {/* Logo */}
                 <button
                     onClick={handleLogoClick}
-                    className="flex items-center gap-2 mr-4 hover:opacity-80 transition-opacity cursor-pointer"
+                    className="flex items-center gap-3 mr-4 hover:opacity-80 transition-opacity cursor-pointer"
                 >
-                    <div className="relative">
-                        <div className="absolute inset-0 bg-primary/50 blur-lg rounded-full animate-pulse" />
-                        <Shield className="relative h-8 w-8 text-primary" />
-                    </div>
-                    <span className="text-xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent hidden sm:inline-block">
-                        Cyber Coach
+                    <img src="/cybercoach.png" alt="Cybercoach" className="h-14 w-14" />
+                    <span className="text-2xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent hidden sm:inline-block">
+                        Cybercoach
                     </span>
                 </button>
 

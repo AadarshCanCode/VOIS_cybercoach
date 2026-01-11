@@ -137,10 +137,8 @@ export const LandingPage: React.FC = () => {
             <div className="flex items-center gap-4">
               <button aria-label="Home" className="flex items-center gap-5 focus:outline-none group" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
                 <div className="relative">
-                  <div className="absolute -inset-2 bg-[#00FF88]/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-700"></div>
-                  <div className="relative p-3 bg-black border border-white/10 rounded-2xl group-hover:border-[#00FF88]/50 transition-all duration-500 group-hover:scale-110">
-                    <Shield className="h-7 w-7 text-[#00FF88]" />
-                  </div>
+                  <div className="absolute -inset-3 bg-[#00FF88]/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-700"></div>
+                  <img src="/cybercoach.png" alt="Cybercoach" className="relative h-16 w-16 group-hover:scale-110 transition-transform duration-500" />
                 </div>
                 <div className="hidden md:block text-left">
                   <div className="text-2xl font-black tracking-tighter text-white uppercase flex items-center gap-1 group-hover:text-[#00FF88] transition-colors duration-500">
@@ -609,9 +607,7 @@ export const LandingPage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-12 gap-16 mb-24">
               <div className="md:col-span-5 space-y-8">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 bg-[#00FF88]/10 border border-[#00FF88]/30 rounded-2xl shadow-[0_0_15px_rgba(0,255,136,0.1)]">
-                    <Shield className="h-10 w-10 text-[#00FF88]" />
-                  </div>
+                  <img src="/cybercoach.png" alt="Cybercoach" className="h-16 w-16" />
                   <div>
                     <div className="text-3xl font-black tracking-tighter text-white uppercase">
                       CYBER <span className="text-[#00FF88]">COACH</span>

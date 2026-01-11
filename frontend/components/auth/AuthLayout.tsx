@@ -1,5 +1,4 @@
 import React from 'react';
-import { Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface AuthLayoutProps {
@@ -21,11 +20,9 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, subtitl
       <div className={`w-full relative z-10 ${className}`}>
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-3 mb-6 group transition-all hover:scale-105">
-            <div className="p-2 bg-[#00FF88]/10 border border-[#00FF88]/20 rounded-lg group-hover:bg-[#00FF88]/20 transition-colors">
-              <Shield className="h-8 w-8 text-[#00FF88]" />
-            </div>
+            <img src="/cybercoach.png" alt="Cybercoach" className="h-14 w-14 group-hover:scale-110 transition-transform" />
             <div className="text-left">
-              <div className="text-xl font-black tracking-tighter text-white uppercase">Career <span className="text-[#00FF88]">Connect</span></div>
+              <div className="text-xl font-black tracking-tighter text-white uppercase">Cyber <span className="text-[#00FF88]">Coach</span></div>
               <div className="text-[10px] font-mono text-[#00B37A] tracking-widest uppercase">Cybersecurity Ops</div>
             </div>
           </Link>
