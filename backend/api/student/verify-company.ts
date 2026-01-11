@@ -1,9 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { scrapeCompanyWebsite } from '../../backend/student/services/detective/webScraper.js';
-import { analyzeDomain, type DomainIntel } from '../../backend/student/services/detective/domainIntel.js';
-import { checkReputation, type ReputationResult } from '../../backend/student/services/detective/reputationCheck.js';
-import { analyzeContent } from '../../backend/student/services/analyst/contentAnalyzer.js';
-import { makeDecision } from '../../backend/student/services/judge/decisionEngine.js';
+import { scrapeCompanyWebsite } from '../../student/services/detective/webScraper.js';
+import { analyzeDomain, type DomainIntel } from '../../student/services/detective/domainIntel.js';
+import { checkReputation, type ReputationResult } from '../../student/services/detective/reputationCheck.js';
+import { analyzeContent } from '../../student/services/analyst/contentAnalyzer.js';
+import { makeDecision } from '../../student/services/judge/decisionEngine.js';
 
 // Logging utility for Vercel serverless function
 const log = (phase: string, message: string, data?: any) => {
