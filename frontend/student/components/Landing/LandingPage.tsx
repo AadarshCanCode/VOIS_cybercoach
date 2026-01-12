@@ -444,31 +444,57 @@ export const LandingPage: React.FC = () => {
           <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
             <div className="space-y-8">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[#00FF88]/5 border border-[#00FF88]/20 text-[#00FF88] text-[10px] font-mono uppercase tracking-[0.2em]">
-                Live Training Sim
+                Intelligence Uplink
               </div>
               <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter leading-none">
-                THE GLOBAL <br />
-                <span className="text-[#00FF88]">CYBER FORGE</span>
+                CYBERSEC <br />
+                <span className="text-[#00FF88]">UPDATE BOT</span>
               </h2>
               <p className="text-xl text-gray-400 leading-relaxed font-light">
-                Step into the most advanced training environment ever built. The Forge synchronizes real-world threat intelligence with high-fidelity virtual ranges, allowing you to sharpen your edge against the world's most sophisticated attack vectors.
+                Stay ahead of the curve with our dedicated Telegram intelligence bot. Get real-time cybersecurity updates, threat alerts, and career insights delivered directly to your device.
               </p>
               <div className="flex flex-col gap-6 pt-4">
                 {[
-                  { label: "High-Fidelity Ranges", detail: "Isolated sandboxes with real OS instances" },
-                  { label: "Live Malware Analysis", detail: "Safely deconstruct active threat samples" },
-                  { label: "Red vs Blue Ops", detail: "Real-time team-based combat simulations" }
-                ].map((item, i) => (
-                  <div key={i} className="flex items-start gap-4 group">
-                    <div className="mt-1 p-2 bg-[#00FF88]/10 rounded border border-[#00FF88]/20 group-hover:bg-[#00FF88]/20 transition-colors">
-                      <Zap className="h-4 w-4 text-[#00FF88]" />
-                    </div>
-                    <div>
-                      <h4 className="text-white font-black uppercase text-sm tracking-wide">{item.label}</h4>
-                      <p className="text-xs text-[#00B37A] font-mono tracking-tight opacity-70">{item.detail}</p>
-                    </div>
-                  </div>
-                ))}
+                  {
+                    label: "Latest Updates",
+                    detail: "The bot talks about cybersecurity and gives you latest cybersec updates",
+                    link: "https://t.me/careerconnet_cyber_bot"
+                  },
+                  {
+                    label: "Career Insights",
+                    detail: "Discover new opportunities and growth paths in the security industry",
+                    link: "https://t.me/careerconnet_cyber_bot"
+                  },
+                  {
+                    label: "Threat Intelligence",
+                    detail: "Real-time alerts on emerging vulnerabilities and attack vectors",
+                    link: "https://t.me/careerconnet_cyber_bot"
+                  }
+                ].map((item, i) => {
+                  const content = (
+                    <>
+                      <div className="mt-1 p-2 bg-[#00FF88]/10 rounded border border-[#00FF88]/20 group-hover:bg-[#00FF88]/20 transition-colors">
+                        <Zap className="h-4 w-4 text-[#00FF88]" />
+                      </div>
+                      <div>
+                        <h4 className="text-white font-black uppercase text-sm tracking-wide">{item.label}</h4>
+                        <p className="text-xs text-[#00B37A] font-mono tracking-tight opacity-70">{item.detail}</p>
+                      </div>
+                    </>
+                  );
+
+                  return (
+                    <a
+                      key={i}
+                      href={item.link}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-start gap-4 group hover:opacity-80 transition-opacity"
+                    >
+                      {content}
+                    </a>
+                  );
+                })}
               </div>
             </div>
 
@@ -481,18 +507,18 @@ export const LandingPage: React.FC = () => {
                 <div className="flex items-center justify-between mb-8">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-black border border-[#00FF88]/20 flex items-center justify-center">
-                      <Zap className="h-5 w-5 text-[#00FF88]" />
+                      <Bot className="h-5 w-5 text-[#00FF88]" />
                     </div>
-                    <span className="text-xs font-mono text-white tracking-widest uppercase">Global Node Map</span>
+                    <span className="text-xs font-mono text-white tracking-widest uppercase">Intelligence Feed</span>
                   </div>
-                  <div className="h-1.5 w-1.5 rounded-full bg-red-500 animate-ping" />
+                  <div className="h-1.5 w-1.5 rounded-full bg-[#00FF88] animate-ping" />
                 </div>
 
                 <div className="grid grid-cols-4 gap-4 mb-8">
                   {[...Array(12)].map((_, i) => (
                     <div key={i} className={`h-12 rounded-lg border border-white/5 bg-black/50 relative overflow-hidden group/node`}>
                       <div className={`absolute inset-0 bg-[#00FF88]/5 opacity-0 group-hover/node:opacity-100 transition-opacity`} />
-                      {i % 3 === 0 && <div className="absolute inset-0 bg-[#00FF88]/10 animate-pulse" />}
+                      {i % 2 === 0 && <div className="absolute inset-0 bg-[#00FF88]/10 animate-pulse" />}
                     </div>
                   ))}
                 </div>
@@ -500,16 +526,21 @@ export const LandingPage: React.FC = () => {
                 <div className="space-y-4">
                   <div className="p-4 bg-black/80 rounded-2xl border border-white/5">
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-[10px] font-mono text-[#00B37A]">OPERATIONAL READINESS</span>
-                      <span className="text-[10px] font-mono text-white">94%</span>
+                      <span className="text-[10px] font-mono text-[#00B37A]">SYNC STATUS</span>
+                      <span className="text-[10px] font-mono text-white">READY</span>
                     </div>
                     <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
-                      <div className="h-full bg-linear-to-r from-[#00FF88] to-[#00CC66] w-[94%]" />
+                      <div className="h-full bg-linear-to-r from-[#00FF88] to-[#00CC66] w-full" />
                     </div>
                   </div>
-                  <button className="w-full py-4 bg-black border border-[#00FF88]/30 rounded-2xl text-[11px] font-mono text-[#00FF88] uppercase tracking-[0.3em] hover:bg-[#00FF88]/10 transition-all">
-                    Deploy to Virtual Range_
-                  </button>
+                  <a
+                    href="https://t.me/careerconnet_cyber_bot"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block w-full text-center py-4 bg-black border border-[#00FF88]/30 rounded-2xl text-[11px] font-mono text-[#00FF88] uppercase tracking-[0.3em] hover:bg-[#00FF88]/10 transition-all"
+                  >
+                    Open Intelligence Bot_
+                  </a>
                 </div>
               </div>
             </div>
