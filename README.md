@@ -7,7 +7,6 @@ An AI-powered cybersecurity education platform that transforms passive learning 
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 ![Vite](https://img.shields.io/badge/Vite-7-646CFF)
 
-
 ## Features
 
 ### 🎓 Learning & Education
