@@ -369,7 +369,8 @@ class CourseService {
 
   async registerVUStudent(data: any) {
     try {
-      const response = await fetch('http://localhost:4000/api/vu/register', {
+      const API_URL = import.meta.env.VITE_API_URL || '';
+      const response = await fetch(`${API_URL}/api/vu/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -390,7 +391,8 @@ class CourseService {
 
   async getVUStudent(email: string) {
     try {
-      const response = await fetch(`http://localhost:4000/api/vu/student/${email}`);
+      const API_URL = import.meta.env.VITE_API_URL || '';
+      const response = await fetch(`${API_URL}/api/vu/student/${email}`);
       if (!response.ok) {
         throw new Error('Failed to fetch VU student details');
       }
@@ -409,7 +411,8 @@ class CourseService {
         if (!email) return []; // Not registered locally yet
 
         try {
-          const response = await fetch(`http://localhost:4000/api/vu/progress/${email}/${courseId}`);
+          const API_URL = import.meta.env.VITE_API_URL || '';
+          const response = await fetch(`${API_URL}/api/vu/progress/${email}/${courseId}`);
           if (response.ok) {
             return await response.json();
           }
@@ -437,10 +440,15 @@ class CourseService {
   async updateProgress(userId: string, courseId: string, moduleId: string, completed: boolean, quizScore?: number) {
     try {
       // Handle static VU courses using MongoDB API
+      // Use env var or default to relative path (for proxy)
+      const API_URL = import.meta.env.VITE_API_URL || '';
+
+      // ... 
+
       if (courseId === 'vu-web-security') {
         const email = localStorage.getItem('vu_student_email');
         if (email) {
-          await fetch('http://localhost:4000/api/vu/progress', {
+          await fetch(`${API_URL}/api/vu/progress`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
