@@ -1,9 +1,21 @@
 import express from 'express';
 import Groq from 'groq-sdk';
 import 'dotenv/config';
+import rateLimit from 'express-rate-limit';
 
 const router = express.Router();
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
+// Strict Limit for AI: 10 requests per 15 minutes
+const aiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    message: { error: 'To conserve neural resources, AI access is limited. Please wait a few minutes.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+router.use(aiLimiter);
 
 router.post('/ask', async (req, res) => {
     try {

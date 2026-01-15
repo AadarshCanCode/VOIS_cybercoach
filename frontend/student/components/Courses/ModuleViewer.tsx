@@ -56,7 +56,8 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
     setAiAnswer(null);
 
     try {
-      const response = await fetch('http://localhost:4000/api/ai/ask', {
+      const API_URL = import.meta.env.VITE_API_URL || '';
+      const response = await fetch(`${API_URL}/api/ai/ask`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -250,7 +251,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
     // 0. Pre-process YouTube
     content = content.replace(
       /<a\s+(?:[^>]*?\s+)?href=["'](?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)(?:&[\w%=]*)?["'][^>]*>.*?<\/a>/gi,
-      (match, videoId) => `<div class="aspect-video w-full my-8 bg-black/50 rounded-xl overflow-hidden border border-[#00FF88]/20 shadow-[0_0_20px_rgba(0,255,136,0.1)] group"><iframe src="https://www.youtube.com/embed/${videoId}" class="w-full h-full" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`
+      (_match, videoId) => `<div class="aspect-video w-full my-8 bg-black/50 rounded-xl overflow-hidden border border-[#00FF88]/20 shadow-[0_0_20px_rgba(0,255,136,0.1)] group"><iframe src="https://www.youtube.com/embed/${videoId}" class="w-full h-full" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`
     );
 
     // 1. Headers & Lists (Markdown) - Relies on \n
@@ -268,11 +269,11 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
       return `__TOKEN_${tokens.length - 1}__`;
     };
 
-    content = content.replace(/```mermaid([\s\S]*?)```/gi, (match, code) => {
+    content = content.replace(/```mermaid([\s\S]*?)```/gi, (_match, code) => {
       return saveToken(`<div class="mermaid my-8 bg-[#0A0F0A] p-6 rounded-xl border border-[#00FF88]/20 flex justify-center overflow-x-auto shadow-[inset_0_0_20px_rgba(0,255,136,0.05)] text-left">${code.trim()}</div>`);
     });
 
-    content = content.replace(/```([\s\S]*?)```/gi, (match, code) => {
+    content = content.replace(/```([\s\S]*?)```/gi, (_match, code) => {
       return saveToken(`<pre class="bg-black border border-[#00FF88]/20 p-4 rounded-lg my-4 overflow-x-auto"><code class="text-[#00FF88] font-mono">${code.trim().replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`);
     });
 

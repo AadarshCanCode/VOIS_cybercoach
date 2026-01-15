@@ -1,5 +1,5 @@
 
-import { Course, Module, Question } from '../../types/types';
+import { Course } from '../../types/types';
 
 export const vuWebSecurityCourse: Course = {
     id: 'vu-web-security',

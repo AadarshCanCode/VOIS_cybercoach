@@ -16,6 +16,18 @@ const PORT = Number.isFinite(parsedPort) && parsedPort > 0 ? parsedPort : 4000;
 
 connectDB();
 
+import rateLimit from 'express-rate-limit';
+
+// Global Rate Limiter: 100 requests per 15 minutes
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use(globalLimiter);
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
 

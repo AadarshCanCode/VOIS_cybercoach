@@ -379,8 +379,14 @@ class CourseService {
       });
 
       if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.message || 'Failed to register');
+        const text = await response.text();
+        try {
+          const err = JSON.parse(text);
+          throw new Error(err.message || 'Failed to register');
+        } catch (e) {
+          console.error('Registration failed with non-JSON response:', text);
+          throw new Error(`Registration failed (${response.status}): ${text.substring(0, 50)}...`);
+        }
       }
       return await response.json();
     } catch (error) {
