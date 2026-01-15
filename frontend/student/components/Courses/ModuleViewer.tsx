@@ -326,8 +326,8 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
             {/* Go to next module */}
             <button
               onClick={goToNextModule}
-              disabled={currentIndex < 0 || currentIndex >= allModules.length - 1}
-              className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center space-x-2 ${currentIndex < 0 || currentIndex >= allModules.length - 1 ? 'bg-white/5 border border-white/10 text-white/30 cursor-not-allowed' : 'bg-[#00B37A] text-black hover:bg-[#00FF88] hover:shadow-[0_0_20px_rgba(0,255,136,0.3)]'}`}
+              disabled={currentIndex < 0 || currentIndex >= allModules.length - 1 || (!module.completed && user?.role !== 'admin')}
+              className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center space-x-2 ${currentIndex < 0 || currentIndex >= allModules.length - 1 || (!module.completed && user?.role !== 'admin') ? 'bg-white/5 border border-white/10 text-white/30 cursor-not-allowed' : 'bg-[#00B37A] text-black hover:bg-[#00FF88] hover:shadow-[0_0_20px_rgba(0,255,136,0.3)]'}`}
               title="Go to next module"
             >
               <span>Next Module</span>

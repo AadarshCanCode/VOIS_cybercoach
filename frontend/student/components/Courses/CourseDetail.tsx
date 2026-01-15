@@ -174,18 +174,7 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
   const totalModules = (course.modules ?? course.course_modules ?? []).length;
   const progressPercentage = (completedModules / totalModules) * 100;
 
-  const allowedModules = (() => {
-    switch (user?.level) {
-      case 'beginner':
-        return 3;
-      case 'intermediate':
-        return 7;
-      case 'advanced':
-        return Number.POSITIVE_INFINITY;
-      default:
-        return 0;
-    }
-  })();
+
 
   return (
     <div className="p-6 min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-[#EAEAEA]">
@@ -271,8 +260,9 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
           </div>
 
           <div className="divide-y divide-[#00FF88]/10">
-            {(course.modules ?? course.course_modules ?? []).map((module: Module, index: number) => {
-              const isModuleUnlocked = index < allowedModules || user?.role === 'admin' || course.category === 'vishwakarma-university';
+            {(course.modules ?? course.course_modules ?? []).map((module: Module, index: number, array: any[]) => {
+              // Sequential Locking: Admin always access, First module always access, Others need previous completed
+              const isModuleUnlocked = user?.role === 'admin' || index === 0 || array[index - 1]?.completed;
 
               return (
                 <div key={module.id} className="p-6 hover:bg-[#00FF88]/5 transition-colors group">
