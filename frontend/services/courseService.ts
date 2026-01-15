@@ -370,7 +370,10 @@ class CourseService {
   async registerVUStudent(data: any) {
     try {
       const API_URL = import.meta.env.VITE_API_URL || '';
-      const response = await fetch(`${API_URL}/api/vu/register`, {
+      const targetUrl = `${API_URL}/api/vu/register`;
+      console.log('Registering at:', targetUrl);
+
+      const response = await fetch(targetUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -378,8 +381,11 @@ class CourseService {
         body: JSON.stringify(data)
       });
 
+      const text = await response.text();
+      console.log('Registration Response Status:', response.status);
+      console.log('Registration Response Body:', text);
+
       if (!response.ok) {
-        const text = await response.text();
         try {
           const err = JSON.parse(text);
           throw new Error(err.message || 'Failed to register');
@@ -388,7 +394,7 @@ class CourseService {
           throw new Error(`Registration failed (${response.status}): ${text.substring(0, 50)}...`);
         }
       }
-      return await response.json();
+      return text ? JSON.parse(text) : {};
     } catch (error) {
       console.error('VU Registration error:', error);
       throw error;
