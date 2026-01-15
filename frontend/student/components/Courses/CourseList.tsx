@@ -135,10 +135,18 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
 
               {/* Action Button */}
               <button
-                onClick={() => window.open(selectedCourse.url, '_blank')}
-                className="w-full bg-[#00FF88] text-black px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#00CC66] hover:shadow-[0_0_20px_rgba(0,255,136,0.3)] transition-all flex items-center justify-center space-x-2"
+                onClick={() => {
+                  if (selectedCourse.id === 'vu-web-security') {
+                    onCourseSelect(selectedCourse.id);
+                    return;
+                  }
+                  if (selectedCourse.url && selectedCourse.url !== '#') {
+                    window.open(selectedCourse.url, '_blank');
+                  }
+                }}
+                className={`w-full bg-[#00FF88] text-black px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#00CC66] hover:shadow-[0_0_20px_rgba(0,255,136,0.3)] transition-all flex items-center justify-center space-x-2 ${selectedCourse.url === '#' && selectedCourse.id !== 'vu-web-security' ? 'cursor-default opacity-80 hover:bg-[#00FF88] hover:shadow-none' : ''}`}
               >
-                <span>Start Course</span>
+                <span>{selectedCourse.id === 'vu-web-security' ? 'Enter Course' : 'Start Course'}</span>
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>

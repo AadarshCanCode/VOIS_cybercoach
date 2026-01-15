@@ -136,10 +136,10 @@ export const AssessmentTest: React.FC = () => {
     // Reset confidence to middle when selecting new answer
   };
 
-  const handleNextQuestion = () => {
+  const handleNextQuestion = async () => {
     if (selectedAnswer !== null) {
       // Save response to database
-      saveAssessmentResponse();
+      await saveAssessmentResponse();
 
       const newAnswers = [...answers];
       newAnswers[currentQuestionIndex] = selectedAnswer;
@@ -150,7 +150,10 @@ export const AssessmentTest: React.FC = () => {
         setSelectedAnswer(answers[currentQuestionIndex + 1] ?? null);
         setQuestionStartTime(new Date()); // Reset timer for next question
       } else {
-        handleSubmitTest(newAnswers);
+        // Pass false because we just saved it and updated state locally above (or logically should)
+        // Actually, let's keep it simple: if we are at the last question, just submit.
+        // But wait, if we just saved, we don't need to save again in handleSubmitTest
+        await handleSubmitTest(newAnswers, false);
       }
     }
   };
@@ -167,11 +170,15 @@ export const AssessmentTest: React.FC = () => {
     }
   };
 
-  const handleSubmitTest = async (finalAnswers = answers) => {
+  const handleSubmitTest = async (finalAnswers = answers, saveCurrent = true) => {
     // called when exam ends (manual or proctoring)
-    // Save final response if not already saved
-    if (selectedAnswer !== null) {
-      saveAssessmentResponse();
+
+    // Save final response if not already saved and we have a selection
+    if (saveCurrent && selectedAnswer !== null) {
+      await saveAssessmentResponse();
+      // Update finalAnswers to include this last one if it wasn't already there
+      // (This covers the case where auto-submit happens while user has an answer selected but hasn't clicked next)
+      finalAnswers[currentQuestionIndex] = selectedAnswer;
     }
 
     setSubmitting(true);
@@ -240,7 +247,7 @@ export const AssessmentTest: React.FC = () => {
       setMediaStream(null);
     }
     // ensure we submit
-    handleSubmitTest();
+    handleSubmitTest(undefined, true);
   };
 
   const calculateScore = (userAnswers: number[]) => {
@@ -268,7 +275,7 @@ export const AssessmentTest: React.FC = () => {
       const timeTaken = Math.floor((new Date().getTime() - questionStartTime.getTime()) / 1000);
       const isCorrect = selectedAnswer === currentQuestion.correctAnswer;
 
-      await supabase.from('assessment_responses').insert({
+      return await supabase.from('assessment_responses').insert({
         attempt_id: attemptId ?? undefined,
         user_id: user.id,
         question_id: currentQuestion.id,
@@ -663,7 +670,7 @@ export const AssessmentTest: React.FC = () => {
                 </button>
 
                 <button
-                  onClick={() => currentQuestionIndex === assessmentQuestions.length - 1 ? handleSubmitTest() : handleNextQuestion()}
+                  onClick={() => handleNextQuestion()}
                   disabled={selectedAnswer === null}
                   className="px-10 py-4 bg-[#00FF88] text-black rounded-xl font-black uppercase tracking-widest hover:shadow-[0_0_40px_rgba(0,255,136,0.3)] hover:bg-[#00CC66] disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-[1.02] active:scale-[0.98]"
                 >

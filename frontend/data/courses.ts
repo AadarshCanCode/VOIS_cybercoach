@@ -1,7 +1,7 @@
 export interface CourseData {
   id: string;
   title: string;
-  category: 'cybersecurity' | 'ai-ml' | 'teacher-courses';
+  category: 'cybersecurity' | 'ai-ml' | 'teacher-courses' | 'vishwakarma-university';
   url: string;
   description: string;
   disclaimer: string;
@@ -39,6 +39,13 @@ export const courseCategories: CourseCategory[] = [
     description: 'Access courses created by your instructors and mentors',
     icon: '👨‍🏫',
     color: 'from-green-500/20 to-teal-500/20'
+  },
+  {
+    id: 'vishwakarma-university',
+    title: 'Vishwakarma University',
+    description: 'Exclusive curriculum and specialized tracks from VU',
+    icon: '🎓',
+    color: 'from-purple-500/20 to-pink-500/20'
   }
 ];
 
@@ -88,7 +95,7 @@ export const coursesData: CourseData[] = [
     duration: '7 weeks',
     skills: ['AES', 'RSA', 'PKI', 'GDPR', 'Encryption']
   },
-  
+
   // AI & Machine Learning Courses
   {
     id: 'ai-1',
@@ -133,6 +140,19 @@ export const coursesData: CourseData[] = [
     difficulty: 'Advanced',
     duration: '9 weeks',
     skills: ['NLTK', 'spaCy', 'BERT', 'GPT', 'Text Analysis']
+  },
+
+  // Vishwakarma University Courses
+  {
+    id: 'vu-web-security',
+    title: 'Web Application Security',
+    category: 'vishwakarma-university',
+    url: '#',
+    description: 'Learn to identify and exploit vulnerabilities in web applications, understanding the OWASP Top 10 and secure coding practices, tailored for VU curriculum.',
+    disclaimer: 'Exclusive for VU students. This course contains practical exercises involving security testing.',
+    difficulty: 'Intermediate',
+    duration: '8 weeks',
+    skills: ['OWASP Top 10', 'SQL Injection', 'XSS', 'VU-Certified']
   }
 ];
 

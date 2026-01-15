@@ -1,12 +1,29 @@
 import React, { useState, useEffect } from 'react';
+import mermaid from 'mermaid';
+import { labs } from '@data/labs';
 import { ArrowLeft, FileText, CheckCircle, Award, Terminal, Play, Shield } from 'lucide-react';
 import { CertificateModal } from '../Certificates/CertificateModal';
 import { courseService } from '@services/courseService';
 import type { Module, Course } from '@types';
 import { ModuleTest } from './ModuleTest';
 import { learningPathService } from '@services/learningPathService';
-import { supabase } from '@lib/supabase';
 import { useAuth } from '@context/AuthContext';
+
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'base',
+  securityLevel: 'loose',
+  themeVariables: {
+    darkMode: true,
+    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+    primaryColor: '#00FF88',
+    primaryTextColor: '#000000',
+    primaryBorderColor: '#00FF88',
+    lineColor: '#00FF88',
+    secondaryColor: '#0a0f0a',
+    tertiaryColor: '#00331b'
+  }
+});
 
 interface ModuleViewerProps {
   courseId: string;
@@ -24,6 +41,42 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
 
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(false);
+  const [vuStudentDetails, setVuStudentDetails] = useState<any>(null);
+
+  // AI Tutor State
+  const [showAiChat, setShowAiChat] = useState(false);
+  const [aiQuestion, setAiQuestion] = useState('');
+  const [aiAnswer, setAiAnswer] = useState<{ text: string, error?: boolean } | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+
+  const askAiTutor = async () => {
+    if (!aiQuestion.trim()) return;
+
+    setAiLoading(true);
+    setAiAnswer(null);
+
+    try {
+      const response = await fetch('http://localhost:4000/api/ai/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          question: aiQuestion,
+          context: module?.title || 'Web Security'
+        })
+      });
+
+      const data = await response.json();
+      if (data.answer) {
+        setAiAnswer({ text: data.answer });
+      } else {
+        setAiAnswer({ text: 'Transmission interrupted. Secure line unstable.', error: true });
+      }
+    } catch (err) {
+      setAiAnswer({ text: 'Connection failed. AI Command unresponsive.', error: true });
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -31,7 +84,40 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
       setLoading(true);
       try {
         const data = await courseService.getCourseById(courseId);
-        if (mounted) setCourse(data);
+        if (mounted && data) {
+          // VU Student Check
+          if (data.category === 'vishwakarma-university') {
+            const email = localStorage.getItem('vu_student_email');
+            if (email) {
+              const student = await courseService.getVUStudent(email);
+              if (student) setVuStudentDetails(student);
+            }
+          }
+
+          if (user?.id) {
+            try {
+              const progress = await courseService.getUserProgress(user.id, courseId) as any[] | null;
+              const moduleProgress = (progress || []).reduce((acc: any, p: any) => {
+                if (p.module_id) acc[p.module_id] = p;
+                return acc;
+              }, {});
+
+              const modules = (data.course_modules ?? data.modules ?? []) as Module[];
+              const normalized = modules.map((m) => ({
+                ...m,
+                completed: !!moduleProgress[m.id]?.completed,
+                testScore: (moduleProgress[m.id]?.quiz_score ?? m.testScore) ?? undefined
+              }));
+
+              setCourse({ ...data, course_modules: normalized, modules: normalized });
+            } catch (e) {
+              console.error('Failed to load progress', e);
+              setCourse(data);
+            }
+          } else {
+            setCourse(data);
+          }
+        }
       } catch (e) {
         console.error('Failed to load course for module viewer:', e);
       } finally {
@@ -46,7 +132,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
 
   const isAllModulesCompleted = (course: Course) => {
     const modules = course.course_modules ?? course.modules ?? [];
-    return modules.every(m => m.completed);
+    return modules.every((m: Module) => m.completed);
   };
 
   if (loading) {
@@ -72,7 +158,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
   }
 
   const allModules = course.course_modules ?? course.modules ?? [];
-  const currentIndex = allModules.findIndex(m => m.id === moduleId);
+  const currentIndex = allModules.findIndex((m: Module) => m.id === moduleId);
 
   const goToNextModule = () => {
     if (currentIndex >= 0 && currentIndex < allModules.length - 1) {
@@ -90,13 +176,13 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
     }
   };
 
-  const markModuleCompleted = async (skipTest = false) => {
+  const markModuleCompleted = async (_skipTest = false) => {
     try {
       module.completed = true;
       setCourse({ ...course });
 
       if (user?.id) {
-        await supabase.from('user_progress').upsert([{ user_id: user.id, course_id: courseId, module_id: moduleId, completed: true, quiz_score: module.testScore ?? null, source: skipTest ? 'manual' : 'test' }]);
+        await courseService.updateProgress(user.id, courseId, moduleId, true, module.testScore ?? undefined);
         await learningPathService.rebalance(user.id, courseId);
         // inform parent to refresh progress
         if (onModuleStatusChange) onModuleStatusChange();
@@ -109,9 +195,14 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
   const completeCourseAndGenerateCertificate = async () => {
     // mark all modules completed if some are missing (for safety)
     try {
-        if (user?.id) {
-        const toUpsert = allModules.map(m => ({ user_id: user.id, course_id: courseId, module_id: m.id, completed: true, quiz_score: m.testScore ?? null, source: 'manual-course-complete' }));
-        await supabase.from('user_progress').upsert(toUpsert);
+      if (user?.id) {
+        // We can't batch update via courseService easily with the current API for VU courses
+        // So we will loop updates for now, or just trust the backend handles course completion logic if we had one.
+        // For now, let's just loop sequentially to be safe with the new API abstraction.
+        for (const m of allModules) {
+          await courseService.updateProgress(user.id, courseId, m.id, true, m.testScore ?? undefined);
+        }
+
         // inform parent to refresh progress, then show certificate
         if (onModuleStatusChange) await onModuleStatusChange();
         setShowCertificate(true);
@@ -131,8 +222,8 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
 
     // Persist progress and trigger rebalance
     try {
-        if (user?.id) {
-        await supabase.from('user_progress').upsert([{ user_id: user.id, course_id: courseId, module_id: moduleId, completed: true, quiz_score: score, source: 'adaptive' }]);
+      if (user?.id) {
+        await courseService.updateProgress(user.id, courseId, moduleId, true, score);
         await learningPathService.rebalance(user.id, courseId);
         if (onModuleStatusChange) onModuleStatusChange();
       }
@@ -148,9 +239,56 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
         moduleTitle={module.title}
         onComplete={handleTestCompletion}
         onBack={() => setShowTest(false)}
+        questions={module.questions || []}
       />
     );
   }
+
+  const processContent = (rawContent: string) => {
+    let content = rawContent || '';
+
+    // 0. Pre-process YouTube
+    content = content.replace(
+      /<a\s+(?:[^>]*?\s+)?href=["'](?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)(?:&[\w%=]*)?["'][^>]*>.*?<\/a>/gi,
+      (match, videoId) => `<div class="aspect-video w-full my-8 bg-black/50 rounded-xl overflow-hidden border border-[#00FF88]/20 shadow-[0_0_20px_rgba(0,255,136,0.1)] group"><iframe src="https://www.youtube.com/embed/${videoId}" class="w-full h-full" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`
+    );
+
+    // 1. Headers & Lists (Markdown) - Relies on \n
+    content = content
+      .replace(/^# (.+)$/gm, '<h1 class="text-2xl font-bold mb-4 text-white">$1</h1>')
+      .replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold mb-3 mt-6 text-white">$1</h2>')
+      .replace(/^### (.+)$/gm, '<h3 class="text-lg font-bold mb-2 mt-4 text-[#00FF88]">$1</h3>')
+      .replace(/^- (.+)$/gm, '<li class="ml-4 text-[#00B37A] list-disc list-inside">$1</li>')
+      .replace(/^(\d+)\. (.+)$/gm, '<li class="ml-4 text-[#00B37A] list-decimal list-inside">$2</li>');
+
+    // 2. Code Blocks (Mermaid & Generic) - Tokenize to protect from <br/>
+    const tokens: string[] = [];
+    const saveToken = (text: string) => {
+      tokens.push(text);
+      return `__TOKEN_${tokens.length - 1}__`;
+    };
+
+    content = content.replace(/```mermaid([\s\S]*?)```/gi, (match, code) => {
+      return saveToken(`<div class="mermaid my-8 bg-[#0A0F0A] p-6 rounded-xl border border-[#00FF88]/20 flex justify-center overflow-x-auto shadow-[inset_0_0_20px_rgba(0,255,136,0.05)] text-left">${code.trim()}</div>`);
+    });
+
+    content = content.replace(/```([\s\S]*?)```/gi, (match, code) => {
+      return saveToken(`<pre class="bg-black border border-[#00FF88]/20 p-4 rounded-lg my-4 overflow-x-auto"><code class="text-[#00FF88] font-mono">${code.trim().replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`);
+    });
+
+    // 3. Replace remaining Newlines
+    content = content.replace(/\n/g, '<br/>');
+
+    // 4. Restore tokens
+    tokens.forEach((token, index) => {
+      content = content.replace(`__TOKEN_${index}__`, token);
+    });
+
+    // 5. Inline Stylings (backticks)
+    content = content.replace(/`([^`]+)`/g, '<code class="bg-black/50 px-1.5 py-0.5 rounded text-[#00FF88] font-mono">$1</code>');
+
+    return content;
+  };
 
   return (
     <div className="p-6 min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-[#EAEAEA]">
@@ -173,6 +311,15 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
               title="Mark this module as completed"
             >
               {module.completed ? '✓ Completed' : 'Mark Complete'}
+            </button>
+
+            {/* AI Tutor */}
+            <button
+              className="px-4 py-2 rounded-lg text-sm font-bold bg-[#00FF88]/10 text-[#00FF88] border border-[#00FF88]/20 hover:bg-[#00FF88] hover:text-black transition-all flex items-center space-x-2 shadow-[0_0_10px_rgba(0,255,136,0.1)] hover:shadow-[0_0_20px_rgba(0,255,136,0.3)]"
+              onClick={() => setShowAiChat(true)}
+            >
+              <Terminal className="h-4 w-4" />
+              <span>Ask AI Tutor</span>
             </button>
 
             {/* Go to next module */}
@@ -201,7 +348,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
               </div>
             </div>
             <p className="text-[#00B37A] mb-6">{module.description}</p>
-          
+
             <div className="flex items-center flex-wrap gap-4 text-sm font-mono text-[#EAEAEA]/60">
               <div className="flex items-center space-x-2">
                 <FileText className="h-4 w-4 text-[#00FF88]" />
@@ -217,27 +364,23 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
             <nav className="flex space-x-1 p-2">
               <button
                 onClick={() => setActiveTab('content')}
-                className={`py-3 px-6 rounded-lg font-medium text-sm transition-all ${
-                  activeTab === 'content'
-                    ? 'bg-[#00FF88] text-black'
-                    : 'text-[#00B37A] hover:text-[#00FF88] hover:bg-[#00FF88]/10'
-                }`}
+                className={`py-3 px-6 rounded-lg font-medium text-sm transition-all ${activeTab === 'content'
+                  ? 'bg-[#00FF88] text-black'
+                  : 'text-[#00B37A] hover:text-[#00FF88] hover:bg-[#00FF88]/10'
+                  }`}
               >
                 <div className="flex items-center space-x-2">
                   <FileText className="h-4 w-4" />
                   <span>Content</span>
                 </div>
               </button>
-              
-              {/* Lab tab removed to avoid static content */}
-              
+
               <button
                 onClick={() => setActiveTab('test')}
-                className={`py-3 px-6 rounded-lg font-medium text-sm transition-all ${
-                  activeTab === 'test'
-                    ? 'bg-[#00FF88] text-black'
-                    : 'text-[#00B37A] hover:text-[#00FF88] hover:bg-[#00FF88]/10'
-                }`}
+                className={`py-3 px-6 rounded-lg font-medium text-sm transition-all ${activeTab === 'test'
+                  ? 'bg-[#00FF88] text-black'
+                  : 'text-[#00B37A] hover:text-[#00FF88] hover:bg-[#00FF88]/10'
+                  }`}
               >
                 <div className="flex items-center space-x-2">
                   <CheckCircle className="h-4 w-4" />
@@ -249,12 +392,32 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
 
           <div className="p-6">
             {activeTab === 'content' && (
-              <div className="prose max-w-none text-[#EAEAEA]">
-                <div dangerouslySetInnerHTML={{ __html: (module.content || '').replace(/\n/g, '<br/>').replace(/```([^`]+)```/g, '<pre class="bg-black border border-[#00FF88]/20 p-4 rounded-lg"><code class="text-[#00FF88] font-mono">$1</code></pre>').replace(/`([^`]+)`/g, '<code class="bg-black/50 px-1.5 py-0.5 rounded text-[#00FF88] font-mono">$1</code>').replace(/^# (.+)$/gm, '<h1 class="text-2xl font-bold mb-4 text-white">$1</h1>').replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold mb-3 mt-6 text-white">$1</h2>').replace(/^### (.+)$/gm, '<h3 class="text-lg font-bold mb-2 mt-4 text-[#00FF88]">$1</h3>').replace(/^- (.+)$/gm, '<li class="ml-4 text-[#00B37A]">$1</li>').replace(/^(\d+)\. (.+)$/gm, '<li class="ml-4 text-[#00B37A]">$2</li>') }} />
-                {/* Video section removed to avoid static player URL */}
+              <div
+                className="prose max-w-none text-[#EAEAEA] module-content"
+                onClick={(e) => {
+                  const target = e.target as HTMLElement;
+                  // Handle Lab Launch Buttons
+                  const labBtn = target.closest('[data-lesson-action="launch-lab"]');
+                  if (labBtn) {
+                    const labId = labBtn.getAttribute('data-lab-id');
+                    if (labId) {
+                      const lab = labs.find(l => l.id === labId);
+                      if (lab && lab.liveUrl) {
+                        window.open(lab.liveUrl, '_blank');
+                      } else {
+                        // Fallback to internal navigation if no URL (optional, or just do nothing)
+                        const evt = new CustomEvent('navigateToTab', {
+                          detail: { tab: 'labs', labId: labId }
+                        });
+                        window.dispatchEvent(evt);
+                      }
+                    }
+                  }
+                }}
+              >
+                <div dangerouslySetInnerHTML={{ __html: processContent(module.content || '') }} />
               </div>
             )}
-            {/* Lab section removed to avoid static content */}
 
             {activeTab === 'test' && (
               <div className="text-center py-12">
@@ -365,9 +528,66 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
             isOpen={showCertificate}
             onClose={() => setShowCertificate(false)}
             courseName={course.title}
-            studentName={user.name || 'Student'}
+            studentName={vuStudentDetails?.name || user.name || 'Student'}
             completionDate={new Date()}
+            facultyName={vuStudentDetails?.faculty_name}
+            isVU={!!vuStudentDetails}
           />
+        )}
+
+        {/* AI Tutor Chat Modal */}
+        {showAiChat && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-[#0A0F0A] border border-[#00FF88]/30 rounded-2xl w-full max-w-lg shadow-[0_0_50px_rgba(0,255,136,0.2)] flex flex-col max-h-[80vh]">
+              {/* Header */}
+              <div className="p-4 border-b border-[#00FF88]/20 flex items-center justify-between bg-[#00FF88]/5">
+                <div className="flex items-center space-x-2 text-[#00FF88]">
+                  <Terminal className="h-5 w-5" />
+                  <span className="font-bold tracking-wider">TACTICAL AI ADVISOR</span>
+                </div>
+                <button
+                  onClick={() => setShowAiChat(false)}
+                  className="text-white/50 hover:text-white transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Chat Area */}
+              <div className="p-6 overflow-y-auto flex-1 space-y-4">
+                <div className="bg-[#00FF88]/5 border border-[#00FF88]/10 p-4 rounded-lg">
+                  <p className="text-[#00FF88] font-mono text-sm">[SYSTEM]: Secure channel established. Awaiting query regarding {module?.title || 'current objective'}.</p>
+                </div>
+
+                {aiAnswer && (
+                  <div className={`p-4 rounded-lg border content-start ${aiAnswer.error ? 'bg-red-500/10 border-red-500/30 text-red-400' : 'bg-slate-900 border-slate-700 text-gray-300'}`}>
+                    <p className="whitespace-pre-wrap font-mono text-sm leading-relaxed">{aiAnswer.text}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Input Area */}
+              <div className="p-4 border-t border-[#00FF88]/20 bg-[#00FF88]/5">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={aiQuestion}
+                    onChange={(e) => setAiQuestion(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && askAiTutor()}
+                    placeholder="Enter tactical query..."
+                    className="flex-1 bg-black border border-[#00FF88]/30 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#00FF88] font-mono placeholder-white/30"
+                  />
+                  <button
+                    onClick={askAiTutor}
+                    disabled={aiLoading}
+                    className="bg-[#00FF88] text-black font-bold px-4 py-2 rounded-lg hover:bg-[#00CC66] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  >
+                    {aiLoading ? '...' : 'SEND'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>

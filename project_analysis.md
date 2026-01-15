@@ -1,81 +1,78 @@
 # Cybercoach Project Analysis
 
 ## Overview
-**Cybercoach** is an AI-powered cybersecurity education platform designed to provide hands-on, job-ready skills through adaptive learning, interactive labs, and proctored assessments. The platform caters to students, teachers, and administrators.
+**Cybercoach** is an AI-powered cybersecurity education platform designed to provide hands-on, job-ready skills. It is a monorepo-style project containing both a React frontend and an Express backend, managed by a single root configuration.
 
 ## Architecture
-The project follows a modern full-stack architecture with a clear separation of concerns:
+The project utilizes a modern full-stack architecture:
 
-- **Frontend**: A React-based Single Page Application (SPA) using Vite, TypeScript, and TailwindCSS. It is organized into three main portals: Student, Teacher, and Admin.
-- **Backend**: An Express.js (Node.js) server written in TypeScript, providing RESTful API endpoints for each portal.
-- **Database**: Supabase (PostgreSQL) is used for data storage, authentication, and real-time features. Row Level Security (RLS) is heavily utilized for data protection.
-- **AI Integration**: Leverages Google Gemini for various AI features like personalized learning paths, quiz generation, and content analysis.
-
-## Key Features
-
-### 🎓 Learning & Education
-- **Adaptive Learning**: AI-personalized curriculum based on student performance.
-- **Hands-on Labs**: Real-world vulnerability scenarios.
-- **RAG-Powered AI Tutor**: Specialized cybersecurity tutor grounded in NIST/OWASP frameworks.
-
-### 📝 Assessments & Proctoring
-- **AI Proctoring**: Face detection and real-time violation monitoring (using `face-api.js`).
-- **Adaptive Exams**: Difficulty adjustments based on learner performance.
-- **Automated Grading**: Instant feedback and score analysis.
-
-### 🛡️ Security & Career Tools
-- **Vulnerability Scanner Simulation**: Practical security assessment training.
-- **Fraud Detection**: AI-driven verification of company and job listings.
-- **Resume & Interview Tools**: AI-assisted career development.
+-   **Repository Structure**: Unified root with a single `package.json` managing dependencies for both frontend and backend.
+-   **Frontend**: React 18 SPA (Vite). The `frontend/` directory serves as the source root (equivalent to `src/`).
+-   **Backend**: Express 5 (Node.js). Located in `backend/`, executed via `tsx`.
+-   **Database**: Supabase (PostgreSQL) with Row Level Security (RLS).
+-   **AI Integration**: Google Gemini 2.5 Flash, `face-api.js` (Client-side proctoring), `natural` (NLP).
 
 ## Tech Stack Deep Dive
 
-### Frontend
-- **Framework**: React 18
-- **Language**: TypeScript
-- **Styling**: TailwindCSS
-- **State Management**: React Context API (e.g., AuthContext)
-- **Icons**: Lucide React
-- **Client Routing**: React Router DOM
-- **Specialized Libs**: `face-api.js` (Proctoring), `jsPDF` (Certificates), `PDF.js` (Document viewing)
+### Frontend (`frontend/`)
+-   **build**: Vite + TypeScript
+-   **UI**: TailwindCSS (v4), Lucide React, Shadcn/Radix Primitives
+-   **State**: React Context API
+-   **Routing**: React Router DOM
+-   **Key Libraries**: `face-api.js`, `imagekitio-react`, `jspdf`
 
-### Backend
-- **Framework**: Express 5
-- **Language**: TypeScript
-- **Execution**: `tsx` for high-performance execution.
-- **Integration**: `imagekit` for image management, `natural` for NLP tasks.
+### Backend (`backend/`)
+-   **Runtime**: Node.js (via `tsx` for TypeScript execution)
+-   **Framework**: Express 5
+-   **Entry Point**: `backend/server.ts`
+-   **Organization**: Modular routes (`student`, `teacher`, `admin`)
 
-### Database & Auth
-- **Service**: Supabase
-- **Database**: PostgreSQL with custom functions and RLS policies.
-- **Auth**: Supabase Auth integration.
+### Shared Configuration
+-   **Dependencies**: All dependencies are listed in the root `package.json`.
+-   **Scripts**: `npm run dev:full` runs both frontend (Vite) and backend (tsx watch) concurrently.
 
 ## Project Structure
+
 ```text
 cybercoach/
-├── frontend/                # React application
-│   ├── student/            # Student portal components and logic
-│   ├── teacher/            # Teacher portal components and logic
-│   ├── admin/              # Admin portal components and logic
-│   ├── components/         # Shared UI components
-│   ├── context/            # Global state (Auth)
-│   ├── services/           # Backend API integration
-│   └── data/               # Static data and configurations
+├── frontend/                # React Source Root (Acts as src/)
+│   ├── student/            # Student Portal
+│   ├── teacher/            # Teacher Portal
+│   ├── admin/              # Admin Portal
+│   ├── components/         # Shared UI Components
+│   ├── context/            # Global State
+│   ├── services/           # API Services
+│   ├── App.tsx             # Main App Component
+│   ├── main.tsx            # Entry Point
+│   └── vite-env.d.ts       # Vite Types
 ├── backend/                 # Express API
-│   ├── student/            # Student-related routes and services
-│   ├── teacher/            # Teacher-related routes and services
-│   ├── admin/              # Admin-related routes and services
-│   └── server.ts           # API Entry point
-├── supabase/                # DB Schema and migrations
-│   ├── schema.sql          # Main database definition
-│   └── exam_schema.sql     # Specialized assessment schema
-└── public/                  # Static assets (Models, Docs)
+│   ├── student/            # Student API Routes
+│   ├── teacher/            # Teacher API Routes
+│   ├── admin/              # Admin API Routes
+│   └── server.ts           # Server Entry Point
+├── supabase/                # Database
+├── public/                  # Static Assets
+├── package.json             # Root Dependencies & Scripts
+├── vite.config.ts           # Vite Config (Defines aliases @ -> frontend/)
+├── tsconfig.json            # Base TypeScript Config
+└── .env                     # Environment Variables
 ```
 
-## Security Implementation
-- **Row Level Security (RLS)**: Policies in Supabase ensure users only access their own data.
-- **Proctoring**: Client-side face detection to ensure academic integrity.
-- **Environment Management**: Secure handling of API keys (Gemini, Supabase, ImageKit).
+## Import Aliases
+Configured in `vite.config.ts`:
+-   `@` -> `frontend/`
+-   `@student` -> `frontend/student/`
+-   `@teacher` -> `frontend/teacher/`
+-   `@admin` -> `frontend/admin/`
+-   `@components` -> (Implicitly via `@/components`)
+-   `@services` -> `frontend/services/`
+-   etc.
+
+## Key Features & Security
+-   **RLS**: Supabase policies protect data.
+-   **Proctoring**: Frontend-based face detection.
+-   **AI**: Gemini integrated for content generation and tutoring.
+-   **Auth**: Supabase Auth (JWT).
 
 ## Conclusion
-Cybercoach is a highly modular and feature-rich platform. The use of AI is central to its value proposition, not just for content generation but for enhancing the entire learning and assessment lifecycle. The codebase is well-organized, leveraging TypeScript for type safety across both frontend and backend.
+The project is well-structured for rapid full-stack development. The use of `tsx` allows for seamless TypeScript execution on the backend without a separate build step during development, while Vite handles the frontend hot-reloading.

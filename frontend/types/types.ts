@@ -53,6 +53,7 @@ export interface Module {
 
   /* Compatibility fields used elsewhere */
   module_order?: number;
+  questions?: Question[];
 }
 
 export interface Certificate {

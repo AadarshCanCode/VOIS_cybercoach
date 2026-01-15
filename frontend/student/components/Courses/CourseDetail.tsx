@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Play, CheckCircle, Clock, FileText, FlaskRound as Flask, Award, Terminal, Lock } from 'lucide-react';
 import { ModuleViewer } from './ModuleViewer';
 import { courseService } from '@services/courseService';
+import { VURegistrationModal } from './VURegistrationModal';
 import type { Course, Module } from '@types';
 import { useAuth } from '@context/AuthContext';
 
@@ -28,7 +29,9 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showVURegistration, setShowVURegistration] = useState(false);
   const { user } = useAuth();
+
 
   useEffect(() => {
     let mounted = true;
@@ -39,6 +42,14 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
         // merge user progress if available
         if (mounted && data) {
           if (user?.id) {
+            // Check for VU Registration
+            if (data.category === 'vishwakarma-university') {
+              const vuEmail = localStorage.getItem('vu_student_email');
+              if (!vuEmail) {
+                setShowVURegistration(true);
+              }
+            }
+
             try {
               const progress = await courseService.getUserProgress(user.id, courseId) as ProgressRow[] | null;
               const moduleProgress = (progress || []).reduce((acc: Record<string, ProgressRow>, p: ProgressRow) => {
@@ -46,7 +57,7 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
                 return acc;
               }, {});
 
-              // normalize modules into course.course_modules for rendering
+              // normalize modules into course.modules for rendering
               const modules = (data.course_modules ?? data.modules ?? []) as CourseModuleLike[];
               const normalized = modules.map((m) => ({
                 ...m,
@@ -54,7 +65,7 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
                 testScore: (moduleProgress[m.id]?.quiz_score ?? m.testScore) ?? undefined
               }));
 
-              setCourse({ ...data, course_modules: normalized });
+              setCourse({ ...data, modules: normalized });
             } catch (e) {
               console.error('Failed to load user progress for course detail:', e);
               setCourse(data);
@@ -77,7 +88,7 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
         if (detail?.moduleId) setSelectedModuleId(detail.moduleId);
       } catch (err) {
         // ignore malformed events but log for debugging
-         
+
         console.warn('navigateModule event parsing failed', err);
       }
     };
@@ -111,7 +122,7 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
             testScore: (moduleProgress[m.id]?.quiz_score ?? m.testScore) ?? undefined
           }));
 
-          setCourse({ ...data, course_modules: normalized });
+          setCourse({ ...data, modules: normalized });
         } else {
           setCourse(data);
         }
@@ -202,7 +213,7 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
                   <h1 className="text-3xl font-bold text-white">{course.title}</h1>
                 </div>
                 <p className="text-[#00B37A] text-lg mb-6">{course.description}</p>
-              
+
                 <div className="flex items-center flex-wrap gap-4 text-sm font-mono mb-6">
                   <div className="flex items-center space-x-2 text-[#EAEAEA]/60">
                     <FileText className="h-4 w-4 text-[#00FF88]" />
@@ -234,7 +245,7 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
                     <div className="text-[#00B37A] text-sm">Complete</div>
                   </div>
                   <div className="w-full bg-black rounded-full h-2 mb-4 border border-[#00FF88]/10">
-                    <div 
+                    <div
                       className="bg-[#00FF88] h-full rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(0,255,136,0.5)]"
                       style={{ width: `${progressPercentage}%` }}
                     ></div>
@@ -258,11 +269,11 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
               <span>Training Modules</span>
             </h2>
           </div>
-          
+
           <div className="divide-y divide-[#00FF88]/10">
             {(course.modules ?? course.course_modules ?? []).map((module: Module, index: number) => {
-              const isModuleUnlocked = index < allowedModules || user?.role === 'admin';
-              
+              const isModuleUnlocked = index < allowedModules || user?.role === 'admin' || course.category === 'vishwakarma-university';
+
               return (
                 <div key={module.id} className="p-6 hover:bg-[#00FF88]/5 transition-colors group">
                   <div className="flex items-center justify-between">
@@ -282,13 +293,13 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
                           </div>
                         )}
                       </div>
-                    
+
                       <div className="flex-1">
                         <h3 className={`text-lg font-medium mb-1 ${isModuleUnlocked ? 'text-white group-hover:text-[#00FF88]' : 'text-white/30'} transition-colors`}>
                           {module.title}
                         </h3>
                         <p className={`mb-3 ${isModuleUnlocked ? 'text-[#00B37A]' : 'text-white/20'}`}>{module.description}</p>
-                      
+
                         <div className={`flex items-center space-x-4 text-sm ${isModuleUnlocked ? 'text-[#EAEAEA]/60' : 'text-white/20'}`}>
                           <div className="flex items-center space-x-1">
                             <FileText className="h-4 w-4" />
@@ -311,7 +322,7 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
                             <span>~2 hours</span>
                           </div>
                         </div>
-                      
+
                         {module.testScore && (
                           <div className="mt-2">
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#00FF88]/10 text-[#00FF88] border border-[#00FF88]/20">
@@ -321,15 +332,14 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
                         )}
                       </div>
                     </div>
-                  
+
                     <button
                       onClick={() => setSelectedModuleId(module.id)}
                       disabled={!isModuleUnlocked}
-                      className={`flex items-center space-x-2 px-5 py-2.5 rounded-lg font-bold transition-all ${
-                        isModuleUnlocked 
-                          ? 'bg-[#00FF88] text-black hover:bg-[#00CC66] hover:shadow-[0_0_20px_rgba(0,255,136,0.3)]' 
-                          : 'bg-white/5 border border-white/10 text-white/30 cursor-not-allowed'
-                      }`}
+                      className={`flex items-center space-x-2 px-5 py-2.5 rounded-lg font-bold transition-all ${isModuleUnlocked
+                        ? 'bg-[#00FF88] text-black hover:bg-[#00CC66] hover:shadow-[0_0_20px_rgba(0,255,136,0.3)]'
+                        : 'bg-white/5 border border-white/10 text-white/30 cursor-not-allowed'
+                        }`}
                     >
                       {isModuleUnlocked ? (
                         <>
@@ -350,6 +360,21 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
           </div>
         </div>
       </div>
+
+      <VURegistrationModal
+        isOpen={showVURegistration}
+        onClose={() => {
+          // If they close without registering, they can't access, so maybe just force open or redirect back?
+          // For now, let them see the course but if they click modules... actually logic above blocks it?
+          // No, we are blocking access via the modal overlay primarily.
+          // Let's redirect back if they cancel
+          onBack();
+        }}
+        onSuccess={() => {
+          setShowVURegistration(false);
+          refreshCourse();
+        }}
+      />
     </div>
   );
 };

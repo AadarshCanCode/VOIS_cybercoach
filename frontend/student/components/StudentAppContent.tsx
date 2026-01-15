@@ -44,12 +44,16 @@ export const StudentAppContent: React.FC<StudentAppContentProps> = ({ initialTab
 
   // Listen for navigation events from assessment completion
   useEffect(() => {
-    const handleNavigateToTab = (e: CustomEvent<{ tab: string }>) => {
+    const handleNavigateToTab = (e: CustomEvent<{ tab: string; labId?: string }>) => {
       if (e.detail?.tab) {
         setActiveTab(e.detail.tab);
-        // Clear any selected items when navigating via event
+        // Clear selected items unless specific ID provided
         setSelectedCourseId(null);
-        setSelectedLabId(null);
+        if (e.detail.labId) {
+          setSelectedLabId(e.detail.labId);
+        } else {
+          setSelectedLabId(null);
+        }
       }
     };
 

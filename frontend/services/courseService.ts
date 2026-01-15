@@ -229,6 +229,12 @@ class CourseService {
   }
 
   async getCourseById(id: string): Promise<Course | null> {
+    // 0. Static Override for VU Course
+    if (id === 'vu-web-security') {
+      const { vuWebSecurityCourse } = await import('../data/vu-courses/web-application-security');
+      return vuWebSecurityCourse;
+    }
+
     try {
       // 1. Get Course
       const { data: course, error: courseError } = await supabase
@@ -283,6 +289,7 @@ class CourseService {
   }
 
   async getModuleCount(courseId: string): Promise<number> {
+    if (courseId === 'vu-web-security') return 11;
     try {
       const { data, error } = await supabase
         .from('modules')
@@ -358,24 +365,61 @@ class CourseService {
   }
 
   // Progress Tracking
-  async updateProgress(progressData: unknown) {
-    try {
-      const { data, error } = await supabase
-        .from('user_progress')
-        .upsert([progressData])
-        .select()
-        .single();
 
-      if (error) throw new Error(`Failed to update progress: ${error.message}`);
-      return data;
+
+  async registerVUStudent(data: any) {
+    try {
+      const response = await fetch('http://localhost:4000/api/vu/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.message || 'Failed to register');
+      }
+      return await response.json();
     } catch (error) {
-      console.error('Update progress error:', error);
+      console.error('VU Registration error:', error);
       throw error;
+    }
+  }
+
+  async getVUStudent(email: string) {
+    try {
+      const response = await fetch(`http://localhost:4000/api/vu/student/${email}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch VU student details');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Get VU Student error:', error);
+      return null;
     }
   }
 
   async getUserProgress(userId: string, courseId: string) {
     try {
+      // Handle static VU courses using MongoDB API
+      if (courseId === 'vu-web-security') {
+        const email = localStorage.getItem('vu_student_email');
+        if (!email) return []; // Not registered locally yet
+
+        try {
+          const response = await fetch(`http://localhost:4000/api/vu/progress/${email}/${courseId}`);
+          if (response.ok) {
+            return await response.json();
+          }
+          return [];
+        } catch (e) {
+          console.error('Failed to fetch VU progress:', e);
+          return [];
+        }
+      }
+
       const { data, error } = await supabase
         .from('user_progress')
         .select('*')
@@ -390,9 +434,71 @@ class CourseService {
     }
   }
 
+  async updateProgress(userId: string, courseId: string, moduleId: string, completed: boolean, quizScore?: number) {
+    try {
+      // Handle static VU courses using MongoDB API
+      if (courseId === 'vu-web-security') {
+        const email = localStorage.getItem('vu_student_email');
+        if (email) {
+          await fetch('http://localhost:4000/api/vu/progress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              vu_email: email,
+              course_id: courseId,
+              module_id: moduleId,
+              completed,
+              quiz_score: quizScore
+            })
+          });
+        }
+        // Fallback: keep local storage sync just in case, or remove if fully switched. 
+        // Keeping it for UI consistency if offline not needed, but safe to keep for now.
+        // Let's rely on the API for "real time" as requested.
+        return;
+      }
+
+      const updates: any = {
+        user_id: userId,
+        course_id: courseId,
+        module_id: moduleId,
+        completed,
+        updated_at: new Date().toISOString()
+      };
+
+      if (quizScore !== undefined) {
+        updates.quiz_score = quizScore;
+      }
+
+      const { error } = await supabase
+        .from('user_progress')
+        .upsert([updates]);
+
+      if (error) throw new Error(`Failed to update progress: ${error.message}`);
+    } catch (error) {
+      console.error('Update progress error:', error);
+      throw error;
+    }
+  }
+
   // Enrollment Management
   async enrollInCourse(userId: string, courseId: string) {
     try {
+      // Handle static VU courses
+      if (courseId === 'vu-web-security') {
+        const key = `vu_enrollments_${userId}`;
+        let enrollments = [];
+        try {
+          enrollments = JSON.parse(localStorage.getItem(key) || '[]');
+        } catch (e) { enrollments = []; }
+
+        if (!enrollments.includes(courseId)) {
+          enrollments.push(courseId);
+          localStorage.setItem(key, JSON.stringify(enrollments));
+        }
+        return { user_id: userId, course_id: courseId, enrolled_at: new Date().toISOString() };
+      }
+
       // Avoid double-enrollments
       const { data: existing, error: existingErr } = await supabase
         .from('course_enrollments')
@@ -455,6 +561,37 @@ class CourseService {
         .order('enrolled_at', { ascending: false });
 
       if (error) throw new Error(`Failed to fetch enrollments: ${error.message}`);
+
+      // Merge with local VU enrollments
+      const key = `vu_enrollments_${userId}`;
+      let localEnrollments = [];
+      try {
+        localEnrollments = JSON.parse(localStorage.getItem(key) || '[]');
+      } catch (e) { localEnrollments = []; }
+
+      if (localEnrollments.includes('vu-web-security')) {
+        // We need to import the static course data to return it here, but importing it might be circular or messy.
+        // Instead, we can try to fetch it via getCourseById if needed, or just append a partial object.
+        // For now, let's just append a mock object if we can, or rely on the UI to fetch details.
+        // The UI usually iterates enrollments and displays them.
+
+        // Actually, getUserEnrollments returns the join. 
+        // We will just append the static course data.
+        const { vuWebSecurityCourse } = await import('../data/vu-courses/web-application-security');
+
+        // Check if already in data (unlikely if DB failed)
+        if (!data?.find((e: any) => e.course_id === 'vu-web-security')) {
+          const vuEnrollment = {
+            id: 'local-vu-enrollment',
+            user_id: userId,
+            course_id: vuWebSecurityCourse.id,
+            enrolled_at: new Date().toISOString(),
+            course: vuWebSecurityCourse
+          };
+          return [vuEnrollment, ...data!];
+        }
+      }
+
       return data;
     } catch (error) {
       console.error('Get user enrollments error:', error);

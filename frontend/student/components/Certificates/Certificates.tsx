@@ -1,10 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Award, Download, Calendar, Shield, Globe } from 'lucide-react';
 import { useAuth } from '@context/AuthContext';
+import { CertificateModal } from './CertificateModal';
 
 export const Certificates: React.FC = () => {
   const { user } = useAuth();
   const earnedCertificates = user?.certificates || [];
+
+  const [viewCertificate, setViewCertificate] = useState<{
+    isOpen: boolean;
+    courseName: string;
+    date: Date;
+  } | null>(null);
 
   return (
     <div className="p-6 min-h-screen animate-fade-in text-[#EAEAEA]">
@@ -55,6 +62,15 @@ export const Certificates: React.FC = () => {
                 const isUrl = typeof certificateEntry === 'string' && (certificateEntry.startsWith('http://') || certificateEntry.startsWith('https://'));
 
                 if (isUrl) {
+                  const filename = certificateEntry.split('/').pop() || "";
+                  const parts = filename.split('_');
+                  let displayTitle = "Classified Operation";
+                  if (parts.length >= 2) {
+                    displayTitle = parts[1].replace(/%20/g, ' ');
+                  }
+                  const timestamp = parseInt(parts[2]?.split('.')[0] || '0');
+                  const completionDate = timestamp ? new Date(timestamp) : new Date();
+
                   return (
                     <div key={`url-${idx}`} className="bg-[#0A0F0A] border border-[#00FF88]/20 rounded-xl p-6 relative overflow-hidden group">
                       <div className="absolute inset-0 bg-gradient-to-r from-[#00FF88]/0 via-[#00FF88]/0 to-[#00FF88]/0 group-hover:via-[#00FF88]/5 transition-all duration-500" />
@@ -64,18 +80,35 @@ export const Certificates: React.FC = () => {
                             <Award className="h-8 w-8 text-[#00FF88]" />
                           </div>
                           <div>
-                            <h3 className="text-xl font-bold text-white uppercase tracking-tight">Verified Certificate</h3>
+                            <h3 className="text-xl font-bold text-white uppercase tracking-tight">{displayTitle}</h3>
                             <p className="text-[#00B37A] font-mono text-sm">DIGITAL ID: {Math.random().toString(36).substr(2, 9).toUpperCase()}</p>
                             <div className="flex items-center space-x-2 mt-2 text-xs text-[#EAEAEA]/60 font-mono">
                               <Calendar className="h-3 w-3" />
-                              <span>ISSUED: {new Date().toLocaleDateString()}</span>
+                              <span>ISSUED: {completionDate.toLocaleDateString()}</span>
                             </div>
                           </div>
                         </div>
-                        <a href={certificateEntry} target="_blank" rel="noreferrer" className="flex items-center space-x-2 bg-[#00FF88] text-black px-6 py-3 rounded-lg hover:bg-[#00CC66] transition-all shadow-[0_0_20px_rgba(0,255,136,0.3)] font-bold">
-                          <Download className="h-4 w-4" />
-                          <span>DOWNLOAD ENCRYPTED</span>
-                        </a>
+                        <div className="flex gap-2">
+                          <a
+                            href={certificateEntry}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center space-x-2 bg-black/50 text-[#00FF88] px-4 py-3 rounded-lg border border-[#00FF88]/20 hover:bg-[#00FF88]/10 transition-all font-bold"
+                          >
+                            <span>PREVIEW</span>
+                          </a>
+                          <button
+                            onClick={() => setViewCertificate({
+                              isOpen: true,
+                              courseName: displayTitle,
+                              date: completionDate
+                            })}
+                            className="flex items-center space-x-2 bg-[#00FF88] text-black px-6 py-3 rounded-lg hover:bg-[#00CC66] transition-all shadow-[0_0_20px_rgba(0,255,136,0.3)] font-bold"
+                          >
+                            <Download className="h-4 w-4" />
+                            <span>DOWNLOAD PDF</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );
@@ -92,6 +125,18 @@ export const Certificates: React.FC = () => {
         )}
 
       </div>
+
+      {viewCertificate && (
+        <CertificateModal
+          isOpen={viewCertificate.isOpen}
+          onClose={() => setViewCertificate(null)}
+          courseName={viewCertificate.courseName}
+          studentName={user?.name || 'Operator'}
+          completionDate={viewCertificate.date}
+          isVU={true}
+          facultyName="Kiran Deshpande"
+        />
+      )}
     </div>
   );
 };

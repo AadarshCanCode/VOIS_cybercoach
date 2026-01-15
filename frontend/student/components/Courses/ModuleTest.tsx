@@ -6,21 +6,16 @@ interface ModuleTestProps {
   moduleTitle: string;
   onComplete: (score: number) => void;
   onBack: () => void;
+  questions?: { question: string; options: string[]; correctAnswer: number; explanation?: string }[];
 }
 
-// Remove static sample questions; return empty set until backend provides data
-const getModuleQuestions = (_moduleId: string) => {
-  return [] as { question: string; options: string[]; correctAnswer: number; explanation?: string }[];
-};
-
-export const ModuleTest: React.FC<ModuleTestProps> = ({ moduleId, moduleTitle, onComplete, onBack }) => {
+export const ModuleTest: React.FC<ModuleTestProps> = ({ moduleId, moduleTitle, onComplete, onBack, questions = [] }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showResults, setShowResults] = useState(false);
   const [timeLeft, setTimeLeft] = useState(10 * 60); // 10 minutes
 
-  const questions = getModuleQuestions(moduleId);
   const currentQuestion = questions[currentQuestionIndex];
 
   React.useEffect(() => {
@@ -107,7 +102,7 @@ export const ModuleTest: React.FC<ModuleTestProps> = ({ moduleId, moduleTitle, o
                 <XCircle className="h-16 w-16 text-red-500 mx-auto" />
               )}
             </div>
-            
+
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Test Complete!</h2>
             <div className="text-4xl font-bold text-cyan-600 mb-2">{score}%</div>
             <p className="text-lg text-gray-600 mb-6">
@@ -129,11 +124,10 @@ export const ModuleTest: React.FC<ModuleTestProps> = ({ moduleId, moduleTitle, o
               <button
                 onClick={() => onComplete(score)}
                 disabled={!passed}
-                className={`px-6 py-3 rounded-lg font-medium ${
-                  passed
-                    ? 'bg-green-600 text-white hover:bg-green-700'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
+                className={`px-6 py-3 rounded-lg font-medium ${passed
+                  ? 'bg-green-600 text-white hover:bg-green-700'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
               >
                 {passed ? 'Complete Module' : 'Retake Required'}
               </button>
@@ -153,7 +147,7 @@ export const ModuleTest: React.FC<ModuleTestProps> = ({ moduleId, moduleTitle, o
               {questions.map((question, index) => {
                 const userAnswer = answers[index];
                 const isCorrect = userAnswer === question.correctAnswer;
-                
+
                 return (
                   <div key={index} className={`border rounded-lg p-4 ${isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
                     <div className="flex items-start space-x-3">
@@ -215,7 +209,7 @@ export const ModuleTest: React.FC<ModuleTestProps> = ({ moduleId, moduleTitle, o
             <span className="text-sm text-gray-600">{Math.round(((currentQuestionIndex + 1) / questions.length) * 100)}% Complete</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
+            <div
               className="bg-cyan-600 h-2 rounded-full transition-all duration-300"
               style={{ width: `${((currentQuestionIndex + 1) / questions.length) * 100}%` }}
             ></div>
@@ -231,18 +225,16 @@ export const ModuleTest: React.FC<ModuleTestProps> = ({ moduleId, moduleTitle, o
               <button
                 key={index}
                 onClick={() => handleAnswerSelect(index)}
-                className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
-                  selectedAnswer === index
-                    ? 'border-cyan-500 bg-cyan-50 text-cyan-900'
-                    : 'border-gray-200 hover:border-gray-300 bg-white'
-                }`}
+                className={`w-full text-left p-4 rounded-lg border-2 transition-all ${selectedAnswer === index
+                  ? 'border-cyan-500 bg-cyan-50 text-cyan-900'
+                  : 'border-gray-200 hover:border-gray-300 bg-white'
+                  }`}
               >
                 <div className="flex items-center space-x-3">
-                  <div className={`w-4 h-4 rounded-full border-2 ${
-                    selectedAnswer === index
-                      ? 'border-cyan-500 bg-cyan-500'
-                      : 'border-gray-300'
-                  }`}>
+                  <div className={`w-4 h-4 rounded-full border-2 ${selectedAnswer === index
+                    ? 'border-cyan-500 bg-cyan-500'
+                    : 'border-gray-300'
+                    }`}>
                     {selectedAnswer === index && (
                       <div className="w-full h-full rounded-full bg-white scale-50"></div>
                     )}
@@ -267,9 +259,9 @@ export const ModuleTest: React.FC<ModuleTestProps> = ({ moduleId, moduleTitle, o
             >
               Previous
             </button>
-            
+
             <button
-              onClick={currentQuestionIndex === questions.length - 1 ? handleSubmitTest : handleNextQuestion}
+              onClick={handleNextQuestion}
               disabled={selectedAnswer === null}
               className="px-6 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
