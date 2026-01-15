@@ -6,6 +6,7 @@ import { CertificateModal } from '../Certificates/CertificateModal';
 import { courseService } from '@services/courseService';
 import type { Module, Course } from '@types';
 import { ModuleTest } from './ModuleTest';
+import { ProctoringComponent } from '../Proctoring/ProctoringComponent';
 import { learningPathService } from '@services/learningPathService';
 import { useAuth } from '@context/AuthContext';
 
@@ -48,6 +49,68 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
   const [aiQuestion, setAiQuestion] = useState('');
   const [aiAnswer, setAiAnswer] = useState<{ text: string, error?: boolean } | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
+
+  // Proctoring State
+  const [isProctoringActive, setIsProctoringActive] = useState(false);
+  const [violationCount, setViolationCount] = useState(0);
+
+  const handleProctoringViolation = async (status: 'ok' | 'violation') => {
+    if (status === 'violation' && isProctoringActive) {
+      // Determine max warnings based on module type
+      const isFinalExam = moduleId === 'vu-final-exam';
+      const maxWarnings = isFinalExam ? 1 : 0;
+
+      if (violationCount < maxWarnings) {
+        // Warning
+        setViolationCount(prev => prev + 1);
+        alert(`PROCTORING WARNING: Suspicious activity detected! You have ${maxWarnings - violationCount} warnings remaining.`);
+      } else {
+        // Lockout
+        console.warn('Proctoring Violation - Locking out!');
+        setIsProctoringActive(false);
+        setShowTest(false);
+        setViolationCount(0); // Reset for next valid attempt after lockout
+
+        try {
+          // Calculate lockout time (1 hour from now)
+          const lockedUntil = new Date();
+          lockedUntil.setHours(lockedUntil.getHours() + 1);
+
+          const API_URL = import.meta.env.VITE_API_URL || '';
+          const email = localStorage.getItem('vu_student_email');
+
+          if (course?.category === 'vishwakarma-university' && email) {
+            await fetch(`${API_URL}/api/vu/progress`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                vu_email: email,
+                course_id: courseId,
+                module_id: moduleId,
+                locked_until: lockedUntil.toISOString()
+              })
+            });
+            alert('PROCTORING VIOLATION: Test has been locked for 1 hour due to suspicious activity.');
+            onBack();
+          }
+        } catch (e) {
+          console.error('Lockout failed', e);
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (showTest) {
+      if (moduleId === 'vu-final-exam') {
+        // Special start logic for Final Exam could go here
+      }
+      setViolationCount(0); // Reset count on start
+      setIsProctoringActive(true);
+    } else {
+      setIsProctoringActive(false);
+    }
+  }, [showTest, moduleId]);
 
   const askAiTutor = async () => {
     if (!aiQuestion.trim()) return;
@@ -104,6 +167,22 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
               }, {});
 
               const modules = (data.course_modules ?? data.modules ?? []) as Module[];
+
+              // Handle Final Exam Dynamic Questions
+              const finalExamModule = modules.find(m => m.id === 'vu-final-exam');
+              if (finalExamModule) {
+                // Collect all questions from other modules
+                const allQuestions = modules
+                  .filter(m => m.id !== 'vu-final-exam')
+                  .flatMap(m => m.questions || []);
+
+                // Shuffle and pick 20
+                const shuffled = [...allQuestions].sort(() => 0.5 - Math.random());
+                finalExamModule.questions = shuffled.slice(0, 20);
+                // Also assign testScore from progress if exists
+                // finalExamModule.testScore = moduleProgress['vu-final-exam']?.quiz_score;
+              }
+
               const normalized = modules.map((m) => ({
                 ...m,
                 completed: !!moduleProgress[m.id]?.completed,
@@ -127,7 +206,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
     };
     load();
     return () => { mounted = false; };
-  }, [courseId]);
+  }, [courseId, user?.id]);
 
   const module: Module | undefined = (course?.course_modules ?? course?.modules ?? []).find((m: Module) => m.id === moduleId);
 
@@ -235,13 +314,19 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
 
   if (showTest) {
     return (
-      <ModuleTest
-        moduleId={moduleId}
-        moduleTitle={module.title}
-        onComplete={handleTestCompletion}
-        onBack={() => setShowTest(false)}
-        questions={module.questions || []}
-      />
+      <>
+        <ModuleTest
+          moduleId={moduleId}
+          moduleTitle={module.title}
+          onComplete={handleTestCompletion}
+          onBack={() => setShowTest(false)}
+          questions={module.questions || []}
+        />
+        <ProctoringComponent
+          isActive={isProctoringActive}
+          onStatusChange={handleProctoringViolation}
+        />
+      </>
     );
   }
 
@@ -591,6 +676,10 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
           </div>
         )}
       </div>
+      <ProctoringComponent
+        isActive={isProctoringActive}
+        onStatusChange={handleProctoringViolation}
+      />
     </div>
   );
 };

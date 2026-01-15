@@ -86,6 +86,30 @@ export const vuWebSecurityCourse: Course = {
                     correctAnswer: 1,
                     difficulty: 'easy',
                     explanation: 'A response is the message sent by the server to the client after receiving a request.'
+                },
+                {
+                    id: 'q1-3',
+                    question: 'Which tool is commonly used to intercept and analyze HTTP traffic?',
+                    options: ['Photoshop', 'Wireshark', 'Excel', 'VLC Media Player'],
+                    correctAnswer: 1,
+                    difficulty: 'medium',
+                    explanation: 'Wireshark and Burp Suite are standard tools for sniffing and analyzing network traffic.'
+                },
+                {
+                    id: 'q1-4',
+                    question: 'What status code indicates a successful HTTP request?',
+                    options: ['404 Not Found', '500 Internal Server Error', '200 OK', '302 Found'],
+                    correctAnswer: 2,
+                    difficulty: 'easy',
+                    explanation: '200 OK is the standard response for successful HTTP requests.'
+                },
+                {
+                    id: 'q1-5',
+                    question: 'Which header typically contains the session ID?',
+                    options: ['User-Agent', 'Cookie', 'Accept', 'Host'],
+                    correctAnswer: 1,
+                    difficulty: 'medium',
+                    explanation: 'The Cookie header usually carries the session ID used for state management.'
                 }
             ]
         },
@@ -129,6 +153,30 @@ export const vuWebSecurityCourse: Course = {
                     correctAnswer: 1,
                     difficulty: 'medium',
                     explanation: 'Authorization determines what an authenticated user is permitted to do. The user is authenticated (logged in) but not authorized for the admin page.'
+                },
+                {
+                    id: 'q2-3',
+                    question: 'What is the purpose of the "Secure" cookie attribute?',
+                    options: ['Encrypts the cookie value', 'Ensures cookie is sent only over HTTPS', 'Prevents deletion', 'Hides cookie from user'],
+                    correctAnswer: 1,
+                    difficulty: 'medium',
+                    explanation: 'The Secure attribute ensures the cookie is only transmitted over encrypted (HTTPS) connections.'
+                },
+                {
+                    id: 'q2-4',
+                    question: 'Authentication answers which question?',
+                    options: ['What can you do?', 'Where are you from?', 'Who are you?', 'How did you get here?'],
+                    correctAnswer: 2,
+                    difficulty: 'easy',
+                    explanation: 'Authentication (AuthN) verifies the identity of the user.'
+                },
+                {
+                    id: 'q2-5',
+                    question: 'What vulnerability allows an attacker to use a stolen Session ID?',
+                    options: ['Session Hijacking', 'SQL Injection', 'Buffer Overflow', 'Path Traversal'],
+                    correctAnswer: 0,
+                    difficulty: 'medium',
+                    explanation: 'Session Hijacking involves stealing a valid session ID to impersonate a user.'
                 }
             ]
         },
@@ -162,6 +210,38 @@ export const vuWebSecurityCourse: Course = {
                     correctAnswer: 2,
                     difficulty: 'hard',
                     explanation: "Client-side validation can be bypassed. Server-side validation is mandatory."
+                },
+                {
+                    id: 'q5-2',
+                    question: "What is Sniffing?",
+                    options: ['Smelling hardware issues', 'Capturing network traffic', 'Deleting logs', 'Encrypting data'],
+                    correctAnswer: 1,
+                    difficulty: 'easy',
+                    explanation: "Sniffing involves intercepting and capturing data packets traversing a network."
+                },
+                {
+                    id: 'q5-3',
+                    question: "Modifying URL parameters (e.g. ?id=5 to ?id=6) to access other data is known as:",
+                    options: ['IDOR', 'Phishing', 'DDoS', 'Ransomware'],
+                    correctAnswer: 0,
+                    difficulty: 'medium',
+                    explanation: "IDOR (Insecure Direct Object Reference) occurs when an application exposes a reference to an internal implementation object."
+                },
+                {
+                    id: 'q5-4',
+                    question: "What is the best mitigation for Sniffing attacks?",
+                    options: ['Use strong passwords', 'Use HTTPS (Encryption)', 'Use a firewall', 'Use antivirus'],
+                    correctAnswer: 1,
+                    difficulty: 'easy',
+                    explanation: "Encryption (HTTPS) prevents sniffers from reading the content of captured traffic."
+                },
+                {
+                    id: 'q5-5',
+                    question: "What should you assume about all user input?",
+                    options: ['It is safe', 'It is trustworthy', 'It is malicious/untrusted', 'It is formatted correctly'],
+                    correctAnswer: 2,
+                    difficulty: 'easy',
+                    explanation: "Security Rule #1: Never Trust User Input."
                 }
             ]
         },
@@ -200,6 +280,38 @@ export const vuWebSecurityCourse: Course = {
                     correctAnswer: 2,
                     difficulty: 'medium',
                     explanation: "IDOR (Insecure Direct Object Reference) is a type of Access Control failure."
+                },
+                {
+                    id: 'q4-2',
+                    question: "What is Privilege Escalation?",
+                    options: ['Running faster code', 'Gaining higher permissions than authorized', 'Upgrading software', 'Increasing server RAM'],
+                    correctAnswer: 1,
+                    difficulty: 'medium',
+                    explanation: "Privilege Escalation occurs when a user gains access to resources reserved for higher-privileged accounts."
+                },
+                {
+                    id: 'q4-3',
+                    question: "What does A01 Broken Access Control refer to?",
+                    options: ['Password guessing', 'Users acting outside their intended permissions', 'Server crashing', 'Slow database'],
+                    correctAnswer: 1,
+                    difficulty: 'easy',
+                    explanation: "It covers vulnerabilities where restrictions on what authenticated users can do are not properly enforced."
+                },
+                {
+                    id: 'q4-4',
+                    question: "Which of these is a CORS misconfiguration risk?",
+                    options: ['Slow loading images', 'Unauthorized sites reading API data', 'Broken layout', 'Server timeout'],
+                    correctAnswer: 1,
+                    difficulty: 'hard',
+                    explanation: "Overly permissive CORS headers can allow arbitrary websites to read sensitive data from your API."
+                },
+                {
+                    id: 'q4-5',
+                    question: "Force browsing to /adminUrl is an example of:",
+                    options: ['Broken Access Control', 'Phishing', 'Social Engineering', 'Insecure Deserialization'],
+                    correctAnswer: 0,
+                    difficulty: 'medium',
+                    explanation: "Accessing hidden or restricted URLs without proper authorization checks is a Broken Access Control issue."
                 }
             ]
         },
@@ -241,6 +353,38 @@ export const vuWebSecurityCourse: Course = {
                     correctAnswer: 1,
                     difficulty: 'medium',
                     explanation: "MD5 is weak and unsalted hashes are vulnerable to rainbow tables."
+                },
+                {
+                    id: 'm5-q2',
+                    question: "What should you use instead of plain HTTP?",
+                    options: ['FTP', 'HTTPS', 'Telnet', 'SMTP'],
+                    correctAnswer: 1,
+                    difficulty: 'easy',
+                    explanation: "HTTPS provides encryption for data in transit."
+                },
+                {
+                    id: 'm5-q3',
+                    question: "Why should you avoid hardcoding API keys in source code?",
+                    options: ['It makes code ugly', 'Anyone with code access can steal them', 'Compiler errors', 'It slows execution'],
+                    correctAnswer: 1,
+                    difficulty: 'easy',
+                    explanation: "Source code is often shared or visible; secrets should be in environment variables or vaults."
+                },
+                {
+                    id: 'm5-q4',
+                    question: "Which of these is a secure algorithm for password hashing?",
+                    options: ['Base64', 'MD5', 'SHA-1', 'Bcrypt'],
+                    correctAnswer: 3,
+                    difficulty: 'medium',
+                    explanation: "Bcrypt (and Argon2) are designed to be slow and salt automatically, making them safe for passwords."
+                },
+                {
+                    id: 'm5-q5',
+                    question: "What does encryption provide?",
+                    options: ['Confidentiality', 'Availability', 'Speed', 'Usability'],
+                    correctAnswer: 0,
+                    difficulty: 'easy',
+                    explanation: "Encryption ensures data is kept confidential and readable only by authorized parties."
                 }
             ]
         },
@@ -280,6 +424,38 @@ export const vuWebSecurityCourse: Course = {
                     correctAnswer: 2,
                     difficulty: 'easy',
                     explanation: "Prepared statements ensure input is treated as data, not code."
+                },
+                {
+                    id: 'm6-q2',
+                    question: "What does SQLi stand for?",
+                    options: ['Sequential Query Language Input', 'Structured Query Language Injection', 'Simple Query Logic Interface', 'Server Query Link Index'],
+                    correctAnswer: 1,
+                    difficulty: 'easy',
+                    explanation: "SQLi stands for SQL Injection."
+                },
+                {
+                    id: 'm6-q3',
+                    question: "Which query condition is commonly used to bypass authentication in SQLi?",
+                    options: ["'1'='1'", "'user'='admin'", "'pass'='123'", "TRUE=FALSE"],
+                    correctAnswer: 0,
+                    difficulty: 'medium',
+                    explanation: "'1'='1' is a tautology (always true) used to manipulate query logic."
+                },
+                {
+                    id: 'm6-q4',
+                    question: "Injection attacks occur when:",
+                    options: ['Untrusted data is sent to an interpreter', 'Passwords are weak', 'Server is slow', 'Network is unencrypted'],
+                    correctAnswer: 0,
+                    difficulty: 'medium',
+                    explanation: "Injection happens when data is mistaken for code by an interpreter."
+                },
+                {
+                    id: 'm6-q5',
+                    question: "Besides SQL, what else is vulnerable to injection?",
+                    options: ['HTML (XSS)', 'OS Commands', 'LDAP', 'All of the above'],
+                    correctAnswer: 3,
+                    difficulty: 'medium',
+                    explanation: "Injection can happen in SQL, LDAP, OS commands, XML, and more."
                 }
             ]
         },
@@ -326,6 +502,30 @@ export const vuWebSecurityCourse: Course = {
                     correctAnswer: 2,
                     difficulty: 'easy',
                     explanation: "It offers unnecessary info to attackers, hence a misconfiguration."
+                },
+                {
+                    id: 'm7-q3',
+                    question: "Using default credentials (admin/admin) is an example of:",
+                    options: ['Security Misconfiguration', 'Insecure Design', 'Broken Access Control', 'Injection'],
+                    correctAnswer: 0,
+                    difficulty: 'easy',
+                    explanation: "Leaving default configurations active is a classic Security Misconfiguration."
+                },
+                {
+                    id: 'm7-q4',
+                    question: "How can you prevent Insecure Design?",
+                    options: ['Write code faster', 'Threat Modeling and Secure Design patterns', 'Use more firewalls', 'Disable logging'],
+                    correctAnswer: 1,
+                    difficulty: 'medium',
+                    explanation: "Insecure design is fixed by better planning, threat modeling, and following secure architecture patterns."
+                },
+                {
+                    id: 'm7-q5',
+                    question: "Displaying full stack traces to users is dangerous because:",
+                    options: ['It looks ugly', 'It reveals internal system details to attackers', 'It slows down the browser', 'It consumes bandwidth'],
+                    correctAnswer: 1,
+                    difficulty: 'medium',
+                    explanation: "Stack traces can leak paths, versions, and logic that help attackers plan further attacks."
                 }
             ]
         },
@@ -357,6 +557,38 @@ export const vuWebSecurityCourse: Course = {
                     correctAnswer: 2,
                     difficulty: 'easy',
                     explanation: "Dependency-Check scans usage of libraries against CVE databases."
+                },
+                {
+                    id: 'm8-q2',
+                    question: "What is a CVE?",
+                    options: ['Common Vulnerabilities and Exposures', 'Computer Virus Elimination', 'Critical Value Error', 'Code Verification Entity'],
+                    correctAnswer: 0,
+                    difficulty: 'easy',
+                    explanation: "CVE is a list of publicly disclosed cybersecurity vulnerabilities."
+                },
+                {
+                    id: 'm8-q3',
+                    question: "Credential Stuffing relies on:",
+                    options: ['Users reusing passwords across sites', 'Complex passwords', 'MFA being enabled', 'Encryption being broken'],
+                    correctAnswer: 0,
+                    difficulty: 'medium',
+                    explanation: "Credential Stuffing works because users recycle passwords; attackers try breached credentials on other sites."
+                },
+                {
+                    id: 'm8-q4',
+                    question: "What is an effective defense against Credential Stuffing?",
+                    options: ['MFA (Multi-Factor Authentication)', 'Shorter passwords', 'No captcha', 'Using HTTP'],
+                    correctAnswer: 0,
+                    difficulty: 'medium',
+                    explanation: "MFA stops attackers even if they have the correct password."
+                },
+                {
+                    id: 'm8-q5',
+                    question: "Why is Log4j (Log4Shell) a famous example of A06?",
+                    options: ['It was a vulnerable component used everywhere', 'It was a SQL injection', 'It was a weak password', 'It was a design flaw'],
+                    correctAnswer: 0,
+                    difficulty: 'easy',
+                    explanation: "Log4j was a widely used library with a critical RCE vulnerability (Vulnerable Component)."
                 }
             ]
         },
@@ -386,6 +618,38 @@ export const vuWebSecurityCourse: Course = {
                     correctAnswer: 3,
                     difficulty: 'hard',
                     explanation: "169.254.169.254 is the link-local address for cloud metadata."
+                },
+                {
+                    id: 'm9-q2',
+                    question: "What is SSRF?",
+                    options: ['Server-Side Request Forgery', 'Super Secure Remote File', 'Simple Server Routing Function', 'Secure Socket Relay Function'],
+                    correctAnswer: 0,
+                    difficulty: 'easy',
+                    explanation: "SSRF stands for Server-Side Request Forgery."
+                },
+                {
+                    id: 'm9-q3',
+                    question: "Logging failures allow attackers to:",
+                    options: ['Steal passwords directly', 'Persist in a network undetected', 'Crash the server', 'See the UI'],
+                    correctAnswer: 1,
+                    difficulty: 'medium',
+                    explanation: "Without logs, you cannot detect that an attack is happening or investigate how it happened."
+                },
+                {
+                    id: 'm9-q4',
+                    question: "Insecure Deserialization can lead to:",
+                    options: ['Remote Code Execution (RCE)', 'Better performance', 'Smaller file sizes', 'Faster database queries'],
+                    correctAnswer: 0,
+                    difficulty: 'hard',
+                    explanation: "Deserializing untrusted data can allow attackers to execute arbitrary code (RCE)."
+                },
+                {
+                    id: 'm9-q5',
+                    question: "What should you NOT log?",
+                    options: ['Failed login attempts', 'System errors', 'User passwords / Credit Card numbers', 'Transaction IDs'],
+                    correctAnswer: 2,
+                    difficulty: 'easy',
+                    explanation: "Never log sensitive data (PII, PCI, Credentials)."
                 }
             ]
         },
@@ -416,6 +680,38 @@ export const vuWebSecurityCourse: Course = {
                     correctAnswer: 1,
                     difficulty: 'easy',
                     explanation: "Doing security tasks earlier in the process."
+                },
+                {
+                    id: 'm10-q2',
+                    question: "What is Threat Modeling?",
+                    options: ['Making scary graphics', 'Identifying potential threats during design', 'Hacking a live server', 'Installing antivirus'],
+                    correctAnswer: 1,
+                    difficulty: 'medium',
+                    explanation: "Threat Modeling is a pro-active design phase activity to identify risks."
+                },
+                {
+                    id: 'm10-q3',
+                    question: "SAST stands for:",
+                    options: ['Static Application Security Testing', 'Simple App Security Tool', 'Server Admin System Test', 'Secure Apps Static Test'],
+                    correctAnswer: 0,
+                    difficulty: 'medium',
+                    explanation: "SAST is Static Application Security Testing (White box)."
+                },
+                {
+                    id: 'm10-q4',
+                    question: "DAST involves:",
+                    options: ['Reading source code', 'Testing a running application', 'Checking database schemas', 'Interviewing developers'],
+                    correctAnswer: 1,
+                    difficulty: 'medium',
+                    explanation: "DAST (Dynamic Application Security Testing) interacts with the running application (Black box)."
+                },
+                {
+                    id: 'm10-q5',
+                    question: "STRIDE is a mnemonic for:",
+                    options: ['Coding standards', 'Threat categories', 'Password rules', 'Firewall types'],
+                    correctAnswer: 1,
+                    difficulty: 'hard',
+                    explanation: "STRIDE (Spoofing, Tampering, Repudiation, Info Disclosure, Denial of Service, Elevation of Priv) categories threats."
                 }
             ]
         },
@@ -443,14 +739,66 @@ export const vuWebSecurityCourse: Course = {
         `,
             questions: [
                 {
-                    id: 'm5-q1',
+                    id: 'm11-q1',
                     question: "Difference between Vuln Assessment and Pen Test?",
                     options: ['Cost', 'Pen tests exploit findings', 'Tools', 'People'],
                     correctAnswer: 1,
                     difficulty: 'medium',
                     explanation: "Pen tests verify risk by exploiting the vulnerability."
+                },
+                {
+                    id: 'm11-q2',
+                    question: "What is a WAF?",
+                    options: ['Web Application Firewall', 'Wide Area Fence', 'Wireless Access Finder', 'Web Admin Function'],
+                    correctAnswer: 0,
+                    difficulty: 'easy',
+                    explanation: "A WAF filters, monitors, and blocks HTTP traffic to and from a web application."
+                },
+                {
+                    id: 'm11-q3',
+                    question: "Which phase comes first in Incident Response?",
+                    options: ['Eradication', 'Recovery', 'Preparation', 'Lessons Learned'],
+                    correctAnswer: 2,
+                    difficulty: 'medium',
+                    explanation: "Preparation is the key first step to ensuring you can handle an incident when it occurs."
+                },
+                {
+                    id: 'm11-q4',
+                    question: "Ethical Hacking is also known as:",
+                    options: ['Black Hat Hacking', 'White Hat Hacking', 'Grey Hat Hacking', 'Script Kiddie'],
+                    correctAnswer: 1,
+                    difficulty: 'easy',
+                    explanation: "White Hat hackers use their skills to improve security with permission."
+                },
+                {
+                    id: 'm11-q5',
+                    question: "Active Defense implies:",
+                    options: ['Waiting for an attack', 'Proactively testing and monitoring', 'Disconnecting from the internet', 'Ignoring logs'],
+                    correctAnswer: 1,
+                    difficulty: 'medium',
+                    explanation: "Active defense involves proactive measures like pen-testing and real-time monitoring."
                 }
             ]
+        },
+        {
+            id: 'vu-final-exam',
+            title: '12. Final Certification Exam',
+            description: 'Comprehensive exam covering all modules. Passing this exam unlocks your certificate.',
+            course_id: 'vu-web-security',
+            order: 12,
+            module_order: 12,
+            content: `
+            <h1>Final Certification Exam</h1>
+            <p>Welcome to the Final Exam. This exam consists of <strong>20 questions</strong> selected randomly from all previous modules.</p>
+            <p><strong>Rules:</strong></p>
+            <ul>
+                <li>You must score at least <strong>70%</strong> to pass.</li>
+                <li><strong>Strict Proctoring is Active.</strong> You are allowed <strong>ONE warning</strong> for looking away or covering your face.</li>
+                <li>A second violation will result in immediate disqualification and a <strong>1-hour lockout</strong>.</li>
+            </ul>
+            <p>Good luck!</p>
+            `,
+            questions: [] // Questions will be dynamically generated
         }
     ]
 };

@@ -12,6 +12,7 @@ const vuStudentSchema = new mongoose.Schema({
         module_id: String,
         completed: Boolean,
         quiz_score: Number,
+        locked_until: Date,
         completed_at: { type: Date, default: Date.now }
     }]
 }, {

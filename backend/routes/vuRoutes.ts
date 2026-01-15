@@ -43,7 +43,7 @@ router.get('/check-registration/:email', async (req, res) => {
 // Update Progress
 router.post('/progress', async (req, res) => {
     try {
-        const { vu_email, course_id, module_id, completed, quiz_score } = req.body;
+        const { vu_email, course_id, module_id, completed, quiz_score, locked_until } = req.body;
 
         const student = await VUStudent.findOne({ vu_email });
         if (!student) {
@@ -58,8 +58,9 @@ router.post('/progress', async (req, res) => {
 
         if (existingProgressIndex >= 0) {
             // Update existing
-            student.progress[existingProgressIndex].completed = completed;
+            if (completed !== undefined) student.progress[existingProgressIndex].completed = completed;
             if (quiz_score !== undefined) student.progress[existingProgressIndex].quiz_score = quiz_score;
+            if (locked_until !== undefined) student.progress[existingProgressIndex].locked_until = locked_until;
             student.progress[existingProgressIndex].completed_at = new Date();
         } else {
             // Push new
@@ -68,6 +69,7 @@ router.post('/progress', async (req, res) => {
                 module_id,
                 completed,
                 quiz_score,
+                locked_until,
                 completed_at: new Date()
             });
         }

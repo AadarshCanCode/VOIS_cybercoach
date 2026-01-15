@@ -289,7 +289,7 @@ class CourseService {
   }
 
   async getModuleCount(courseId: string): Promise<number> {
-    if (courseId === 'vu-web-security') return 11;
+    if (courseId === 'vu-web-security') return 12;
     try {
       const { data, error } = await supabase
         .from('modules')
