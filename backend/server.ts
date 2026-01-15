@@ -47,9 +47,14 @@ app.get('/', (_req: Request, res: Response): void => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`Backend server running on http://localhost:${PORT}`);
-});
+import { fileURLToPath } from 'url';
+
+// Only listen if run directly (not imported)
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  app.listen(PORT, () => {
+    console.log(`Backend server running on http://localhost:${PORT}`);
+  });
+}
 
 // Force restart for env vars
 export default app;
