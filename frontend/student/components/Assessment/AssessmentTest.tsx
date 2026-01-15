@@ -44,6 +44,20 @@ export const AssessmentTest: React.FC = () => {
     }
   }, [timeLeft, showResults, permissionGranted]);
 
+  // Sync assessment status from DB if local state is out of sync
+  useEffect(() => {
+    if (user?.id && !user.completedAssessment && !showResults) {
+      assessmentService.checkAssessmentStatus(user.id)
+        .then(data => {
+          if (data && data.completed_assessment) {
+            console.log('Assessment status synced from DB: COMPLETED');
+            updateUser({ completedAssessment: true, level: data.level as any });
+          }
+        })
+        .catch(err => console.warn('Failed to sync assessment status from DB:', err));
+    }
+  }, [user?.id]);
+
   // block copy/paste/right-click during assessment
   useEffect(() => {
     if (!permissionGranted || showResults) return;
@@ -171,13 +185,13 @@ export const AssessmentTest: React.FC = () => {
   };
 
   const handleSubmitTest = async (finalAnswers = answers, saveCurrent = true) => {
-    // called when exam ends (manual or proctoring)
+    if (submitting) return; // Prevent double submission
 
+    // called when exam ends (manual or proctoring)
     // Save final response if not already saved and we have a selection
     if (saveCurrent && selectedAnswer !== null) {
       await saveAssessmentResponse();
       // Update finalAnswers to include this last one if it wasn't already there
-      // (This covers the case where auto-submit happens while user has an answer selected but hasn't clicked next)
       finalAnswers[currentQuestionIndex] = selectedAnswer;
     }
 
@@ -190,13 +204,17 @@ export const AssessmentTest: React.FC = () => {
       // Read responses for this attempt and run analysis
       let analysis;
       if (attemptId) {
-        const results = await assessmentService.getAttemptResults(attemptId);
-        analysis = await ragService.analyzeAssessment(results);
+        try {
+          const results = await assessmentService.getAttemptResults(attemptId);
+          analysis = await ragService.analyzeAssessment(results);
+        } catch (err) {
+          console.warn('RAG analysis failed, diagnostic only:', err);
+        }
       }
 
-      // Persist user level + completion
+      // Persist user level + completion using robust service
       if (user?.id) {
-        await supabase.from('users').update({ level, completed_assessment: true }).eq('id', user.id);
+        await assessmentService.markAssessmentCompleted(user.id, level, user.email);
         updateUser({ completedAssessment: true, level });
       } else {
         updateUser({ completedAssessment: true, level });
@@ -218,9 +236,10 @@ export const AssessmentTest: React.FC = () => {
       setShowResults(true);
     } catch (e: unknown) {
       console.error('Submit test failed:', e);
-      const msg = e instanceof Error ? e.message : 'Submission failed.';
+      const msg = e instanceof Error ? e.message : 'Submission failed. Please check your connection and try again.';
       setSubmitError(msg);
-      setShowResults(true);
+      // We don't setShowResults(true) here if it's a transient error
+      setShowResults(true); // Keep showing results view but with error message
     } finally {
       setSubmitting(false);
     }
@@ -295,6 +314,44 @@ export const AssessmentTest: React.FC = () => {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
+  if (user?.completedAssessment && !showResults) {
+    return (
+      <div className="p-6 min-h-screen bg-black">
+        <div className="max-w-2xl mx-auto text-center">
+          <div className="bg-[#0A0F0A] rounded-xl border border-[#00FF88]/20 p-8">
+            <CheckCircle className="h-16 w-16 text-[#00FF88] mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-white mb-4">Assessment Already Completed</h2>
+            <p className="text-[#00B37A] mb-2">
+              You have already completed the assessment test.
+            </p>
+            <p className="text-[#EAEAEA] mb-6">
+              Your current level: <span className="font-bold text-[#00FF88] uppercase">{user.level}</span>
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent('navigateToTab', { detail: { tab: 'courses' } }));
+                }}
+                className="bg-[#00FF88] text-black px-6 py-3 rounded-lg font-bold hover:bg-[#00CC66] transition-colors flex items-center justify-center space-x-2"
+              >
+                <span>Continue Learning</span>
+                <ArrowRight className="h-5 w-5" />
+              </button>
+              <button
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent('navigateToTab', { detail: { tab: 'dashboard' } }));
+                }}
+                className="border border-[#00FF88]/30 text-[#00FF88] px-6 py-3 rounded-lg hover:bg-[#00FF88]/10 transition-colors"
+              >
+                Go to Dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!permissionGranted) {
     return (
       <div className="p-6 min-h-[calc(100vh-4rem)] bg-black">
@@ -343,44 +400,6 @@ export const AssessmentTest: React.FC = () => {
             >
               {isRequestingPermission ? 'ESTABLISHING LINK...' : 'INITIATE SECURITY CLEARANCE'}
             </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (user?.completedAssessment && !showResults) {
-    return (
-      <div className="p-6 min-h-screen bg-black">
-        <div className="max-w-2xl mx-auto text-center">
-          <div className="bg-[#0A0F0A] rounded-xl border border-[#00FF88]/20 p-8">
-            <CheckCircle className="h-16 w-16 text-[#00FF88] mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-white mb-4">Assessment Already Completed</h2>
-            <p className="text-[#00B37A] mb-2">
-              You have already completed the assessment test.
-            </p>
-            <p className="text-[#EAEAEA] mb-6">
-              Your current level: <span className="font-bold text-[#00FF88] uppercase">{user.level}</span>
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button
-                onClick={() => {
-                  window.dispatchEvent(new CustomEvent('navigateToTab', { detail: { tab: 'courses' } }));
-                }}
-                className="bg-[#00FF88] text-black px-6 py-3 rounded-lg font-bold hover:bg-[#00CC66] transition-colors flex items-center justify-center space-x-2"
-              >
-                <span>Continue Learning</span>
-                <ArrowRight className="h-5 w-5" />
-              </button>
-              <button
-                onClick={() => {
-                  window.dispatchEvent(new CustomEvent('navigateToTab', { detail: { tab: 'dashboard' } }));
-                }}
-                className="border border-[#00FF88]/30 text-[#00FF88] px-6 py-3 rounded-lg hover:bg-[#00FF88]/10 transition-colors"
-              >
-                Go to Dashboard
-              </button>
-            </div>
           </div>
         </div>
       </div>

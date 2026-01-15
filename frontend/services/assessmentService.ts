@@ -55,6 +55,85 @@ class AssessmentService {
     if (error) throw new Error(`Failed to fetch results: ${error.message}`);
     return data ?? [];
   }
+
+  async markAssessmentCompleted(userId: string, level: string, email?: string) {
+    if (!userId) throw new Error("User ID is required to mark assessment as completed.");
+
+    console.log(`Attempting to mark assessment completed for user ${userId} (${email || 'no email'})`);
+
+    // 1. Precise update by ID
+    const { data: dataById, error: errorById } = await supabase
+      .from('users')
+      .update({
+        completed_assessment: true,
+        level: level
+      })
+      .eq('id', userId)
+      .select();
+
+    if (errorById) {
+      console.warn('Update by ID failed:', errorById.message);
+    }
+
+    // 2. Fallback update by email (case-insensitive) if ID failed or found nothing
+    if ((!dataById || dataById.length === 0) && email) {
+      console.log(`Falling back to email-based update for: ${email}`);
+      const { data: dataByEmail, error: errorByEmail } = await supabase
+        .from('users')
+        .update({
+          completed_assessment: true,
+          level: level
+        })
+        .ilike('email', email)
+        .select();
+
+      if (errorByEmail) throw new Error(`Failed to save completion status by email: ${errorByEmail.message}`);
+      if (!dataByEmail || dataByEmail.length === 0) {
+        console.log(`User profile missing for ${email}, creating JIT record...`);
+        const { error: createError } = await supabase
+          .from('users')
+          .insert({
+            id: userId,
+            email: email,
+            name: email.split('@')[0],
+            role: 'student',
+            password_hash: 'JIT_ASSESSMENT',
+            completed_assessment: true,
+            level: level
+          })
+          .select();
+
+        if (createError) {
+          console.error('JIT profile creation failed:', createError.message);
+          throw new Error(`Profile not found and auto-creation failed for ${email}. Please ensure you are logged in.`);
+        }
+        console.log('JIT profile created during assessment submission.');
+        return true;
+      }
+      console.log('Assessment status successfully saved via email fallback.');
+      return true;
+    }
+
+    if (errorById) throw new Error(`Failed to save completion status: ${errorById.message}`);
+
+    if (!dataById || dataById.length === 0) {
+      throw new Error(`Could not find a user profile to update (ID: ${userId}). This might happen if your profile record is missing.`);
+    }
+
+    console.log('Assessment status successfully saved via ID.');
+    return true;
+  }
+
+  async checkAssessmentStatus(userId: string) {
+    const { data, error } = await supabase
+      .from('users')
+      .select('completed_assessment, level')
+      .eq('id', userId)
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
 }
 
 export const assessmentService = new AssessmentService();

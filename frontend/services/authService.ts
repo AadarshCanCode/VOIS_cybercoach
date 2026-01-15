@@ -61,7 +61,7 @@ class AuthService {
         const { data: user, error } = await supabase
           .from('users')
           .select('*')
-          .eq('email', credentials.email)
+          .ilike('email', credentials.email)
           .eq('role', credentials.role)
           .maybeSingle();
 
@@ -87,7 +87,7 @@ class AuthService {
       const { data: profile, error: profileError } = await supabase
         .from('users')
         .select('*')
-        .eq('email', sessionUser.email)
+        .ilike('email', sessionUser.email || '')
         .maybeSingle();
 
       if (profileError) {
@@ -99,7 +99,29 @@ class AuthService {
       if (profileRow) {
         profileCopy = sanitizeUser(profileRow);
       } else {
-        profileCopy = { id: sessionUser.id, email: sessionUser.email, name: sessionUser.user_metadata?.full_name } as User;
+        console.log('Profile missing for authenticated user, creating JIT profile...');
+        const newProfile = {
+          id: sessionUser.id,
+          email: sessionUser.email!,
+          name: sessionUser.user_metadata?.full_name || sessionUser.email?.split('@')[0] || 'User',
+          role: 'student', // Default role
+          password_hash: 'SESSIONS_AUTH', // Placeholder
+          completed_assessment: false,
+          level: 'beginner'
+        };
+
+        const { data: created, error: createError } = await supabase
+          .from('users')
+          .insert([newProfile])
+          .select()
+          .single();
+
+        if (createError) {
+          console.error('Failed to create JIT profile during login:', createError.message);
+          profileCopy = { id: sessionUser.id, email: sessionUser.email, name: sessionUser.user_metadata?.full_name } as User;
+        } else {
+          profileCopy = sanitizeUser(created as DBUser);
+        }
       }
       // store to localStorage without password_hash
       localStorage.setItem('cyberSecUser', JSON.stringify(profileCopy));
@@ -249,7 +271,7 @@ class AuthService {
     const { data: profile } = await supabase
       .from('users')
       .select('*')
-      .eq('email', user.email)
+      .ilike('email', user.email || '')
       .maybeSingle();
 
     if (profile) {
@@ -292,7 +314,8 @@ class AuthService {
       completed_assessment: false,
       bio: '',
       specialization: '',
-      experience_years: role === 'student' ? null : '0-1'
+      experience_years: role === 'student' ? null : '0-1',
+      password_hash: 'OAUTH'
     } as Record<string, unknown>;
 
     const { data: newUser, error: createError } = await supabase
