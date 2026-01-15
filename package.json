@@ -38,6 +38,7 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "express-rate-limit": "^8.2.1",
+    "face-api.js": "^0.22.2",
     "google-search-results-nodejs": "^2.1.0",
     "groq-sdk": "^0.37.0",
     "html-to-image": "^1.11.13",
