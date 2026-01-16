@@ -1,4 +1,21 @@
-import mongoose from 'mongoose';
+import mongoose, { Document, Model } from 'mongoose';
+
+export interface IVUStudent extends Document {
+    name: string;
+    vu_email: string;
+    faculty_name: string;
+    year: string;
+    department: string;
+    registered_at: Date;
+    progress: {
+        course_id: string;
+        module_id: string;
+        completed: boolean;
+        quiz_score?: number;
+        locked_until?: Date;
+        completed_at: Date;
+    }[];
+}
 
 const vuStudentSchema = new mongoose.Schema({
     name: { type: String, required: true },
@@ -19,6 +36,6 @@ const vuStudentSchema = new mongoose.Schema({
     timestamps: true
 });
 
-const VUStudent = mongoose.models.VUStudent || mongoose.model('VUStudent', vuStudentSchema);
+const VUStudent = (mongoose.models.VUStudent || mongoose.model<IVUStudent>('VUStudent', vuStudentSchema)) as Model<IVUStudent>;
 
 export default VUStudent;
