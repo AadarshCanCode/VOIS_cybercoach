@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { GraduationCap, Users, Lock, Mail, User, ArrowRight } from 'lucide-react';
+import { Lock, Mail, User, ArrowRight } from 'lucide-react';
 import { useAuth } from '@context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,19 +8,17 @@ import { useNavigate, Link } from 'react-router-dom';
 import { SEO } from '@/components/SEO/SEO';
 
 interface RegisterFormProps {
-  userType?: 'student' | 'teacher' | null;
   onSuccess?: () => void;
 }
 
 export const RegisterForm: React.FC<RegisterFormProps> = ({
-  userType,
   onSuccess
 }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [role, setRole] = useState<'teacher' | 'student'>(userType || 'student');
+  const role = 'student';
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const { register } = useAuth();
@@ -42,7 +40,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
       if (onSuccess) {
         onSuccess();
       } else {
-        navigate(role === 'teacher' ? '/teacher' : '/dashboard');
+        navigate('/dashboard');
       }
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Registration failed');
@@ -54,7 +52,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   return (
     <AuthLayout
       title="Sign Up"
-      subtitle={role === 'teacher' ? 'Teacher Registration' : 'Student Registration'}
+      subtitle="Student Registration"
       className="max-w-2xl"
     >
       <SEO
@@ -71,37 +69,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
-          {!userType && (
-            <div className="space-y-3">
-              <label className="text-xs font-semibold ml-1">
-                Select Role
-              </label>
-              <div className="grid grid-cols-2 gap-4">
-                <button
-                  type="button"
-                  onClick={() => setRole('student')}
-                  className={`flex flex-col items-center gap-2 p-4 rounded-xl border transition-all duration-300 relative z-20 ${role === 'student'
-                    ? 'bg-[#00FF88]/10 border-[#00FF88] text-[#00FF88] shadow-[0_0_20px_rgba(0,255,136,0.1)]'
-                    : 'bg-[#000000]/40 border-[#00FF88]/10 text-[#00B37A] hover:border-[#00FF88]/40 hover:bg-[#00FF88]/5'
-                    }`}
-                >
-                  <GraduationCap className="h-6 w-6" />
-                  <span className="text-xs font-bold">Student</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setRole('teacher')}
-                  className={`flex flex-col items-center gap-2 p-4 rounded-xl border transition-all duration-300 relative z-20 ${role === 'teacher'
-                    ? 'bg-[#00FF88]/10 border-[#00FF88] text-[#00FF88] shadow-[0_0_20px_rgba(0,255,136,0.1)]'
-                    : 'bg-[#000000]/40 border-[#00FF88]/10 text-[#00B37A] hover:border-[#00FF88]/40 hover:bg-[#00FF88]/5'
-                    }`}
-                >
-                  <Users className="h-6 w-6" />
-                  <span className="text-xs font-bold">Teacher</span>
-                </button>
-              </div>
-            </div>
-          )}
+
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Input

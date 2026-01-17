@@ -70,7 +70,7 @@ export const AppContent = () => {
 
                 {/* Protected Teacher Routes */}
                 <Route path="/teacher/*" element={
-                    user && isTeacher() ? <TeacherDashboard /> : <Navigate to="/login" replace />
+                    user ? (isTeacher() ? <TeacherDashboard /> : <Navigate to="/" replace />) : <LoginForm userType="teacher" />
                 } />
 
                 {/* Protected Admin Routes */}

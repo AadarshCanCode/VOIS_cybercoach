@@ -518,10 +518,7 @@ export const LandingPage: React.FC = () => {
                 </span>
               </div>
 
-              {/* Copyright */}
-              <div className="text-xs font-mono text-[#00B37A]/50 uppercase tracking-wider text-center">
-                © {new Date().getFullYear()} Vois Cybercoach. All rights reserved.
-              </div>
+
 
               {/* Status Indicator */}
               <div className="flex items-center gap-2 text-[10px] font-mono text-[#00FF88]/60 uppercase tracking-widest">
