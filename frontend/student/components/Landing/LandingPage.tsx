@@ -1,11 +1,22 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Shield, Zap, ArrowRight, Terminal, Menu, X, Users, Activity, Bot } from 'lucide-react';
+import { Shield, Zap, ArrowRight, Terminal, Users, Activity, Bot } from 'lucide-react';
 import { useAuth } from '@context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 // UI Components
 import { Tabs } from '@/components/ui/tabs';
 import { SEO } from '@/components/SEO/SEO';
+import {
+  Navbar,
+  NavBody,
+  NavItems,
+  MobileNav,
+  NavbarLogo,
+  NavbarButton,
+  MobileNavHeader,
+  MobileNavToggle,
+  MobileNavMenu,
+} from '@/components/ui/resizable-navbar';
 
 const TabImage = ({ src }: { src: string }) => (
   <img
@@ -140,95 +151,83 @@ export const LandingPage: React.FC = () => {
         <div className="fixed top-0 left-1/2 -translate-x-1/2 w-250 h-150 bg-linear-to-b from-[#00FF88]/15 to-transparent blur-[120px] rounded-full pointer-events-none" />
 
         {/* Nav */}
-        <header className="py-5 px-6 sticky top-0 z-50 transition-all duration-300 backdrop-blur-md bg-black/60 border-b border-white/5">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <button aria-label="Home" className="flex items-center gap-5 focus:outline-none group" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-                <div className="relative">
-                  <div className="absolute -inset-3 bg-[#00FF88]/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-700"></div>
-                  <img src="/cybercoach.png" alt="Cybercoach" className="relative h-16 w-16 group-hover:scale-110 transition-transform duration-500" />
-                </div>
-                <div className="hidden md:block text-left">
-                  <div className="text-2xl font-black tracking-tighter text-white uppercase flex items-center gap-1 group-hover:text-[#00FF88] transition-colors duration-500">
-                    CYBER <span className="text-[#00FF88]">COACH</span>
-                  </div>
-                  <div className="text-[10px] font-mono text-[#00B37A] tracking-[0.4em] uppercase opacity-50">Unified Defense Initiative</div>
-                </div>
-              </button>
+        <Navbar>
+          {/* Desktop Navigation */}
+          <NavBody>
+            <NavbarLogo onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} />
+            <NavItems
+              items={[
+                {
+                  name: 'Features',
+                  link: '#features',
+                  onClick: () => {
+                    const el = document.getElementById('features');
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }
+                },
+                {
+                  name: 'Testimonials',
+                  link: '#testimonials',
+                  onClick: () => {
+                    const el = document.getElementById('testimonials');
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }
+                },
+              ]}
+            />
+            <div className="flex items-center gap-3">
+              <NavbarButton variant="primary" onClick={() => handleGetStarted('student')}>
+                {user ? 'Dashboard' : 'Register'}
+              </NavbarButton>
             </div>
+          </NavBody>
 
-            {/* desktop links */}
-            <nav className="hidden lg:flex items-center gap-10">
-              {['Features', 'Testimonials'].map((item) => (
-                <button
-                  key={item}
-                  onClick={() => {
-                    const el = document.getElementById(item.toLowerCase());
-                    if (el) {
-                      el.scrollIntoView({ behavior: 'smooth' });
-                      // Clean hash from URL for perfectly clean routes
-                      if (window.location.hash) {
-                        window.history.replaceState(null, '', window.location.pathname + window.location.search);
-                      }
-                    }
-                  }}
-                  className="text-[11px] font-mono font-bold text-[#00B37A]/60 hover:text-[#00FF88] transition-all uppercase tracking-[0.2em] relative group/item cursor-pointer"
-                >
-                  {item}
-                  <span className="absolute -bottom-1 left-0 w-0 h-px bg-[#00FF88] transition-all group-hover/item:w-full" />
-                </button>
-              ))}
-              <div className="h-5 w-px bg-white/10" />
+          {/* Mobile Navigation */}
+          <MobileNav>
+            <MobileNavHeader>
+              <NavbarLogo onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} />
+              <MobileNavToggle
+                isOpen={mobileOpen}
+                onClick={() => setMobileOpen(!mobileOpen)}
+              />
+            </MobileNavHeader>
+
+            <MobileNavMenu
+              isOpen={mobileOpen}
+              onClose={() => setMobileOpen(false)}
+            >
               <button
-                onClick={() => handleGetStarted('student')}
-                className="relative px-8 py-3.5 rounded-2xl bg-[#00FF88] hover:bg-[#00CC66] text-black font-black text-xs tracking-[0.2em] transition-all hover:scale-105 shadow-[0_0_30px_rgba(0,255,136,0.2)] active:scale-95 group/btn overflow-hidden"
+                onClick={() => {
+                  setMobileOpen(false);
+                  const el = document.getElementById('features');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="text-[#EAEAEA] hover:text-[#00FF88] transition-colors text-sm font-bold uppercase tracking-wider"
               >
-                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300" />
-                <span className="relative z-10 uppercase">{user ? 'ACCESS_TERMINAL' : 'REGISTER'}</span>
+                Features
               </button>
-            </nav>
-
-            {/* mobile menu button */}
-            <div className="lg:hidden">
-              <button aria-expanded={mobileOpen} aria-controls="mobile-menu" onClick={() => setMobileOpen((s) => !s)} className="p-3 rounded-2xl text-[#00FF88] bg-[#00FF88]/5 border border-[#00FF88]/20 hover:bg-[#00FF88]/10 transition-all">
-                {mobileOpen ? <X className="h-7 w-7" /> : <Menu className="h-7 w-7" />}
+              <button
+                onClick={() => {
+                  setMobileOpen(false);
+                  const el = document.getElementById('testimonials');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="text-[#EAEAEA] hover:text-[#00FF88] transition-colors text-sm font-bold uppercase tracking-wider"
+              >
+                Testimonials
               </button>
-            </div>
-          </div>
-
-          {/* mobile nav panel */}
-          {mobileOpen && (
-            <div id="mobile-menu" className="lg:hidden absolute top-full left-0 right-0 bg-black/95 backdrop-blur-2xl border-b border-white/10 p-8 animate-in slide-in-from-top-4 duration-300">
-              <div className="flex flex-col gap-8">
-                {['Features', 'Testimonials'].map((item) => (
-                  <button
-                    key={item}
-                    className="text-[10px] text-left font-mono font-bold text-[#00B37A] hover:text-[#00FF88] transition-colors uppercase tracking-[0.4em]"
-                    onClick={() => {
-                      setMobileOpen(false);
-                      const el = document.getElementById(item.toLowerCase());
-                      if (el) {
-                        el.scrollIntoView({ behavior: 'smooth' });
-                        // Clean hash from URL for perfectly clean routes
-                        if (window.location.hash) {
-                          window.history.replaceState(null, '', window.location.pathname + window.location.search);
-                        }
-                      }
-                    }}
-                  >
-                    {item}
-                  </button>
-                ))}
-                <button
+              <div className="flex w-full flex-col gap-3 pt-4 border-t border-[#00FF88]/10">
+                <NavbarButton
                   onClick={() => { setMobileOpen(false); handleGetStarted('student'); }}
-                  className="w-full text-center px-6 py-5 rounded-2xl bg-[#00FF88] text-black font-black uppercase text-xs tracking-[0.3em] shadow-[0_0_30px_rgba(0,255,136,0.2)]"
+                  variant="primary"
+                  className="w-full"
                 >
-                  {user ? 'ACCESS TERMINAL' : 'REGISTER'}
-                </button>
+                  {user ? 'Dashboard' : 'Register'}
+                </NavbarButton>
               </div>
-            </div>
-          )}
-        </header>
+            </MobileNavMenu>
+          </MobileNav>
+        </Navbar>
 
         {/* Hero */}
         <section className="relative pt-20 pb-12 px-6 overflow-hidden flex items-center">
@@ -507,72 +506,26 @@ export const LandingPage: React.FC = () => {
 
 
         {/* Footer */}
-        <footer className="py-32 px-6 border-t border-[#00FF88]/10 bg-[#050505] relative z-10">
-          <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-16 mb-24">
-              <div className="md:col-span-5 space-y-8">
-                <div className="flex items-center gap-4">
-                  <img src="/cybercoach.png" alt="Cybercoach" className="h-16 w-16" />
-                  <div>
-                    <div className="text-3xl font-black tracking-tighter text-white uppercase">
-                      CYBER <span className="text-[#00FF88]">COACH</span>
-                    </div>
-                    <div className="text-[10px] font-mono text-[#00B37A] tracking-[0.4em] uppercase">Unified Defense Protocol</div>
-                  </div>
-                </div>
-                <p className="text-lg text-[#00B37A]/80 leading-relaxed font-light">
-                  Architecting the future of cybersecurity training. Our platform combines neuro-linked AI mentorship with high-fidelity simulations to forge the world's most elite digital defenders.
-                </p>
-
+        <footer className="py-12 px-6 border-t border-[#00FF88]/10 bg-[#050505] relative z-10">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+              {/* Logo & Brand */}
+              <div className="flex items-center gap-3">
+                <img src="/cybercoach.png" alt="Cybercoach" className="h-8 w-8" />
+                <span className="text-lg font-black tracking-tight text-white uppercase">
+                  Cyber<span className="text-[#00FF88]">coach</span>
+                </span>
               </div>
 
-              <div className="md:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-12">
-                <div className="space-y-6">
-                  <h4 className="text-white font-black uppercase text-sm tracking-widest">Training Modules</h4>
-                  <ul className="space-y-3 text-sm text-[#00B37A]/60 font-medium">
-                    <li><button className="hover:text-[#00FF88] transition-colors leading-relaxed cursor-pointer">Neural Assessment</button></li>
-                    <li><button className="hover:text-[#00FF88] transition-colors leading-relaxed cursor-pointer">High-Fidelity Ranges</button></li>
-                    <li><button className="hover:text-[#00FF88] transition-colors leading-relaxed cursor-pointer">AI Combat Briefs</button></li>
-                    <li><button className="hover:text-[#00FF88] transition-colors leading-relaxed cursor-pointer">Protocol Forge</button></li>
-                  </ul>
-                </div>
-                <div className="space-y-6">
-                  <h4 className="text-white font-black uppercase text-sm tracking-widest">Resources</h4>
-                  <ul className="space-y-3 text-sm text-[#00B37A]/60 font-medium">
-                    <li><button className="hover:text-[#00FF88] transition-colors leading-relaxed cursor-pointer">Intel Archives</button></li>
-                    <li><button className="hover:text-[#00FF88] transition-colors leading-relaxed cursor-pointer">Operative Manual</button></li>
-                    <li><button className="hover:text-[#00FF88] transition-colors leading-relaxed cursor-pointer">Strategic Feed</button></li>
-                  </ul>
-                </div>
-                <div className="space-y-6">
-                  <h4 className="text-white font-black uppercase text-sm tracking-widest">Legal</h4>
-                  <ul className="space-y-3 text-sm text-[#00B37A]/60 font-medium">
-                    <li><button className="hover:text-[#00FF88] transition-colors leading-relaxed cursor-pointer">Clearance Level</button></li>
-                    <li><button className="hover:text-[#00FF88] transition-colors leading-relaxed cursor-pointer">Data Protocol</button></li>
-                    <li><button className="hover:text-[#00FF88] transition-colors leading-relaxed cursor-pointer">Engagement T&C</button></li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-col md:flex-row items-center justify-between gap-8 pt-12 border-t border-white/5">
-              <div className="flex items-center gap-6 text-[11px] font-mono text-[#00B37A]/40 uppercase tracking-[0.3em] overflow-x-auto whitespace-nowrap pb-2 md:pb-0">
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full bg-[#00FF88] shadow-[0_0_10px_#00FF88]" />
-                  NODES_NOMINAL
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full bg-[#00FF88]/30" />
-                  LATENCY_04MS
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full bg-[#00FF88]/30" />
-                  UPTIME_99.99
-                </div>
+              {/* Copyright */}
+              <div className="text-xs font-mono text-[#00B37A]/50 uppercase tracking-wider text-center">
+                © {new Date().getFullYear()} Vois Cybercoach. All rights reserved.
               </div>
 
-              <div className="text-[10px] font-mono text-[#00B37A]/30 uppercase tracking-widest text-center md:text-right leading-loose">
-                PROTOCOL_V.4.2 // © {new Date().getFullYear()} VOIS CYBERCOACH // FORGED IN THE DIGITAL FRONTINES
+              {/* Status Indicator */}
+              <div className="flex items-center gap-2 text-[10px] font-mono text-[#00FF88]/60 uppercase tracking-widest">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#00FF88] shadow-[0_0_8px_#00FF88] animate-pulse" />
+                System Online
               </div>
             </div>
           </div>
