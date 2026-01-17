@@ -2,7 +2,6 @@
 
 An AI-powered cybersecurity education platform that transforms passive learning into hands-on, job-ready skills. Featuring adaptive learning paths, proctored assessments, vulnerability labs, and career tools—all in one unified platform.
 
-
 ![Cybercoach](https://img.shields.io/badge/Cybercoach-Cybersecurity%20Education-00FF88)
 ![React](https://img.shields.io/badge/React-18-61dafb)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
