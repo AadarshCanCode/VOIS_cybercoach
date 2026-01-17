@@ -239,30 +239,7 @@ export const LandingPage: React.FC = () => {
 
 
 
-            <div className="pb-8 w-full max-w-4xl mx-auto">
-              <div className="mb-4 text-[#00FF88] font-mono text-xs tracking-[0.2em] uppercase opacity-70">
-                OPERATIONAL FOUNDERS
-              </div>
-              <div className="flex flex-wrap justify-center gap-4">
-                {[
-                  { name: 'Piyush Dhoka', url: 'https://piyush.sparkstudio.co.in' },
-                  { name: 'Aadarsh Pathre', url: 'https://aadarsh.sparkstudio.co.in' },
-                  { name: 'Varun Inamdar', url: 'https://varun.sparkstudio.co.in' },
-                  { name: 'Vedant Pandhare', url: 'https://www.linkedin.com/in/vedant-pandhare' }
-                ].map((founder) => (
-                  <a
-                    key={founder.name}
-                    href={founder.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group flex items-center gap-3 px-5 py-3 bg-[#00FF88]/5 border border-[#00FF88]/20 rounded-xl hover:bg-[#00FF88]/10 transition-all hover:scale-105"
-                  >
-                    <span className="text-white font-bold leading-none">{founder.name.split(' ').map((n, i) => <span key={i} className={i === 0 ? "" : "block"}>{n} </span>)}</span>
-                    <ArrowRight className="h-4 w-4 text-[#00FF88] group-hover:translate-x-1 transition-transform" />
-                  </a>
-                ))}
-              </div>
-            </div>
+
 
             <div className="space-y-6">
               <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-white leading-[0.85] uppercase">
@@ -288,17 +265,32 @@ export const LandingPage: React.FC = () => {
               </button>
             </div>
 
-            <div className="pt-10 grid grid-cols-3 gap-12 border-t border-white/10 w-full max-w-2xl">
-              {[
-                { label: 'Modules', val: '500+' },
-                { label: 'Uptime', val: '99.9%' },
-                { label: 'Ops', val: '12K+' }
-              ].map((stat, i) => (
-                <div key={i} className="space-y-1">
-                  <div className="text-3xl font-black text-white tracking-tighter">{stat.val}</div>
-                  <div className="text-[10px] font-mono text-[#00B37A] tracking-widest uppercase opacity-60">{stat.label}</div>
-                </div>
-              ))}
+
+
+            {/* Operational Founders - Moved to Bottom */}
+            <div className="pt-10 w-full max-w-4xl mx-auto">
+              <div className="mb-4 text-[#00FF88] font-mono text-xs tracking-[0.2em] uppercase opacity-70">
+                OPERATIONAL FOUNDERS
+              </div>
+              <div className="flex flex-wrap justify-center gap-4">
+                {[
+                  { name: 'Piyush Dhoka', url: 'https://piyush.sparkstudio.co.in' },
+                  { name: 'Aadarsh Pathre', url: 'https://aadarsh.sparkstudio.co.in' },
+                  { name: 'Varun Inamdar', url: 'https://varun.sparkstudio.co.in' },
+                  { name: 'Vedant Pandhare', url: 'https://www.linkedin.com/in/vedant-pandhare' }
+                ].map((founder) => (
+                  <a
+                    key={founder.name}
+                    href={founder.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex items-center gap-3 px-5 py-3 bg-[#00FF88]/5 border border-[#00FF88]/20 rounded-xl hover:bg-[#00FF88]/10 transition-all hover:scale-105"
+                  >
+                    <span className="text-white font-bold leading-none">{founder.name.split(' ').map((n, i) => <span key={i} className={i === 0 ? "" : "block"}>{n} </span>)}</span>
+                    <ArrowRight className="h-4 w-4 text-[#00FF88] group-hover:translate-x-1 transition-transform" />
+                  </a>
+                ))}
+              </div>
             </div>
 
 
