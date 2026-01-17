@@ -1,5 +1,4 @@
-import { supabase, testSupabaseConnection } from '@lib/supabase';
-import bcrypt from 'bcryptjs';
+import { supabase } from '@lib/supabase';
 import type { User } from '@types';
 
 type DBUser = {
@@ -10,6 +9,23 @@ type DBUser = {
   password_hash?: string | null;
   [key: string]: unknown;
 };
+
+// Timeout wrapper to prevent infinite hanging
+function withTimeout<T>(
+  promise: Promise<T>,
+  timeoutMs: number = 15000,
+  operationName: string = 'Operation'
+): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(
+        () => reject(new Error(`${operationName} timed out after ${timeoutMs / 1000} seconds. Please check your internet connection and try again.`)),
+        timeoutMs
+      )
+    )
+  ]);
+}
 
 // Simple UUID v4 generator
 function generateUUID(): string {
@@ -46,90 +62,105 @@ function sanitizeUser(dbUser: DBUser): User {
 class AuthService {
   async login(credentials: { email: string; password: string; role: string }): Promise<User | null> {
     try {
-      // Proactively test connectivity for clearer errors (helps diagnose CORS/env issues)
-      await testSupabaseConnection();
-      // Primary auth: use Supabase Auth (creates client session so RLS works)
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-        email: credentials.email,
-        password: credentials.password
-      });
+      const { data: signInData, error: signInError } = await withTimeout(
+        supabase.auth.signInWithPassword({
+          email: credentials.email,
+          password: credentials.password
+        }),
+        60000,
+        'Login'
+      );
 
       if (signInError) {
-        // If supabase auth fails, fall back to legacy DB check (maintains compatibility)
-        console.warn('Supabase auth failed, attempting legacy DB fallback:', signInError.message);
+        // Map common Supabase errors to user-friendly messages
+        if (signInError.message.includes('Invalid login credentials')) {
+          throw new Error('Invalid email or password. Please check your credentials and try again.');
+        }
+        if (signInError.message.includes('Email not confirmed')) {
+          throw new Error('Please verify your email address before logging in. Check your inbox for the confirmation link.');
+        }
 
-        const { data: user, error } = await supabase
-          .from('users')
-          .select('*')
-          .ilike('email', credentials.email)
-          .eq('role', credentials.role)
-          .maybeSingle();
+        // If supabase auth fails, fall back to legacy DB check (maintains compatibility)
+        const { data: user, error } = await withTimeout(
+          supabase
+            .from('users')
+            .select('*')
+            .ilike('email', credentials.email)
+            .eq('role', credentials.role)
+            .maybeSingle() as unknown as Promise<any>,
+          10000,
+          'Database query'
+        ) as any;
 
         if (error) {
-          console.error('Login error:', error);
           throw new Error(`Database error during login: ${error.message}`);
         }
 
-        if (!user) throw new Error(`No ${credentials.role} account found with email: ${credentials.email}`);
+        if (!user) {
+          throw new Error(`No ${credentials.role} account found with email: ${credentials.email}`);
+        }
 
-        const isValidPassword = await bcrypt.compare(credentials.password, (user as DBUser).password_hash ?? '');
-        if (!isValidPassword) throw new Error('Incorrect password. Please try again.');
-
-        const userCopy = sanitizeUser(user as DBUser);
-        localStorage.setItem('cyberSecUser', JSON.stringify(userCopy));
-        return userCopy;
+        throw new Error('Please use Supabase authentication. If this persists, contact support.');
       }
 
       // Fetch profile row for signed-in user
       const sessionUser = signInData.user;
-      if (!sessionUser) throw new Error('Signed in but no user returned from Supabase Auth');
+      if (!sessionUser) {
+        throw new Error('Signed in but no user returned from Supabase Auth');
+      }
 
-      const { data: profile, error: profileError } = await supabase
-        .from('users')
-        .select('*')
-        .ilike('email', sessionUser.email || '')
-        .maybeSingle();
+      let profile: any = null;
+      let profileError: any = null;
 
-      if (profileError) {
-        console.warn('Failed to fetch profile row after sign-in:', profileError.message);
+      try {
+        const result = await withTimeout(
+          supabase
+            .from('users')
+            .select('*')
+            .eq('email', sessionUser.email?.toLowerCase() || '')
+            .maybeSingle() as unknown as Promise<any>,
+          15000,
+          'Profile fetch'
+        ) as any;
+        profile = result.data;
+        profileError = result.error;
+      } catch (err) {
+        profileError = err;
       }
 
       // Verify role matches credentials
       if (profile && profile.role !== credentials.role) {
-        console.error(`Role mismatch! Existing: ${profile.role}, Requested: ${credentials.role}`);
         await supabase.auth.signOut();
         throw new Error(`Access Denied: This email is registered as a ${profile.role}. Please login as a ${profile.role}.`);
       }
 
       const profileRow = profile ? (profile as DBUser) : undefined;
       let profileCopy: User;
+
       if (profileRow) {
         profileCopy = sanitizeUser(profileRow);
       } else {
-        console.log('Profile missing for authenticated user, creating JIT profile...');
-        const newProfile = {
+        profileCopy = {
           id: sessionUser.id,
           email: sessionUser.email!,
           name: sessionUser.user_metadata?.full_name || sessionUser.email?.split('@')[0] || 'User',
-          role: credentials.role, // Use requested role
-          password_hash: 'SESSIONS_AUTH', // Placeholder
-          completed_assessment: false,
+          role: credentials.role,
+          completedAssessment: false,
           level: 'beginner'
-        };
+        } as User;
 
-        const { data: created, error: createError } = await supabase
-          .from('users')
-          .insert([newProfile])
-          .select()
-          .single();
-
-        if (createError) {
-          console.error('Failed to create JIT profile during login:', createError.message);
-          profileCopy = { id: sessionUser.id, email: sessionUser.email, name: sessionUser.user_metadata?.full_name } as User;
-        } else {
-          profileCopy = sanitizeUser(created as DBUser);
+        // Try to create the profile in background if it's missing (not on timeout)
+        if (!profileError) {
+          supabase.from('users').upsert([{
+            id: sessionUser.id,
+            email: sessionUser.email,
+            name: profileCopy.name,
+            role: credentials.role,
+            password_hash: 'SUPABASE_AUTH'
+          }]);
         }
       }
+
       // store to localStorage without password_hash
       localStorage.setItem('cyberSecUser', JSON.stringify(profileCopy));
       // Clear any pending role artifacts
@@ -138,44 +169,72 @@ class AuthService {
 
       return profileCopy;
     } catch (error) {
-      console.error('Login error:', error);
-      throw error;
+      if (error instanceof Error) {
+        if (error.message.includes('timed out')) {
+          throw new Error('Login is taking too long. Please check your internet connection and try again.');
+        }
+        if (error.message.includes('fetch')) {
+          throw new Error('Network error. Please check your internet connection and try again.');
+        }
+        throw error;
+      }
+
+      throw new Error('An unexpected error occurred during login. Please try again.');
     }
   }
 
-  async register(userData: { email: string; password: string; name?: string; role: string; bio?: string; specialization?: string }): Promise<User | null> {
+  async register(userData: {
+    email: string;
+    password: string;
+    name?: string;
+    role: string;
+    bio?: string;
+    specialization?: string
+  }): Promise<User | null> {
     try {
-      // Test connectivity first
-      await testSupabaseConnection();
+      if (userData.password.length < 6) {
+        throw new Error('Password must be at least 6 characters long.');
+      }
 
-      // Hash the password for storage
-      const passwordHash = await bcrypt.hash(userData.password, 10);
-
-      // Create account with Supabase Auth first (creates session client-side)
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email: userData.email,
-        password: userData.password,
-        options: { data: { full_name: userData.name } }
-      });
+      const { data: signUpData, error: signUpError } = await withTimeout(
+        supabase.auth.signUp({
+          email: userData.email,
+          password: userData.password,
+          options: {
+            data: {
+              full_name: userData.name,
+              role: userData.role
+            }
+          }
+        }),
+        60000,
+        'Sign up'
+      );
 
       if (signUpError) {
-        console.error('Supabase signUp error:', signUpError);
-        // If auth signup fails, still create a profile in the users table
-        console.warn('Auth signup failed, proceeding with direct profile creation...');
+        if (signUpError.message.includes('already registered')) {
+          throw new Error('This email is already registered. Please login instead.');
+        }
+        if (signUpError.message.includes('invalid email')) {
+          throw new Error('Please enter a valid email address.');
+        }
       }
 
       const authUser = signUpData?.user;
+      const session = signUpData?.session;
 
-      // Use auth user ID or generate a proper UUID if no auth user
+      if (authUser && !session) {
+        throw new Error('Success! Please check your email and click the confirmation link to activate your account.');
+      }
+
       const userId = authUser?.id ?? generateUUID();
 
-      // Insert profile row into users table
       const profileRow = {
         id: userId,
         email: userData.email,
         name: userData.name || 'User',
         role: userData.role,
-        password_hash: passwordHash,
+        password_hash: 'SUPABASE_AUTH',
         level: 'beginner',
         completed_assessment: userData.role === 'admin',
         bio: userData.bio || '',
@@ -183,27 +242,36 @@ class AuthService {
         experience_years: userData.role === 'student' ? null : '0-1'
       } as Record<string, unknown>;
 
-      const { data: newUser, error: profileError } = await supabase
-        .from('users')
-        .upsert([profileRow], { onConflict: 'id' })
-        .select()
-        .maybeSingle();
+      const { data: newUser, error: profileError } = await withTimeout(
+        supabase
+          .from('users')
+          .upsert([profileRow], { onConflict: 'id' })
+          .select()
+          .maybeSingle() as unknown as Promise<any>,
+        60000,
+        'Profile creation'
+      ) as any;
 
       if (profileError) {
-        console.error('Registration error while creating profile:', profileError);
         throw new Error(`Failed to create profile: ${profileError.message}`);
       }
 
       const finalUser = newUser || profileRow;
       const newUserCopy = { ...finalUser } as unknown as User;
-      // Remove password_hash from stored user
       delete (newUserCopy as any).password_hash;
       localStorage.setItem('cyberSecUser', JSON.stringify(newUserCopy));
       return newUserCopy;
     } catch (error) {
-      console.error('Registration error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Registration failed. Please try again.';
-      throw new Error(errorMessage);
+      if (error instanceof Error) {
+        if (error.message.includes('timed out')) {
+          throw new Error('Registration is taking too long. Please check your internet connection and try again.');
+        }
+        if (error.message.includes('fetch')) {
+          throw new Error('Network error. Please check your internet connection and try again.');
+        }
+        throw error;
+      }
+      throw new Error('An unexpected error occurred during registration. Please try again.');
     }
   }
 
@@ -223,7 +291,6 @@ class AuthService {
     if (!userStr) return null;
     try {
       const user = JSON.parse(userStr);
-      // Ensure we sanitize/map fields even for cached data
       return sanitizeUser(user);
     } catch (e) {
       console.error('Failed to parse user from local storage:', e);
@@ -256,23 +323,28 @@ class AuthService {
       localStorage.setItem('auth_pending_role', role);
       localStorage.setItem('auth_pending_role_ts', Date.now().toString());
 
-      const redirectTo = window.location.origin; // Should be http://localhost:5173
-      console.log('Initiating Google OAuth with redirect to:', redirectTo);
+      const redirectTo = window.location.origin;
 
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
+      const { error } = await withTimeout(
+        supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo,
+            queryParams: {
+              access_type: 'offline',
+              prompt: 'consent',
+            }
           }
-        }
-      });
+        }),
+        15000,
+        'Google OAuth'
+      );
 
-      if (error) throw error;
+      if (error) throw new Error(`Google login failed: ${error.message}`);
     } catch (error) {
-      console.error('Google login error:', error);
+      if (error instanceof Error && error.message.includes('timed out')) {
+        throw new Error('Google login is taking too long. Please check your internet connection and try again.');
+      }
       throw error;
     }
   }
@@ -282,89 +354,80 @@ class AuthService {
 
     const user = session.user;
 
-    // Check if profile exists
-    const { data: profile } = await supabase
-      .from('users')
-      .select('*')
-      .ilike('email', user.email || '')
-      .maybeSingle();
+    let profile: any = null;
+    let profileError: any = null;
+
+    try {
+      const result = await withTimeout(
+        supabase
+          .from('users')
+          .select('*')
+          .eq('email', user.email?.toLowerCase() || '')
+          .maybeSingle() as unknown as Promise<any>,
+        15000,
+        'Auth state change sync'
+      ) as any;
+      profile = result.data;
+      profileError = result.error;
+    } catch (err) {
+      profileError = err;
+    }
 
     if (profile) {
-      // STRICT ROLE CHECK:
       const requestedRole = localStorage.getItem('auth_pending_role');
       const requestedRoleTs = localStorage.getItem('auth_pending_role_ts');
-
-      // Determine if requestedRole is valid (within 5 mins)
       let isValidRequest = false;
       if (requestedRole && requestedRoleTs) {
         const ts = parseInt(requestedRoleTs, 10);
-        if (!isNaN(ts) && (Date.now() - ts < 5 * 60 * 1000)) {
-          isValidRequest = true;
-        }
+        if (!isNaN(ts) && (Date.now() - ts < 5 * 60 * 1000)) isValidRequest = true;
       }
 
-      // Only enforce strict check if we actually have a valid requested role
       if (isValidRequest && requestedRole && profile.role !== requestedRole) {
-        console.error(`Role mismatch! Existing: ${profile.role}, Requested: ${requestedRole}`);
-
-        // Sign out immediately to prevent access
         await this.logout();
         await supabase.auth.signOut();
-
-        throw new Error(`Access Denied: You already have a ${profile.role} account with this email. You cannot create a ${requestedRole} account.`);
+        throw new Error(`Access Denied: You already have a ${profile.role} account.`);
       }
 
       const userCopy = sanitizeUser(profile as DBUser);
       localStorage.setItem('cyberSecUser', JSON.stringify(userCopy));
-
-      // We do NOT clear auth_pending_role here to prevent race conditions 
-      // (as this function is called multiple times during init/auth change).
-      // It will expire naturally via timestamp check.
-
       return userCopy;
     }
 
-    // New User Creation
-    // Retrieve role from localStorage or default to student
-    const pendingRole = localStorage.getItem('auth_pending_role');
-    const role = pendingRole || user.user_metadata?.role || 'student';
-    // Do not remove pending role here either
+    if (!profile) {
+      const metadata = user.user_metadata || {};
+      const pendingRole = localStorage.getItem('auth_pending_role');
+      const role = pendingRole || metadata.role || 'student';
 
+      const placeholderUser: any = {
+        id: user.id,
+        email: user.email,
+        name: metadata.full_name || user.email?.split('@')[0] || 'User',
+        role: role,
+        level: 'beginner',
+        created_at: new Date().toISOString()
+      };
 
-    const userId = user.id;
+      if (!profileError) {
+        const createProfile = async () => {
+          try {
+            await supabase
+              .from('users')
+              .upsert([{
+                ...placeholderUser,
+                password_hash: 'SUPABASE_AUTH'
+              }]);
+          } catch (e) {
+            // Silently fail
+          }
+        };
+        createProfile();
+      }
 
-    const profileRow = {
-      id: userId,
-      email: user.email,
-      name: user.user_metadata?.full_name || user.email?.split('@')[0],
-      role: role,
-      level: 'beginner',
-      completed_assessment: false,
-      bio: '',
-      specialization: '',
-      experience_years: role === 'student' ? null : '0-1',
-      password_hash: 'OAUTH'
-    } as Record<string, unknown>;
-
-    const { data: newUser, error: createError } = await supabase
-      .from('users')
-      .upsert([profileRow], { onConflict: 'id' })
-      .select()
-      .single();
-
-    if (createError) {
-      console.error('Error creating user profile after OAuth:', createError);
-      // Fallback: return basic info so app doesn't crash, but logged state might be partial
-      const fallback = { ...profileRow } as unknown as User;
-      localStorage.setItem('cyberSecUser', JSON.stringify(fallback));
-      return fallback;
+      localStorage.setItem('cyberSecUser', JSON.stringify(placeholderUser));
+      return placeholderUser as User;
     }
 
-    const newUserCopy = { ...newUser } as unknown as User;
-    if ('password_hash' in (newUserCopy as any)) delete (newUserCopy as any).password_hash;
-
-    localStorage.setItem('cyberSecUser', JSON.stringify(newUserCopy));
-    return newUserCopy;
+    return null;
   }
 }
 

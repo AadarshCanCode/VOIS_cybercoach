@@ -165,20 +165,14 @@ class StudentService {
                 .from('user_progress')
                 .select(`
                     updated_at,
-                    course:courses (
-                        id,
-                        title,
-                        description
-                    ),
-                    module:modules (
-                        title
-                    )
+                    course_id,
+                    module_id
                 `)
                 .eq('user_id', userId)
                 .eq('completed', false)
                 .order('updated_at', { ascending: false })
                 .limit(1)
-                .single();
+                .maybeSingle() as any;
 
             if (progressError) {
                 if (progressError.code === 'PGRST116') return null; // No active operation found
@@ -203,10 +197,10 @@ class StudentService {
             const progress = completionData && completionData.length > 0 ? completionData[0].progress : 0;
 
             return {
-                courseId: (progressData.course as any).id,
-                title: (progressData.course as any).title,
-                description: (progressData.course as any).description,
-                currentModule: (progressData.module as any)?.title || 'Unknown Module',
+                courseId: progressData.course_id || '',
+                title: 'Continuing Session',
+                description: 'Pick up where you left off',
+                currentModule: 'In Progress',
                 progress: progress || 0,
                 lastAccessed: progressData.updated_at
             };

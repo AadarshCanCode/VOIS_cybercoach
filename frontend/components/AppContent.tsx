@@ -17,13 +17,6 @@ export const AppContent = () => {
     const { user, loading, isAdmin, isTeacher } = useAuth();
     const navigate = useNavigate();
 
-    console.log('AppContent Render:', {
-        loading,
-        user: user ? { email: user.email, role: user.role } : null,
-        isTeacher: isTeacher(),
-        isAdmin: isAdmin()
-    });
-
     if (loading) {
         return (
             <div className="min-h-screen bg-black flex items-center justify-center">

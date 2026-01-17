@@ -20,6 +20,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   const [confirmPassword, setConfirmPassword] = useState('');
   const role = 'student';
   const [isLoading, setIsLoading] = useState(false);
+  const [isEmailSent, setIsEmailSent] = useState(false);
   const [error, setError] = useState('');
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -37,17 +38,59 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
 
     try {
       await register(email, password, name, role);
+      // If register returns without throwing, it means auto-login worked
       if (onSuccess) {
         onSuccess();
       } else {
         navigate('/dashboard');
       }
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Registration failed');
+    } catch (err: any) {
+      const msg = err instanceof Error ? err.message : 'Registration failed';
+      // Check if this is the success/confirmation required message we added in authService
+      if (msg.includes('Success!') || msg.includes('check your email')) {
+        setIsEmailSent(true);
+        setError('');
+      } else {
+        setError(msg);
+      }
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (isEmailSent) {
+    return (
+      <AuthLayout
+        title="Check Your Email"
+        subtitle="Verification Required"
+        className="max-w-2xl"
+      >
+        <div className="bg-[#0A0F0A] border border-[#00FF88]/20 rounded-2xl p-8 shadow-[0_0_50px_rgba(0,255,136,0.05)] backdrop-blur-xl relative overflow-hidden group w-full text-center">
+          <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-[#00FF88]/10 border border-[#00FF88]/20 animate-pulse">
+            <Mail className="h-8 w-8 text-[#00FF88]" />
+          </div>
+
+          <h3 className="text-[#00FF88] text-xl font-black mb-4 uppercase tracking-tighter">Email Sent!</h3>
+          <p className="text-[#00B37A] text-sm mb-8 leading-relaxed">
+            We've sent a confirmation link to <span className="text-[#00FF88] font-bold">{email}</span>.<br />
+            Please click the link in the email to activate your account.
+          </p>
+
+          <div className="space-y-4">
+            <Link to="/login" className="block">
+              <Button className="w-full h-12 bg-[#00FF88] text-black hover:bg-[#00CC66] font-black rounded-xl">
+                Return to Login
+              </Button>
+            </Link>
+
+            <p className="text-[#00B37A]/50 text-[10px] uppercase font-mono">
+              Didn't get the email? Check your spam folder.
+            </p>
+          </div>
+        </div>
+      </AuthLayout>
+    );
+  }
 
   return (
     <AuthLayout
