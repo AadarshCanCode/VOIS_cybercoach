@@ -4,6 +4,7 @@ import { courseCategories, getCoursesByCategory, type CourseData } from '@data/c
 import { useAuth } from '@context/AuthContext';
 import { courseService } from '@services/courseService';
 import type { Course } from '@types';
+import { EnrollmentModal } from './EnrollmentModal';
 
 interface CourseListProps {
   onCourseSelect: (courseId: string) => void;
@@ -158,6 +159,35 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
     );
   }
 
+  // Enrollment handling
+  const [showEnrollModal, setShowEnrollModal] = useState(false);
+  const [enrollCourse, setEnrollCourse] = useState<Course | null>(null);
+
+  const handleTeacherCourseSelect = async (courseId: string) => {
+    if (!user?.email) return;
+
+    // Check if already enrolled
+    try {
+      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+      const response = await fetch(`${apiBase}/api/teacher/enrollment/${courseId}/${user.email}`);
+      const data = await response.json();
+
+      if (data.enrolled) {
+        onCourseSelect(courseId);
+      } else {
+        // Find course details
+        const course = dbCourses.find(c => c.id === courseId);
+        if (course) {
+          setEnrollCourse(course);
+          setShowEnrollModal(true);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to check enrollment:', error);
+      alert('Failed to verify enrollment status');
+    }
+  };
+
   // Show courses for selected category
   if (selectedCategory) {
     // Special handling for teacher courses from database
@@ -215,7 +245,7 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
                 {dbCourses.map((course) => (
                   <div
                     key={course.id}
-                    onClick={() => onCourseSelect(course.id)}
+                    onClick={() => handleTeacherCourseSelect(course.id)}
                     className="bg-[#0A0F0A] rounded-xl border border-[#00FF88]/10 overflow-hidden group hover:border-[#00FF88]/30 transition-all duration-300 cursor-pointer"
                   >
                     <div className="p-6">
@@ -241,7 +271,9 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
                           </div>
                         </div>
                         <div className="text-[#00FF88] text-sm font-bold group-hover:translate-x-1 transition-transform">
-                          View Course →
+                          {/* We don't know if locked or not until click, but can assume locked symbol if not yet enrolled? 
+                              For simplicity, just show arrow. */}
+                          Access Course →
                         </div>
                       </div>
 
@@ -256,6 +288,18 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
                   </div>
                 ))}
               </div>
+            )}
+
+            {showEnrollModal && enrollCourse && (
+              <EnrollmentModal
+                courseId={enrollCourse.id}
+                courseTitle={enrollCourse.title}
+                onClose={() => setShowEnrollModal(false)}
+                onSuccess={() => {
+                  setShowEnrollModal(false);
+                  onCourseSelect(enrollCourse.id);
+                }}
+              />
             )}
           </div>
         </div>

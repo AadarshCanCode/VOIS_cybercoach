@@ -182,46 +182,30 @@ class CourseService {
 
   async getAllCourses(): Promise<Course[]> {
     try {
-      console.log('Starting getAllCourses query...');
+      console.log('Starting getAllCourses query from MongoDB...');
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
-      // 1. Fetch all published courses
-      const { data: courses, error: coursesError } = await supabase
-        .from('courses')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (coursesError) {
-        console.error('Supabase error fetching courses:', coursesError);
-        throw new Error(coursesError.message);
+      const response = await fetch(`${API_URL}/api/teacher/courses/public/all`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch courses from backend');
       }
 
-      if (!courses || courses.length === 0) return [];
+      const courses = await response.json();
+      console.log(`Successfully fetched ${courses.length} courses from MongoDB`);
 
-      // 2. Fetch all published modules (lightweight, just IDs and course_ids) to count them
-      // We purposefully avoid a JOIN here to prevent timeouts if RLS policies are complex
-      const { data: rawModules, error: modulesError } = await supabase
-        .from('modules')
-        .select('course_id')
-        .select('course_id');
-      // .eq('is_published', true); // Removed
-
-      if (modulesError) {
-        console.warn('Error fetching modules for count (non-fatal):', modulesError);
-      }
-
-      // 3. Calculate counts locally
-      const moduleCounts = (rawModules || []).reduce((acc: Record<string, number>, mod: any) => {
-        acc[mod.course_id] = (acc[mod.course_id] || 0) + 1;
-        return acc;
-      }, {});
-
-      console.log(`Successfully fetched ${courses.length} courses`);
-
+      // Map backend fields to frontend interface if needed
       return courses.map((course: any) => ({
         ...course,
-        module_count: moduleCounts[course.id] || 0,
-        modules: [] // Clear partial modules
-      })) as Course[];
+        // Ensure mapping is correct
+        id: course.id || course._id,
+        module_count: course.modules?.length || 0,
+        modules: (course.modules || []).map((m: any) => ({
+          ...m,
+          id: m.id || m._id
+        })),
+        skills: [] // Mock skills as they are not in DB yet
+      }));
+
     } catch (error) {
       console.error('Get all courses error:', error);
       return [];
@@ -236,7 +220,27 @@ class CourseService {
     }
 
     try {
-      // 1. Get Course
+      // 1. Try fetching from MongoDB API (New System)
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+      const response = await fetch(`${API_URL}/api/teacher/courses/public/${id}`);
+
+      if (response.ok) {
+        const course = await response.json();
+        // Ensure id is set and modules are present with correct ID mapping
+        return {
+          ...course,
+          id: course.id || course._id,
+          modules: (course.modules || []).map((m: any) => ({
+            ...m,
+            id: m.id || m._id
+          }))
+        };
+      }
+
+      // 2. Fallback to Supabase (Old System)
+      // This allows legacy courses to still work if needed
+      console.warn('Course not found in MongoDB, trying Supabase fallback...');
+
       const { data: course, error: courseError } = await supabase
         .from('courses')
         .select('*')
@@ -248,7 +252,7 @@ class CourseService {
 
       let modules = [];
 
-      // 2. Hybrid Storage Retrieval
+      // Hybrid Storage Retrieval...
       if (course.content_json_url) {
         try {
           const response = await fetch(course.content_json_url);
@@ -263,14 +267,11 @@ class CourseService {
         }
       }
 
-      // 3. Fallback to SQL modules if JSON failed or was empty (and not empty intentionally)
       if (modules.length === 0) {
         const { data: sqlModules, error: moduleError } = await supabase
           .from('modules')
           .select('*')
           .eq('course_id', id)
-          .eq('course_id', id)
-          // .eq('is_published', true) // Removed
           .order('order', { ascending: true });
 
         if (!moduleError && sqlModules) {
@@ -284,7 +285,7 @@ class CourseService {
       } as Course;
     } catch (error) {
       console.error('Get course by id error:', error);
-      throw error;
+      return null;
     }
   }
 
@@ -451,33 +452,53 @@ class CourseService {
 
   async updateProgress(userId: string, courseId: string, moduleId: string, completed: boolean, quizScore?: number) {
     try {
-      // Handle static VU courses using MongoDB API
-      // Use env var or default to relative path (for proxy)
       const API_URL = import.meta.env.VITE_API_URL || '';
 
-      // ... 
+      // 1. Try Saving to MongoDB (New System)
+      // We try this for ALL courses, including VU ones if migrated, or just generic ones.
+      // If it fails (e.g. legacy), we fall back.
 
-      if (courseId === 'vu-web-security') {
-        const email = localStorage.getItem('vu_student_email');
-        if (email) {
-          await fetch(`${API_URL}/api/vu/progress`, {
+      const user = await supabase.auth.getUser();
+      const email = user.data.user?.email || localStorage.getItem('vu_student_email');
+
+      if (email) {
+        try {
+          await fetch(`${API_URL}/api/teacher/progress`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              vu_email: email,
-              course_id: courseId,
-              module_id: moduleId,
+              studentEmail: email,
+              courseId,
+              moduleId,
               completed,
-              quiz_score: quizScore
+              quizScore
             })
           });
+          // We can return early if we want to fully migrate, but for safety we might also update Supabase if needed?
+          // User requested "teacher should be able to progress", which is on MongoDB now.
+          // So we prioritize MongoDB.
+        } catch (e) {
+          console.error('Failed to save progress to MongoDB:', e);
         }
-        // Fallback: keep local storage sync just in case, or remove if fully switched. 
-        // Keeping it for UI consistency if offline not needed, but safe to keep for now.
-        // Let's rely on the API for "real time" as requested.
+      }
+
+      // 2. Legacy / VU Specific handling (checking if it matches special ID)
+      if (courseId === 'vu-web-security' && email) {
+        await fetch(`${API_URL}/api/vu/progress`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            vu_email: email,
+            course_id: courseId,
+            module_id: moduleId,
+            completed,
+            quiz_score: quizScore
+          })
+        });
         return;
       }
 
+      // 3. Fallback to Supabase for Legacy Courses
       const updates: any = {
         user_id: userId,
         course_id: courseId,
@@ -494,7 +515,10 @@ class CourseService {
         .from('user_progress')
         .upsert([updates]);
 
-      if (error) throw new Error(`Failed to update progress: ${error.message}`);
+      if (error) {
+        // Don't throw if we already saved to MongoDB successfully, just warn
+        console.warn(`Supabase progress update failed: ${error.message}`);
+      }
     } catch (error) {
       console.error('Update progress error:', error);
       throw error;

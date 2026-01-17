@@ -156,15 +156,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const isAdmin = () => {
-    return authService.isAdmin();
+    return user?.role === 'admin';
   };
 
   const isTeacher = () => {
-    return authService.isTeacher();
+    return user?.role === 'teacher';
   };
 
   const isStudent = () => {
-    return authService.isStudent();
+    return user?.role === 'student';
   };
 
   return (

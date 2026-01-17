@@ -94,6 +94,13 @@ class AuthService {
         console.warn('Failed to fetch profile row after sign-in:', profileError.message);
       }
 
+      // Verify role matches credentials
+      if (profile && profile.role !== credentials.role) {
+        console.error(`Role mismatch! Existing: ${profile.role}, Requested: ${credentials.role}`);
+        await supabase.auth.signOut();
+        throw new Error(`Access Denied: This email is registered as a ${profile.role}. Please login as a ${profile.role}.`);
+      }
+
       const profileRow = profile ? (profile as DBUser) : undefined;
       let profileCopy: User;
       if (profileRow) {
@@ -104,7 +111,7 @@ class AuthService {
           id: sessionUser.id,
           email: sessionUser.email!,
           name: sessionUser.user_metadata?.full_name || sessionUser.email?.split('@')[0] || 'User',
-          role: 'student', // Default role
+          role: credentials.role, // Use requested role
           password_hash: 'SESSIONS_AUTH', // Placeholder
           completed_assessment: false,
           level: 'beginner'
@@ -125,6 +132,10 @@ class AuthService {
       }
       // store to localStorage without password_hash
       localStorage.setItem('cyberSecUser', JSON.stringify(profileCopy));
+      // Clear any pending role artifacts
+      localStorage.removeItem('auth_pending_role');
+      localStorage.removeItem('auth_pending_role_ts');
+
       return profileCopy;
     } catch (error) {
       console.error('Login error:', error);
@@ -198,6 +209,8 @@ class AuthService {
 
   async logout() {
     localStorage.removeItem('cyberSecUser');
+    localStorage.removeItem('auth_pending_role');
+    localStorage.removeItem('auth_pending_role_ts');
     try {
       await supabase.auth.signOut();
     } catch (error) {
@@ -241,6 +254,8 @@ class AuthService {
   async loginWithGoogle(role: 'student' | 'teacher' = 'student'): Promise<void> {
     try {
       localStorage.setItem('auth_pending_role', role);
+      localStorage.setItem('auth_pending_role_ts', Date.now().toString());
+
       const redirectTo = window.location.origin; // Should be http://localhost:5173
       console.log('Initiating Google OAuth with redirect to:', redirectTo);
 
@@ -276,11 +291,20 @@ class AuthService {
 
     if (profile) {
       // STRICT ROLE CHECK:
-      // The user might be trying to log in as 'teacher' but already has a 'student' account (or vice versa).
       const requestedRole = localStorage.getItem('auth_pending_role');
+      const requestedRoleTs = localStorage.getItem('auth_pending_role_ts');
 
-      // Only enforce strict check if we actually have a requested role (i.e. came from the specific login button)
-      if (requestedRole && profile.role !== requestedRole) {
+      // Determine if requestedRole is valid (within 5 mins)
+      let isValidRequest = false;
+      if (requestedRole && requestedRoleTs) {
+        const ts = parseInt(requestedRoleTs, 10);
+        if (!isNaN(ts) && (Date.now() - ts < 5 * 60 * 1000)) {
+          isValidRequest = true;
+        }
+      }
+
+      // Only enforce strict check if we actually have a valid requested role
+      if (isValidRequest && requestedRole && profile.role !== requestedRole) {
         console.error(`Role mismatch! Existing: ${profile.role}, Requested: ${requestedRole}`);
 
         // Sign out immediately to prevent access
@@ -292,8 +316,11 @@ class AuthService {
 
       const userCopy = sanitizeUser(profile as DBUser);
       localStorage.setItem('cyberSecUser', JSON.stringify(userCopy));
-      // Clear pending role if any
-      localStorage.removeItem('auth_pending_role');
+
+      // We do NOT clear auth_pending_role here to prevent race conditions 
+      // (as this function is called multiple times during init/auth change).
+      // It will expire naturally via timestamp check.
+
       return userCopy;
     }
 
@@ -301,7 +328,8 @@ class AuthService {
     // Retrieve role from localStorage or default to student
     const pendingRole = localStorage.getItem('auth_pending_role');
     const role = pendingRole || user.user_metadata?.role || 'student';
-    localStorage.removeItem('auth_pending_role');
+    // Do not remove pending role here either
+
 
     const userId = user.id;
 
