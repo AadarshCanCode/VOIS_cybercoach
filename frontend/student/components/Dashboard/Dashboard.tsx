@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Shield, Target, Award, Activity, Play, ChevronRight, Terminal, FileText } from 'lucide-react';
 import { useAuth } from '@context/AuthContext';
 import { supabase } from '@lib/supabase';
+import { SEO } from '@/components/SEO/SEO';
 import { studentService, StudentStats, RecentActivity, ActiveOperation } from '@services/studentService';
 import { labApiService, LabStats } from '@services/labApiService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -78,6 +79,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
 
   return (
     <div className="p-6 space-y-8 min-h-screen animate-fade-in text-[#EAEAEA]">
+      <SEO
+        title="Standard Dashboard"
+        description="Your central command unit for monitoring cybersecurity training progress, labs, and certificates."
+      />
       {/* Header - Identity */}
       <div className="flex items-center justify-between border-b border-[#00FF88]/10 pb-6">
         <div>

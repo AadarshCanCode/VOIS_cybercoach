@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Search, Shield, CheckCircle, AlertTriangle, Building, Globe, Award, ExternalLink, ArrowLeft, Database, Clock } from 'lucide-react';
 import { verificationService, CompanyData } from '../../services/verificationService';
-
 import { useNavigate } from 'react-router-dom';
+import { SEO } from '@/components/SEO/SEO';
 
 export const CompanyVerification: React.FC = () => {
     const navigate = useNavigate();
@@ -24,7 +24,6 @@ export const CompanyVerification: React.FC = () => {
                 setSearchResult(data);
             } else {
                 // Fallback for demo if not found in DB, or show "Not Found" state
-                // For now, we'll just show nothing if not found in our registry
             }
         } catch (error) {
             console.error('Search failed:', error);
@@ -34,9 +33,9 @@ export const CompanyVerification: React.FC = () => {
     };
 
     const getScoreColor = (score: number) => {
-        if (score >= 60) return 'text-emerald-400'; // 0-40 risk
-        if (score >= 35) return 'text-amber-400';   // 41-65 risk
-        return 'text-red-400';                      // 66+ risk
+        if (score >= 60) return 'text-emerald-400';
+        if (score >= 35) return 'text-amber-400';
+        return 'text-red-400';
     };
 
     const getStatusBadge = (status: string) => {
@@ -64,6 +63,10 @@ export const CompanyVerification: React.FC = () => {
 
     return (
         <div className="p-6 min-h-screen bg-black animate-fade-in text-[#EAEAEA]">
+            <SEO
+                title="Verify Target"
+                description="Scan and validate corporate entities against global security registries for risk assessment."
+            />
             <div className="max-w-3xl mx-auto space-y-8">
                 <div className="mb-6">
                     <button

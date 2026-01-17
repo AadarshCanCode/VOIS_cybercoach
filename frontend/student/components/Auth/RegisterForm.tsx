@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AuthLayout } from '../../../components/auth/AuthLayout';
 import { useNavigate, Link } from 'react-router-dom';
+import { SEO } from '@/components/SEO/SEO';
 
 interface RegisterFormProps {
   userType?: 'student' | 'teacher' | null;
@@ -56,6 +57,10 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
       subtitle={role === 'teacher' ? 'Teacher Registration' : 'Student Registration'}
       className="max-w-2xl"
     >
+      <SEO
+        title="Sign Up"
+        description="Join the elite cybersecurity training platform. Create your account to start hands-on labs and assessments."
+      />
       <div className="bg-[#0A0F0A] border border-[#00FF88]/20 rounded-2xl p-8 shadow-[0_0_50px_rgba(0,255,136,0.05)] backdrop-blur-xl relative overflow-hidden group w-full">
         <div className="absolute inset-0 bg-linear-to-b from-[#00FF88]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
@@ -76,8 +81,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
                   type="button"
                   onClick={() => setRole('student')}
                   className={`flex flex-col items-center gap-2 p-4 rounded-xl border transition-all duration-300 relative z-20 ${role === 'student'
-                      ? 'bg-[#00FF88]/10 border-[#00FF88] text-[#00FF88] shadow-[0_0_20px_rgba(0,255,136,0.1)]'
-                      : 'bg-[#000000]/40 border-[#00FF88]/10 text-[#00B37A] hover:border-[#00FF88]/40 hover:bg-[#00FF88]/5'
+                    ? 'bg-[#00FF88]/10 border-[#00FF88] text-[#00FF88] shadow-[0_0_20px_rgba(0,255,136,0.1)]'
+                    : 'bg-[#000000]/40 border-[#00FF88]/10 text-[#00B37A] hover:border-[#00FF88]/40 hover:bg-[#00FF88]/5'
                     }`}
                 >
                   <GraduationCap className="h-6 w-6" />
@@ -87,8 +92,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
                   type="button"
                   onClick={() => setRole('teacher')}
                   className={`flex flex-col items-center gap-2 p-4 rounded-xl border transition-all duration-300 relative z-20 ${role === 'teacher'
-                      ? 'bg-[#00FF88]/10 border-[#00FF88] text-[#00FF88] shadow-[0_0_20px_rgba(0,255,136,0.1)]'
-                      : 'bg-[#000000]/40 border-[#00FF88]/10 text-[#00B37A] hover:border-[#00FF88]/40 hover:bg-[#00FF88]/5'
+                    ? 'bg-[#00FF88]/10 border-[#00FF88] text-[#00FF88] shadow-[0_0_20px_rgba(0,255,136,0.1)]'
+                    : 'bg-[#000000]/40 border-[#00FF88]/10 text-[#00B37A] hover:border-[#00FF88]/40 hover:bg-[#00FF88]/5'
                     }`}
                 >
                   <Users className="h-6 w-6" />
