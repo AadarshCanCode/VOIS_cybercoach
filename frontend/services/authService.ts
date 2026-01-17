@@ -358,17 +358,34 @@ class AuthService {
     let profileError: any = null;
 
     try {
-      const result = await withTimeout(
-        supabase
-          .from('users')
-          .select('*')
-          .eq('email', user.email?.toLowerCase() || '')
-          .maybeSingle() as unknown as Promise<any>,
-        15000,
-        'Auth state change sync'
-      ) as any;
-      profile = result.data;
-      profileError = result.error;
+      // Retry loop to handle race conditions where profile creation might lag behind auth
+      let attempts = 0;
+      while (attempts < 3) {
+        const result = await withTimeout(
+          supabase
+            .from('users')
+            .select('*')
+            .eq('email', user.email?.toLowerCase() || '')
+            .maybeSingle() as unknown as Promise<any>,
+          5000,
+          `Profile fetch attempt ${attempts + 1}`
+        ) as any;
+
+        if (result.data) {
+          profile = result.data;
+          profileError = null;
+          break;
+        }
+
+        if (result.error) {
+          profileError = result.error;
+          // Don't retry on fatal errors, but maybe retry on connection issues?
+          // For now, simple retry logic
+        }
+
+        attempts++;
+        if (attempts < 3) await new Promise(r => setTimeout(r, 1000));
+      }
     } catch (err) {
       profileError = err;
     }
