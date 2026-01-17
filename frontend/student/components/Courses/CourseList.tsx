@@ -18,6 +18,10 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Enrollment handling
+  const [showEnrollModal, setShowEnrollModal] = useState(false);
+  const [enrollCourse, setEnrollCourse] = useState<Course | null>(null);
+
   const canAccessCourses = Boolean(user?.completedAssessment) || user?.role === 'admin';
 
   // Fetch database courses when teacher-courses category is selected
@@ -159,9 +163,7 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
     );
   }
 
-  // Enrollment handling
-  const [showEnrollModal, setShowEnrollModal] = useState(false);
-  const [enrollCourse, setEnrollCourse] = useState<Course | null>(null);
+
 
   const handleTeacherCourseSelect = async (courseId: string) => {
     if (!user?.email) return;

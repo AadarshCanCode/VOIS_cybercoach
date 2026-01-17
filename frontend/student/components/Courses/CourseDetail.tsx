@@ -57,21 +57,41 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
                 return acc;
               }, {});
 
+              console.log('Course data loaded:', data);
               // normalize modules into course.modules for rendering
-              const modules = (data.course_modules ?? data.modules ?? []) as CourseModuleLike[];
-              const normalized = modules.map((m) => ({
-                ...m,
-                completed: !!moduleProgress[m.id]?.completed,
-                testScore: (moduleProgress[m.id]?.quiz_score ?? m.testScore) ?? undefined
-              }));
+              const rawModules = data.course_modules ?? data.modules ?? [];
+              if (!Array.isArray(rawModules)) {
+                console.error('Modules is not an array:', rawModules);
+                throw new Error('Modules data is malformed');
+              }
+              const modules = rawModules as CourseModuleLike[];
+
+              const normalized = modules.map((m) => {
+                if (!m) return null;
+                return {
+                  ...m,
+                  completed: !!moduleProgress[m.id]?.completed,
+                  testScore: (moduleProgress[m.id]?.quiz_score ?? m.testScore) ?? undefined
+                };
+              }).filter(Boolean) as CourseModuleLike[];
 
               setCourse({ ...data, modules: normalized });
             } catch (e) {
               console.error('Failed to load user progress for course detail:', e);
-              setCourse(data);
+              // Fallback to data without progress integration if that fails
+              const rawModules = data.course_modules ?? data.modules ?? [];
+              const modules = Array.isArray(rawModules) ? rawModules : [];
+              setCourse({ ...data, modules });
             }
           } else {
-            setCourse(data);
+            const rawModules = data.course_modules ?? data.modules ?? [];
+            // Ensure modules is an array
+            if (!Array.isArray(rawModules)) {
+              console.warn('Course has no valid modules array, defaulting to empty');
+              setCourse({ ...data, modules: [] });
+            } else {
+              setCourse(data);
+            }
           }
         }
       } catch (e) {

@@ -247,18 +247,28 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
             <CardContent>
               <div className="space-y-6">
                 {activities.length > 0 ? (
-                  activities.map((activity, index) => (
-                    <div key={index} className="relative pl-6 pb-1 last:pb-0 border-l border-[#00FF88]/10 last:border-0">
-                      <div className={`absolute -left-1.25 top-1.5 h-2.5 w-2.5 rounded-full ring-4 ring-black ${activity.type === 'completion' ? 'bg-[#00FF88]' :
-                        activity.type === 'start' ? 'bg-[#00CC66]' :
-                          'bg-[#00B37A]'
-                        }`} />
-                      <div>
-                        <p className="text-sm font-medium text-[#EAEAEA]">{activity.action}</p>
-                        <p className="text-[10px] text-[#00B37A] font-mono mt-0.5">{formatDistanceToNow(new Date(activity.created_at), { addSuffix: true })}</p>
+                  activities.map((activity, index) => {
+                    let timeAgo = 'recently';
+                    try {
+                      if (activity.created_at) {
+                        timeAgo = formatDistanceToNow(new Date(activity.created_at), { addSuffix: true });
+                      }
+                    } catch (e) {
+                      console.warn('Invalid date for activity', activity);
+                    }
+                    return (
+                      <div key={index} className="relative pl-6 pb-1 last:pb-0 border-l border-[#00FF88]/10 last:border-0">
+                        <div className={`absolute -left-1.25 top-1.5 h-2.5 w-2.5 rounded-full ring-4 ring-black ${activity.type === 'completion' ? 'bg-[#00FF88]' :
+                          activity.type === 'start' ? 'bg-[#00CC66]' :
+                            'bg-[#00B37A]'
+                          }`} />
+                        <div>
+                          <p className="text-sm font-medium text-[#EAEAEA]">{activity.action}</p>
+                          <p className="text-[10px] text-[#00B37A] font-mono mt-0.5">{timeAgo}</p>
+                        </div>
                       </div>
-                    </div>
-                  ))
+                    );
+                  })
                 ) : (
                   <p className="text-[#00B37A] text-sm italic">No recent intel.</p>
                 )}

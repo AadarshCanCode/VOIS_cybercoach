@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { MessageSquare, ThumbsUp, User, ArrowLeft } from 'lucide-react';
 import { SEO } from '@/components/SEO/SEO';
+import { useAuth } from '@context/AuthContext';
 
 interface Post {
     id: string;
@@ -18,7 +19,8 @@ interface Post {
 }
 
 export const CommunityPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
-    const [posts] = useState<Post[]>([
+    const { user } = useAuth(); // Get current user
+    const [posts, setPosts] = useState<Post[]>([
         {
             id: '1',
             author: { name: 'Sentinel_AI', role: 'Security Architect' },
@@ -29,6 +31,28 @@ export const CommunityPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             tags: ['AI', 'ZeroDay', 'Heuristics']
         }
     ]);
+    const [newPostContent, setNewPostContent] = useState('');
+
+    const handlePostSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!newPostContent.trim()) return;
+
+        const newPost: Post = {
+            id: Date.now().toString(),
+            author: {
+                name: user?.name || 'Operative',
+                role: user?.role === 'teacher' ? 'Instructor' : 'Student',
+            },
+            content: newPostContent,
+            likes: 0,
+            comments: 0,
+            timestamp: 'Just now',
+            tags: ['General']
+        };
+
+        setPosts([newPost, ...posts]);
+        setNewPostContent('');
+    };
 
     return (
         <div className="min-h-screen bg-[#000000] text-[#EAEAEA] font-sans selection:bg-[#00FF88]/30">
@@ -52,6 +76,34 @@ export const CommunityPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div className="lg:col-span-2 space-y-6">
+                        {/* Create Post Section */}
+                        <div className="bg-[#0A0F0A] border border-[#00FF88]/10 rounded-2xl p-6 mb-8">
+                            <form onSubmit={handlePostSubmit}>
+                                <div className="flex gap-4">
+                                    <div className="h-10 w-10 rounded-full bg-[#00FF88]/10 border border-[#00FF88]/20 flex-shrink-0 flex items-center justify-center">
+                                        <User className="h-5 w-5 text-[#00FF88]" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <textarea
+                                            value={newPostContent}
+                                            onChange={(e) => setNewPostContent(e.target.value)}
+                                            placeholder="Transmit intel to the network..."
+                                            className="w-full bg-transparent border-none focus:ring-0 text-[#EAEAEA] placeholder-[#00B37A]/30 resize-none min-h-[80px]"
+                                        />
+                                        <div className="flex justify-end pt-4 border-t border-[#00FF88]/10">
+                                            <button
+                                                type="submit"
+                                                disabled={!newPostContent.trim()}
+                                                className="px-6 py-2 bg-[#00FF88]/10 hover:bg-[#00FF88]/20 text-[#00FF88] rounded-lg font-bold text-xs uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                Transmit
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
                         {posts.map(post => (
                             <div key={post.id} className="bg-[#0A0F0A] border border-[#00FF88]/10 rounded-2xl p-6 hover:border-[#00FF88]/30 transition-all">
                                 <div className="flex items-center gap-3 mb-4">
@@ -63,7 +115,7 @@ export const CommunityPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                         <p className="text-[10px] text-[#00B37A] uppercase tracking-widest">{post.author.role} • {post.timestamp}</p>
                                     </div>
                                 </div>
-                                <p className="text-[#EAEAEA]/80 mb-4 leading-relaxed">{post.content}</p>
+                                <p className="text-[#EAEAEA]/80 mb-4 leading-relaxed whitespace-pre-wrap">{post.content}</p>
                                 <div className="flex items-center gap-6 text-[#00B37A]">
                                     <button className="flex items-center gap-2 hover:text-[#00FF88] transition-colors">
                                         <ThumbsUp className="h-4 w-4" />
