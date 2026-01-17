@@ -1,19 +1,22 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Shield, BookOpen, Award, Target, Zap, ArrowRight, Brain, Video, Menu, X, Users, Terminal, Activity, Bot, Briefcase, FileText, ClipboardCheck, LayoutDashboard } from 'lucide-react';
+import { Shield, Zap, ArrowRight, Terminal, Activity, Bot, Target, Menu, X, Users, Brain } from 'lucide-react';
 import { useAuth } from '@context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 // UI Components
-const FeatureCard: React.FC<{ icon: React.ReactNode; title: string; copy: string }> = ({ icon, title, copy }) => (
-  <div className="group bg-[#0A0F0A] border border-[#00FF88]/10 hover:border-[#00FF88]/50 rounded-2xl p-8 transition-all hover:bg-[#00FF88]/5 relative overflow-hidden">
-    <div className="absolute top-0 right-0 w-24 h-24 bg-[#00FF88]/5 blur-2xl rounded-full translate-x-12 -translate-y-12 group-hover:bg-[#00FF88]/10 transition-colors" />
-    <div className="w-12 h-12 rounded-xl bg-[#00FF88]/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-[#00FF88]/20 relative z-10">
-      <div className="text-[#00FF88]">{icon}</div>
-    </div>
-    <h3 className="text-xl font-bold text-white mb-3 uppercase tracking-wide relative z-10">{title}</h3>
-    <p className="text-sm text-[#00B37A] leading-relaxed relative z-10">{copy}</p>
-  </div>
+import { Tabs } from '@/components/ui/tabs';
+
+const TabImage = ({ src }: { src: string }) => (
+  <img
+    src={src}
+    alt="Cyber Intel"
+    width="1000"
+    height="1000"
+    className="object-cover object-left-top h-[60%] md:h-[90%] absolute -bottom-10 inset-x-0 w-[90%] rounded-xl mx-auto"
+  />
 );
+
+
 
 
 
@@ -152,10 +155,17 @@ export const LandingPage: React.FC = () => {
             {/* desktop links */}
             <nav className="hidden lg:flex items-center gap-10">
               {['Features', 'Testimonials'].map((item) => (
-                <a key={item} className="text-[11px] font-mono font-bold text-[#00B37A]/60 hover:text-[#00FF88] transition-all uppercase tracking-[0.2em] relative group/item" href={`#${item.toLowerCase()}`}>
+                <button
+                  key={item}
+                  onClick={() => {
+                    const el = document.getElementById(item.toLowerCase());
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="text-[11px] font-mono font-bold text-[#00B37A]/60 hover:text-[#00FF88] transition-all uppercase tracking-[0.2em] relative group/item cursor-pointer"
+                >
                   {item}
                   <span className="absolute -bottom-1 left-0 w-0 h-px bg-[#00FF88] transition-all group-hover/item:w-full" />
-                </a>
+                </button>
               ))}
               <div className="h-5 w-px bg-white/10" />
               <button
@@ -180,9 +190,17 @@ export const LandingPage: React.FC = () => {
             <div id="mobile-menu" className="lg:hidden absolute top-full left-0 right-0 bg-black/95 backdrop-blur-2xl border-b border-white/10 p-8 animate-in slide-in-from-top-4 duration-300">
               <div className="flex flex-col gap-8">
                 {['Features', 'Testimonials'].map((item) => (
-                  <a key={item} className="text-[10px] font-mono font-bold text-[#00B37A] hover:text-[#00FF88] transition-colors uppercase tracking-[0.4em]" href={`#${item.toLowerCase()}`} onClick={() => setMobileOpen(false)}>
+                  <button
+                    key={item}
+                    className="text-[10px] text-left font-mono font-bold text-[#00B37A] hover:text-[#00FF88] transition-colors uppercase tracking-[0.4em]"
+                    onClick={() => {
+                      setMobileOpen(false);
+                      const el = document.getElementById(item.toLowerCase());
+                      if (el) el.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                  >
                     {item}
-                  </a>
+                  </button>
                 ))}
                 <button
                   onClick={() => { setMobileOpen(false); handleGetStarted('student'); }}
@@ -354,17 +372,59 @@ export const LandingPage: React.FC = () => {
               <div className="h-px bg-[#00FF88]/20 flex-1" />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-              <FeatureCard icon={<LayoutDashboard />} title="Dashboard" copy="Real-time operational overview of your cybersecurity progress and missions." />
-              <FeatureCard icon={<BookOpen />} title="Courses" copy="Classified intelligence archives and structured technical learning paths." />
-              <FeatureCard icon={<Terminal />} title="Virtual Labs" copy="Hands-on combat simulations in isolated, high-fidelity environments." />
-              <FeatureCard icon={<Video />} title="Video Intel" copy="On-demand tactical briefings and expert-led technical walkthroughs." />
-              <FeatureCard icon={<Award />} title="Certificates" copy="Earn blockchain-verifiable credentials and field-ready clearance levels." />
-              <FeatureCard icon={<FileText />} title="Mission Notes" copy="Securely document findings, strategies, and key intelligence during operations." />
-              <FeatureCard icon={<Briefcase />} title="Career Vault" copy="Direct uplink to elite cybersecurity opportunities and recruiter networks." />
-              <FeatureCard icon={<Bot />} title="AI Interview" copy="Advanced neural-linked combat prep for high-stakes technical evaluations." />
-              <FeatureCard icon={<FileText />} title="Resume Engine" copy="Forge a battle-tested professional identity with our automated builder." />
-              <FeatureCard icon={<ClipboardCheck />} title="Assessments" copy="Validate your technical efficiency with rigorous performance evaluations." />
+            <div className="h-[20rem] md:h-[40rem] [perspective:1000px] relative b flex flex-col max-w-5xl mx-auto w-full items-start justify-start my-40">
+              <Tabs tabs={[
+                {
+                  title: "Tactical Dashboard",
+                  value: "dashboard",
+                  content: (
+                    <div className="w-full overflow-hidden relative h-full rounded-2xl p-10 text-xl md:text-4xl font-bold text-black bg-linear-to-br from-[#00FF88] to-[#00B37A]">
+                      <p>Tactical Overview</p>
+                      <TabImage src="/tabs/dashboard.png" />
+                    </div>
+                  ),
+                },
+                {
+                  title: "Combat Labs",
+                  value: "labs",
+                  content: (
+                    <div className="w-full overflow-hidden relative h-full rounded-2xl p-10 text-xl md:text-4xl font-bold text-black bg-linear-to-br from-[#00FF88] to-[#00B37A]">
+                      <p>Combat Simulations</p>
+                      <TabImage src="/tabs/course.png" />
+                    </div>
+                  ),
+                },
+                {
+                  title: "Neural Intel",
+                  value: "intel",
+                  content: (
+                    <div className="w-full overflow-hidden relative h-full rounded-2xl p-10 text-xl md:text-4xl font-bold text-black bg-linear-to-br from-[#00FF88] to-[#00B37A]">
+                      <p>Neural Intelligence</p>
+                      <TabImage src="/tabs/chatbot.png" />
+                    </div>
+                  ),
+                },
+                {
+                  title: "Resume Engine",
+                  value: "resume",
+                  content: (
+                    <div className="w-full overflow-hidden relative h-full rounded-2xl p-10 text-xl md:text-4xl font-bold text-black bg-linear-to-br from-[#00FF88] to-[#00B37A]">
+                      <p>Resume Protocol</p>
+                      <TabImage src="/tabs/resume.png" />
+                    </div>
+                  ),
+                },
+                {
+                  title: "Career Vault",
+                  value: "career",
+                  content: (
+                    <div className="w-full overflow-hidden relative h-full rounded-2xl p-10 text-xl md:text-4xl font-bold text-black bg-linear-to-br from-[#00FF88] to-[#00B37A]">
+                      <p>Career Vault</p>
+                      <TabImage src="/tabs/career.png" />
+                    </div>
+                  ),
+                },
+              ]} />
             </div>
           </div>
         </section >
@@ -678,26 +738,26 @@ export const LandingPage: React.FC = () => {
                 <div className="space-y-6">
                   <h4 className="text-white font-black uppercase text-sm tracking-widest">Training Modules</h4>
                   <ul className="space-y-3 text-sm text-[#00B37A]/60 font-medium">
-                    <li><a href="#" className="hover:text-[#00FF88] transition-colors leading-relaxed">Neural Assessment</a></li>
-                    <li><a href="#" className="hover:text-[#00FF88] transition-colors leading-relaxed">High-Fidelity Ranges</a></li>
-                    <li><a href="#" className="hover:text-[#00FF88] transition-colors leading-relaxed">AI Combat Briefs</a></li>
-                    <li><a href="#" className="hover:text-[#00FF88] transition-colors leading-relaxed">Protocol Forge</a></li>
+                    <li><button className="hover:text-[#00FF88] transition-colors leading-relaxed cursor-pointer">Neural Assessment</button></li>
+                    <li><button className="hover:text-[#00FF88] transition-colors leading-relaxed cursor-pointer">High-Fidelity Ranges</button></li>
+                    <li><button className="hover:text-[#00FF88] transition-colors leading-relaxed cursor-pointer">AI Combat Briefs</button></li>
+                    <li><button className="hover:text-[#00FF88] transition-colors leading-relaxed cursor-pointer">Protocol Forge</button></li>
                   </ul>
                 </div>
                 <div className="space-y-6">
                   <h4 className="text-white font-black uppercase text-sm tracking-widest">Resources</h4>
                   <ul className="space-y-3 text-sm text-[#00B37A]/60 font-medium">
-                    <li><a href="#" className="hover:text-[#00FF88] transition-colors leading-relaxed">Intel Archives</a></li>
-                    <li><a href="#" className="hover:text-[#00FF88] transition-colors leading-relaxed">Operative Manual</a></li>
-                    <li><a href="#" className="hover:text-[#00FF88] transition-colors leading-relaxed">Strategic Feed</a></li>
+                    <li><button className="hover:text-[#00FF88] transition-colors leading-relaxed cursor-pointer">Intel Archives</button></li>
+                    <li><button className="hover:text-[#00FF88] transition-colors leading-relaxed cursor-pointer">Operative Manual</button></li>
+                    <li><button className="hover:text-[#00FF88] transition-colors leading-relaxed cursor-pointer">Strategic Feed</button></li>
                   </ul>
                 </div>
                 <div className="space-y-6">
                   <h4 className="text-white font-black uppercase text-sm tracking-widest">Legal</h4>
                   <ul className="space-y-3 text-sm text-[#00B37A]/60 font-medium">
-                    <li><a href="#" className="hover:text-[#00FF88] transition-colors leading-relaxed">Clearance Level</a></li>
-                    <li><a href="#" className="hover:text-[#00FF88] transition-colors leading-relaxed">Data Protocol</a></li>
-                    <li><a href="#" className="hover:text-[#00FF88] transition-colors leading-relaxed">Engagement T&C</a></li>
+                    <li><button className="hover:text-[#00FF88] transition-colors leading-relaxed cursor-pointer">Clearance Level</button></li>
+                    <li><button className="hover:text-[#00FF88] transition-colors leading-relaxed cursor-pointer">Data Protocol</button></li>
+                    <li><button className="hover:text-[#00FF88] transition-colors leading-relaxed cursor-pointer">Engagement T&C</button></li>
                   </ul>
                 </div>
               </div>
