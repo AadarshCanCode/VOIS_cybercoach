@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AuthLayout } from '../../../components/auth/AuthLayout';
 import { useNavigate, Link } from 'react-router-dom';
+import { SEO } from '@/components/SEO/SEO';
 
 interface LoginFormProps {
   userType?: 'student' | 'teacher' | null;
@@ -71,6 +72,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       subtitle={role === 'teacher' ? 'Teacher Login' : 'Student Login'}
       className="max-w-md"
     >
+      <SEO
+        title="Login"
+        description="Access your Cybercoach terminal. Sign in to continue your cybersecurity training and operations."
+      />
       <div className="bg-[#0A0F0A] border border-[#00FF88]/20 rounded-2xl p-8 shadow-[0_0_50px_rgba(0,255,136,0.05)] backdrop-blur-xl relative overflow-hidden group">
         <div className="absolute inset-0 bg-linear-to-b from-[#00FF88]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 

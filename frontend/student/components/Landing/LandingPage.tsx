@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 // UI Components
 import { Tabs } from '@/components/ui/tabs';
+import { SEO } from '@/components/SEO/SEO';
 
 const TabImage = ({ src }: { src: string }) => (
   <img
@@ -119,6 +120,10 @@ export const LandingPage: React.FC = () => {
 
   return (
     <>
+      <SEO
+        title="Forge Your Edge"
+        description="The elite tactical platform for unified cybersecurity defense. Master real-world threats with AI-powered labs and assessments."
+      />
 
       <div className="min-h-screen bg-[#000000] text-[#EAEAEA] font-sans selection:bg-[#00FF88]/30">
         {/* Grid Background */}
@@ -159,7 +164,13 @@ export const LandingPage: React.FC = () => {
                   key={item}
                   onClick={() => {
                     const el = document.getElementById(item.toLowerCase());
-                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                    if (el) {
+                      el.scrollIntoView({ behavior: 'smooth' });
+                      // Clean hash from URL for perfectly clean routes
+                      if (window.location.hash) {
+                        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+                      }
+                    }
                   }}
                   className="text-[11px] font-mono font-bold text-[#00B37A]/60 hover:text-[#00FF88] transition-all uppercase tracking-[0.2em] relative group/item cursor-pointer"
                 >
@@ -196,7 +207,13 @@ export const LandingPage: React.FC = () => {
                     onClick={() => {
                       setMobileOpen(false);
                       const el = document.getElementById(item.toLowerCase());
-                      if (el) el.scrollIntoView({ behavior: 'smooth' });
+                      if (el) {
+                        el.scrollIntoView({ behavior: 'smooth' });
+                        // Clean hash from URL for perfectly clean routes
+                        if (window.location.hash) {
+                          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+                        }
+                      }
                     }}
                   >
                     {item}
