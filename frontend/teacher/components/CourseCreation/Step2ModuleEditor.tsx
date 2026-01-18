@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CourseData } from '../CourseCreation';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@radix-ui/react-tabs';
+import { Sparkles, Loader2, X } from 'lucide-react';
 
 interface StepProps {
     data: CourseData;
@@ -11,6 +12,9 @@ interface StepProps {
 
 export const Step2ModuleEditor: React.FC<StepProps> = ({ data, onUpdate, onNext, onBack }) => {
     const [currentModuleIndex, setCurrentModuleIndex] = useState(0);
+    const [showAiInput, setShowAiInput] = useState(false);
+    const [aiPrompt, setAiPrompt] = useState('');
+    const [isGenerating, setIsGenerating] = useState(false);
 
     // Initialize modules array if empty or size changed
     useEffect(() => {
@@ -56,8 +60,48 @@ export const Step2ModuleEditor: React.FC<StepProps> = ({ data, onUpdate, onNext,
         updateQuiz({ options: newOptions });
     };
 
+    const handleGenerateModule = async () => {
+        if (!aiPrompt.trim()) return;
+
+        setIsGenerating(true);
+        try {
+            const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+            const response = await fetch(`${apiBase}/api/ai/generate-module`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    prompt: aiPrompt,
+                    courseContext: data.title
+                })
+            });
+
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.details || errData.error || 'Failed to generate content');
+            }
+
+            const generatedData = await response.json();
+
+            updateCurrentModule({
+                title: generatedData.title,
+                content: generatedData.content,
+                quiz: generatedData.quiz
+            });
+
+            setShowAiInput(false);
+            setAiPrompt('');
+        } catch (error: any) {
+            console.error('AI Generation failed:', error);
+            alert(`Generation Failed: ${error.message}`);
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
     return (
-        <div className="flex flex-col h-full animate-in fade-in slide-in-from-right-4">
+        <div className="flex flex-col h-full animate-in fade-in slide-in-from-right-4 relative">
             <div className="flex gap-6 h-full">
                 {/* Sidebar for Module Navigation */}
                 <div className="w-64 flex-shrink-0 border-r border-slate-800 pr-6 overflow-y-auto">
@@ -68,8 +112,8 @@ export const Step2ModuleEditor: React.FC<StepProps> = ({ data, onUpdate, onNext,
                                 key={idx}
                                 onClick={() => setCurrentModuleIndex(idx)}
                                 className={`w-full text-left p-3 rounded-lg text-sm transition-all ${currentModuleIndex === idx
-                                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                                        : 'text-slate-400 hover:bg-slate-800'
+                                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                    : 'text-slate-400 hover:bg-slate-800'
                                     }`}
                             >
                                 <div className="font-bold">Module {idx + 1}</div>
@@ -83,6 +127,49 @@ export const Step2ModuleEditor: React.FC<StepProps> = ({ data, onUpdate, onNext,
 
                 {/* Editor Area */}
                 <div className="flex-1 overflow-y-auto">
+                    {/* AI Generation Box */}
+                    {showAiInput ? (
+                        <div className="mb-6 bg-slate-900 border border-emerald-500/30 rounded-xl p-4 animate-in fade-in zoom-in-95">
+                            <div className="flex justify-between items-center mb-2">
+                                <label className="text-sm font-bold text-emerald-400 flex items-center gap-2">
+                                    <Sparkles className="w-4 h-4" />
+                                    Describe what you want in this module
+                                </label>
+                                <button onClick={() => setShowAiInput(false)} className="text-slate-500 hover:text-white">
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={aiPrompt}
+                                    onChange={(e) => setAiPrompt(e.target.value)}
+                                    placeholder="e.g., Explain the concept of Zero Trust Architecture including its core principles..."
+                                    className="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-4 py-2 text-white focus:border-emerald-500 focus:outline-none"
+                                    onKeyDown={(e) => e.key === 'Enter' && handleGenerateModule()}
+                                />
+                                <button
+                                    onClick={handleGenerateModule}
+                                    disabled={isGenerating}
+                                    className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                                    Generate
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="flex justify-end mb-2">
+                            <button
+                                onClick={() => setShowAiInput(true)}
+                                className="text-xs font-medium text-emerald-400 hover:text-emerald-300 flex items-center gap-1 transition-colors"
+                            >
+                                <Sparkles className="w-3 h-3" />
+                                Auto-Fill with AI
+                            </button>
+                        </div>
+                    )}
+
                     <div className="mb-6">
                         <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Module Title</label>
                         <input

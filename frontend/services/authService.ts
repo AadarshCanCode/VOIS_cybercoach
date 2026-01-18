@@ -413,7 +413,23 @@ class AuthService {
     if (!profile) {
       const metadata = user.user_metadata || {};
       const pendingRole = localStorage.getItem('auth_pending_role');
-      const role = pendingRole || metadata.role || 'student';
+
+      // Fallback: Check if we have a valid cached user in localStorage to preserve role
+      const cachedUserStr = localStorage.getItem('cyberSecUser');
+      let cachedRole = null;
+      if (cachedUserStr) {
+        try {
+          const cached = JSON.parse(cachedUserStr);
+          if (cached && cached.email === user.email) {
+            cachedRole = cached.role;
+          }
+        } catch (e) { /* ignore */ }
+      }
+
+      // Priority: Pending Role (Login/Signup) > Metadata Role > Cached Role > 'student'
+      const role = pendingRole || metadata.role || cachedRole || 'student';
+
+      console.warn(`Profile not found during sync. Constructing placeholder with role: ${role}`);
 
       const placeholderUser: any = {
         id: user.id,

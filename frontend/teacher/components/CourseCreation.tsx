@@ -22,7 +22,7 @@ export type CourseData = {
       question: string;
       options: string[];
       correctAnswer: string;
-    };
+    }[];
   }[];
 };
 

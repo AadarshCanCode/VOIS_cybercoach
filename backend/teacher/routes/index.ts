@@ -28,19 +28,14 @@ router.post('/onboarding', async (req: Request, res: Response) => {
       return;
     }
 
-    const existing = await Teacher.findOne({ email });
-    if (existing) {
-      res.status(400).json({ message: 'Teacher profile already exists' });
-      return;
-    }
+    // Upsert: Create if new, Update if exists
+    const teacher = await Teacher.findOneAndUpdate(
+      { email },
+      { email, name, organization },
+      { upsert: true, new: true }
+    );
 
-    const newTeacher = await Teacher.create({
-      email,
-      name,
-      organization
-    });
-
-    res.status(201).json(newTeacher);
+    res.status(200).json(teacher);
   } catch (error: any) {
     console.error('Onboarding Error:', error);
     res.status(500).json({ message: 'Failed to complete onboarding' });

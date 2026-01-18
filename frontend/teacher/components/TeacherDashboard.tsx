@@ -66,10 +66,13 @@ export const TeacherDashboard: React.FC = () => {
 
       if (response.ok) {
         setIsOnboarded(true);
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Server error');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Onboarding failed:', error);
-      alert('Failed to save profile. Please try again.');
+      alert(`Failed to save profile: ${error.message || 'Unknown error'}`);
     } finally {
       setSubmitting(false);
     }

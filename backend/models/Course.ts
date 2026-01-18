@@ -1,16 +1,16 @@
 import mongoose from 'mongoose';
 import { teacherConnection } from '../lib/teacherDb.js';
 
-const quizSchema = new mongoose.Schema({
+const questionSchema = new mongoose.Schema({
     question: { type: String, required: true },
     options: [{ type: String, required: true }],
-    correctAnswer: { type: String, required: true }, // Should match one of the options
+    correctAnswer: { type: String, required: true },
 });
 
 const moduleSchema = new mongoose.Schema({
     title: { type: String, required: true },
-    content: { type: String, required: true }, // Rich text or video URL
-    quiz: { type: quizSchema, required: false }, // Optional quiz per module
+    content: { type: String, required: true },
+    quiz: [questionSchema], // Array of questions
 });
 
 const courseSchema = new mongoose.Schema({
