@@ -1,272 +1,426 @@
-# Cybercoach
+<div align="center">
 
-An AI-powered cybersecurity education platform that transforms passive learning into hands-on, job-ready skills. Featuring adaptive learning paths, proctored assessments, vulnerability labs, and career tools—all in one unified platform.
+<img src="./frontend/public/cybercoach-logo.png" alt="CyberCoach Logo" width="200"/>
 
-![Cybercoach](https://img.shields.io/badge/Cybercoach-Cybersecurity%20Education-00FF88)
-![React](https://img.shields.io/badge/React-18-61dafb)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
-![Vite](https://img.shields.io/badge/Vite-7-646CFF)
+# 🛡️ VOIS CyberCoach
 
-## Features
+### AI-Powered Cybersecurity Education Platform
 
-### 🎓 Learning & Education
+Transform passive learning into hands-on, job-ready cybersecurity skills with adaptive learning paths, proctored assessments, vulnerability labs, and career tools—all in one unified platform.
 
-- **Adaptive Learning Paths** - AI-personalized curriculum that evolves based on performance
-- **Interactive Courses** - Structured modules with video, text, and lab content
-- **Hands-on Labs** - Real vulnerability scenarios and security challenges
-- **Progress Tracking** - Visual dashboards showing completion and skill levels
-- **RAG-Powered AI Tutor** - Answers grounded in OWASP/NIST frameworks
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Express](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
+[![Google Gemini](https://img.shields.io/badge/Google%20Gemini-8E75B2?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/)
 
-### 📝 Assessments & Proctoring
+[Features](#-features) • [Quick Start](#-quick-start) • [Tech Stack](#️-tech-stack) • [Documentation](#-project-structure) • [Team](#-team)
 
-- **Proctored Exams** - Video monitoring with face detection for exam integrity
-- **Adaptive Difficulty** - Questions adjust based on learner performance
-- **Real-time Violation Detection** - Alerts for suspicious behavior during tests
-- **Detailed Analytics** - Performance breakdowns and skill gap analysis
-- **Certificate Generation** - Verifiable completion certificates
+</div>
 
-### 🛡️ Security Tools
+---
 
-- **Vulnerability Scanner** - AI-powered security assessment simulation
-- **Company Verification** - Detective-style fraud detection for job listings
-- **Domain Intelligence** - WHOIS lookups and domain analysis
-- **Content Analysis** - NLP-based scam detection with red/green flags
+## ✨ Features
 
-### 💼 Career Development
+<table>
+<tr>
+<td width="50%">
 
-- **AI Interview Bot** - Practice technical interviews with real-time feedback
-- **Resume Generator** - Create professional cybersecurity resumes
-- **Job Board** - Curated listings with company verification
-- **Technical Questions** - Categorized practice problems
+### 🎓 **Learning & Education**
+- 🧠 **Adaptive Learning Paths** - AI-personalized curriculum
+- 📚 **Interactive Courses** - Video, text, and lab content
+- 🔬 **Hands-on Labs** - Real vulnerability scenarios
+- 📊 **Progress Tracking** - Visual dashboards
+- 🤖 **RAG-Powered AI Tutor** - OWASP/NIST grounded answers
 
-### 👨‍🏫 Teacher Portal
+</td>
+<td width="50%">
 
-- **AI Course Generator** - Auto-generate course outlines with Gemini
-- **Module Management** - Organize video, lab, and text content
-- **Student Analytics** - Track progress and identify struggling learners
-- **Assessment Builder** - Create custom quizzes and exams
+### 📝 **Assessments & Proctoring**
+- 🎥 **Proctored Exams** - Face detection monitoring
+- 🎯 **Adaptive Difficulty** - Performance-based questions
+- 🚨 **Violation Detection** - Real-time alerts
+- 📈 **Detailed Analytics** - Skill gap analysis
+- 🏆 **Certificate Generation** - Verifiable credentials
 
-### 🔧 Admin Portal
+</td>
+</tr>
+<tr>
+<td width="50%">
 
-- **Platform Monitoring** - System health and usage statistics
-- **Proctoring Logs** - Review flagged exam sessions
-- **User Management** - Role-based access control
-- **API Proxy Services** - Secure external API access
+### 🛡️ **Security Tools**
+- 🔍 **Vulnerability Scanner** - AI-powered assessments
+- 🕵️ **Company Verification** - Fraud detection
+- 🌐 **Domain Intelligence** - WHOIS & analysis
+- 📄 **Content Analysis** - NLP scam detection
+
+</td>
+<td width="50%">
+
+### 💼 **Career Development**
+- 🎤 **AI Interview Bot** - Real-time feedback
+- 📝 **Resume Generator** - Professional templates
+- 💼 **Job Board** - Verified listings
+- 💡 **Technical Practice** - Categorized problems
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 👨‍🏫 **Teacher Portal**
+- 🤖 **AI Course Generator** - Auto-generate outlines
+- 📦 **Module Management** - Organize content
+- 📊 **Student Analytics** - Track progress
+- ✏️ **Assessment Builder** - Custom quizzes
+
+</td>
+<td width="50%">
+
+### 🔧 **Admin Portal**
+- 📡 **Platform Monitoring** - System health
+- 🎥 **Proctoring Logs** - Review sessions
+- 👥 **User Management** - Role-based access
+- 🔌 **API Proxy Services** - Secure access
+
+</td>
+</tr>
+</table>
+
+---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js 18+ and npm
-- Git
-- Supabase account (for database)
-- Google Gemini API key (for AI features)
+```bash
+Node.js 18+ | npm | Git | Supabase Account | Google Gemini API Key
+```
 
 ### Installation
 
-1. **Clone the repository**
+1️⃣ **Clone the repository**
+```bash
+git clone https://github.com/AadarshCanCode/VOIS_cybercoach.git
+cd VOIS_cybercoach
+```
 
-   ```bash
-   git clone https://github.com/your-username/cybercoach.git
-   cd cybercoach
-   ```
+2️⃣ **Install dependencies**
+```bash
+npm install
+```
 
-2. **Install dependencies**
+3️⃣ **Set up environment variables**
 
-   ```bash
-   npm install
-   ```
+Create `.env` and `frontend/.env` files:
 
-3. **Set up environment variables**
+```env
+# Supabase Configuration (Required)
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
 
-   Create a `.env` file in the root directory:
+# Google Gemini AI (Required)
+VITE_GEMINI_API_KEY=your-gemini-api-key
+GEMINI_API_KEY=your-gemini-api-key
 
-   ```env
-   # Supabase Configuration (Required)
-   VITE_SUPABASE_URL=https://your-project.supabase.co
-   VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+# MongoDB (Required)
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/
+MONGODB_TEACHER=mongodb+srv://username:password@cluster.mongodb.net/
 
-   # Google Gemini AI (Required for AI features)
-   VITE_GEMINI_API_KEY=your-gemini-api-key
+# ImageKit (Optional - for media storage)
+VITE_IMAGEKIT_PUBLIC_KEY=your-imagekit-public-key
+IMAGEKIT_PRIVATE_KEY=your-imagekit-private-key
 
-   # Backend Port (Optional - defaults to 4000)
-   PORT=4000
-   ```
+# API Keys (Optional)
+GROQ_API_KEY=your-groq-api-key
+SERPAPI_KEY=your-serpapi-key
+```
 
-4. **Start the development server**
+4️⃣ **Download face detection models** (for proctoring)
+```bash
+npm run fetch-faceapi
+```
 
-   ```bash
-   # Run both frontend and backend
-   npm run dev:full
-   ```
+5️⃣ **Start the development server**
+```bash
+npm run dev:full
+```
 
-5. **Open your browser**
+6️⃣ **Open your browser**
+- 🌐 Frontend: [http://localhost:5173](http://localhost:5173)
+- 🔌 Backend API: [http://localhost:4000](http://localhost:4000)
 
-   - Frontend: [http://localhost:5173](http://localhost:5173)
-   - Backend API: [http://localhost:4000](http://localhost:4000)
+---
 
-## 📖 Usage
+## 🛠️ Tech Stack
 
-### Student Workflow
+<div align="center">
 
-1. **Register/Login** - Create an account or sign in
-2. **Take Assessment** - Complete initial skill evaluation with proctoring
-3. **Follow Learning Path** - AI recommends personalized course sequence
+### Frontend
+[![React](https://img.shields.io/badge/React-18.3-61DAFB?style=flat-square&logo=react&logoColor=white)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-6.4-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4.1-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![React Router](https://img.shields.io/badge/React_Router-7.1-CA4245?style=flat-square&logo=reactrouter&logoColor=white)](https://reactrouter.com/)
+
+### Backend
+[![Node.js](https://img.shields.io/badge/Node.js-22+-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Express](https://img.shields.io/badge/Express-5.0-000000?style=flat-square&logo=express&logoColor=white)](https://expressjs.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![tsx](https://img.shields.io/badge/tsx-4.19-000000?style=flat-square)](https://github.com/privatenumber/tsx)
+
+### Database & Auth
+[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?style=flat-square&logo=supabase&logoColor=white)](https://supabase.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=flat-square&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+
+### AI & ML
+[![Google Gemini](https://img.shields.io/badge/Gemini-2.5_Flash-8E75B2?style=flat-square&logo=google&logoColor=white)](https://ai.google.dev/)
+[![face-api.js](https://img.shields.io/badge/face--api.js-Proctoring-FF6B6B?style=flat-square)](https://github.com/justadudewhohacks/face-api.js/)
+[![Natural](https://img.shields.io/badge/Natural-NLP-4CAF50?style=flat-square)](https://naturalnode.github.io/natural/)
+
+### Additional Tools
+[![jsPDF](https://img.shields.io/badge/jsPDF-Certificates-E74C3C?style=flat-square)](https://github.com/parallax/jsPDF)
+[![Cheerio](https://img.shields.io/badge/Cheerio-Web_Scraping-F39C12?style=flat-square)](https://cheerio.js.org/)
+[![Socket.IO](https://img.shields.io/badge/Socket.IO-Real--time-010101?style=flat-square&logo=socket.io&logoColor=white)](https://socket.io/)
+
+</div>
+
+---
+
+---
+
+
+## 📜 Available Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | 🚀 Start Vite frontend dev server |
+| `npm run dev:full` | 🔥 Start both frontend and backend |
+| `npm run build` | 📦 Build frontend for production |
+| `npm run preview` | 👀 Preview production build |
+| `npm run proxy` | 🔌 Run backend server only |
+| `npm run backend:dev` | 🔄 Run backend with hot reload |
+| `npm run backend:build` | 🏗️ Compile TypeScript backend |
+| `npm run lint` | 🔍 Run ESLint |
+| `npm run fetch-faceapi` | 📥 Download face detection models |
+
+---
+
+## 🔌 API Endpoints
+
+<details>
+<summary><b>Student Endpoints</b></summary>
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/student/overview` | Dashboard summary |
+| `GET` | `/api/student/jobs` | Job listings |
+| `GET` | `/api/student/courses` | Available courses |
+| `POST` | `/api/student/progress` | Update progress |
+
+</details>
+
+<details>
+<summary><b>Teacher Endpoints</b></summary>
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/teacher/overview` | Teacher dashboard |
+| `GET` | `/api/teacher/courses/:email` | Teacher's courses |
+| `POST` | `/api/teacher/courses` | Create new course |
+| `GET` | `/api/teacher/analytics/:courseId` | Course analytics |
+| `POST` | `/api/teacher/enroll` | Enroll student |
+
+</details>
+
+<details>
+<summary><b>Admin Endpoints</b></summary>
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/admin/status` | System status |
+| `GET` | `/api/admin/models` | Model availability |
+| `POST` | `/api/admin/proctor/logs` | Record proctoring events |
+
+</details>
+
+<details>
+<summary><b>AI & Utility Endpoints</b></summary>
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/ai/chat` | AI chatbot |
+| `POST` | `/api/ai/generate-quiz` | Generate quiz questions |
+| `POST` | `/api/vu/register` | VU student registration |
+| `GET` | `/api/vu/progress/:email/:courseId` | VU progress |
+
+</details>
+
+---
+
+## 📖 Usage Guide
+
+### 🎓 Student Workflow
+
+```mermaid
+graph LR
+    A[Register/Login] --> B[Take Assessment]
+    B --> C[Get Learning Path]
+    C --> D[Complete Courses]
+    D --> E[Practice Labs]
+    E --> F[AI Interview Prep]
+    F --> G[Apply for Jobs]
+```
+
+1. **Register/Login** - Create account or sign in
+2. **Take Assessment** - Complete proctored skill evaluation
+3. **Follow Learning Path** - AI-recommended course sequence
 4. **Complete Labs** - Hands-on security challenges
-5. **Practice Interviews** - AI-powered technical interview preparation
+5. **Practice Interviews** - AI-powered interview preparation
 6. **Apply for Jobs** - Browse verified job listings
 
-### Teacher Workflow
+### 👨‍🏫 Teacher Workflow
 
 1. **Create Course** - Use AI to generate course outline
 2. **Add Modules** - Upload videos, create labs, write content
 3. **Publish** - Make course available to students
 4. **Monitor** - Track student progress and analytics
 
-## 🛠️ Tech Stack
+### 🔧 Admin Workflow
 
-### Frontend
+1. **Monitor System** - Check platform health
+2. **Review Logs** - Analyze proctoring sessions
+3. **Manage Users** - Handle permissions and roles
 
-- **[React 18](https://react.dev/)** - UI library with hooks
-- **[TypeScript](https://www.typescriptlang.org/)** - Type safety
-- **[Vite](https://vitejs.dev/)** - Fast build tool and dev server
-- **[TailwindCSS](https://tailwindcss.com/)** - Utility-first styling
-- **[Lucide React](https://lucide.dev/)** - Icon library
-- **[React Router](https://reactrouter.com/)** - Client-side routing
+---
 
-### Backend
+## 🔒 Security Features
 
-- **[Express 5](https://expressjs.com/)** - Web framework
-- **[TypeScript](https://www.typescriptlang.org/)** - Type safety
-- **[tsx](https://github.com/privatenumber/tsx)** - Fast TS execution
+- 🎥 **Proctored Assessments** - Face detection prevents exam fraud
+- 🔐 **CORS Configuration** - Secure cross-origin requests
+- 🔑 **Environment Variables** - Secrets never in code
+- 📝 **Type-Safe API** - TypeScript prevents runtime errors
+- ✅ **Authorized Testing Only** - Detective tools require consent
+- 🛡️ **Row Level Security** - Supabase RLS policies
 
-### Database & Auth
-
-- **[Supabase](https://supabase.com/)** - PostgreSQL database + Auth + Real-time
-
-### AI & ML
-
-- **[Google Gemini 2.5 Flash](https://ai.google.dev/)** - AI responses, quiz generation, content analysis
-- **[face-api.js](https://github.com/justadudewhohacks/face-api.js/)** - Face detection for proctoring
-- **[Natural](https://naturalnode.github.io/natural/)** - NLP for content analysis
-
-### Other
-
-- **[PDF.js](https://mozilla.github.io/pdf.js/)** - PDF rendering
-- **[Cheerio](https://cheerio.js.org/)** - Web scraping for company verification
-- **[jsPDF](https://github.com/parallax/jsPDF)** - Certificate generation
-
-## 📁 Project Structure
-
-```text
-cybercoach/
-├── frontend/                # React application
-│   ├── admin/              # Admin dashboard
-│   ├── student/            # Student portal
-│   │   ├── components/     # UI components
-│   │   │   ├── Assessment/ # Proctored tests
-│   │   │   ├── Career/     # Job board, resume
-│   │   │   ├── Chatbot/    # AI tutor
-│   │   │   ├── Course/     # Learning modules
-│   │   │   ├── Landing/    # Homepage
-│   │   │   └── Tools/      # Security tools
-│   │   └── pages/          # Route pages
-│   ├── teacher/            # Teacher dashboard
-│   ├── components/         # Shared components
-│   ├── context/            # React context (Auth)
-│   ├── services/           # API service layer
-│   └── types/              # TypeScript definitions
-├── backend/                 # Express API
-│   ├── admin/              # Admin routes/services
-│   ├── student/            # Student routes/services
-│   ├── teacher/            # Teacher routes/services
-│   └── server.ts           # Entry point
-├── public/                  # Static assets
-│   ├── docs/               # RAG documents
-│   └── models/             # Face detection models
-└── supabase/               # Database migrations
-```
-
-## 📜 Available Scripts
-
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start Vite frontend dev server |
-| `npm run dev:full` | Start both frontend and backend |
-| `npm run build` | Build frontend for production |
-| `npm run preview` | Preview production build |
-| `npm run proxy` | Run backend server |
-| `npm run backend:dev` | Run backend with hot reload |
-| `npm run backend:build` | Compile TypeScript backend |
-| `npm run lint` | Run ESLint |
-| `npm run fetch-faceapi` | Download face detection models |
-
-## 🔌 API Endpoints
-
-### Student
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/student/overview` | Dashboard summary |
-| GET | `/api/student/jobs` | Job listings |
-
-### Teacher
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/teacher/overview` | Teacher dashboard |
-
-### Admin
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/admin/status` | System status |
-| GET | `/api/admin/models` | Model availability |
-| POST | `/api/admin/proctor/logs` | Record proctoring events |
-
-## 🔒 Security
-
-- **Proctored Assessments** - Face detection prevents exam fraud
-- **CORS Configuration** - Secure cross-origin requests
-- **Environment Variables** - Secrets never in code
-- **Type-Safe API** - TypeScript prevents runtime errors
-- **Authorized Testing Only** - Detective tools require consent
+---
 
 ## 🐛 Troubleshooting
 
-### Loading screen stuck
-- Check Supabase credentials in `.env`
-- Ensure `VITE_SUPABASE_URL` starts with `https://`
-- Disable ad blockers for localhost
+<details>
+<summary><b>White screen / Loading stuck</b></summary>
 
-### Backend doesn't start
-- Ensure port 4000 is available
-- Run `npm run backend:build` to check for TS errors
+- ✅ Check Supabase credentials in `.env` and `frontend/.env`
+- ✅ Ensure `VITE_SUPABASE_URL` starts with `https://`
+- ✅ Restart dev server: `Ctrl+C` then `npm run dev:full`
+- ✅ Disable ad blockers for localhost
+- ✅ Clear browser cache
 
-### AI features not working
-- Verify `VITE_GEMINI_API_KEY` is set
-- Check API quota in Google AI Studio
+</details>
 
-### Proctoring not detecting face
-- Run `npm run fetch-faceapi` to download models
-- Ensure camera permissions are granted
+<details>
+<summary><b>Backend doesn't start</b></summary>
+
+- ✅ Ensure port 4000 is available
+- ✅ Run `npm run backend:build` to check for TS errors
+- ✅ Check MongoDB connection string
+- ✅ Verify all environment variables are set
+
+</details>
+
+<details>
+<summary><b>AI features not working</b></summary>
+
+- ✅ Verify `VITE_GEMINI_API_KEY` is set in both `.env` files
+- ✅ Check API quota in [Google AI Studio](https://aistudio.google.com/)
+- ✅ Ensure API key has proper permissions
+
+</details>
+
+<details>
+<summary><b>Proctoring not detecting face</b></summary>
+
+- ✅ Run `npm run fetch-faceapi` to download models
+- ✅ Ensure camera permissions are granted
+- ✅ Check browser console for errors
+- ✅ Try a different browser (Chrome recommended)
+
+</details>
+
+<details>
+<summary><b>Import errors after restructure</b></summary>
+
+- ✅ Check path aliases in `tsconfig.json` and `vite.config.ts`
+- ✅ Ensure imports use `@` aliases (e.g., `@components`, `@services`)
+- ✅ Restart TypeScript server in VS Code
+
+</details>
+
+---
 
 ## 👥 Team
 
-| Name | Portfolio |
-|------|-----------|
-| Piyush Dhoka | [piyush.sparkstudio.co.in](https://piyush.sparkstudio.co.in) |
-| Aadarsh Pathre | [aadarsh.sparkstudio.co.in](https://aadarsh.sparkstudio.co.in) |
-| Varun Inamdar | [varun.sparkstudio.co.in](https://varun.sparkstudio.co.in) |
+<div align="center">
+
+| <img src="https://github.com/piyushdhoka.png" width="100" style="border-radius:50%"/> | <img src="https://github.com/AadarshCanCode.png" width="100" style="border-radius:50%"/> | <img src="https://github.com/varuninamdar.png" width="100" style="border-radius:50%"/> |
+|:---:|:---:|:---:|
+| **Piyush Dhoka** | **Aadarsh Pathre** | **Varun Inamdar** |
+| [Portfolio](https://piyush.sparkstudio.co.in) | [Portfolio](https://aadarsh.sparkstudio.co.in) | [Portfolio](https://varun.sparkstudio.co.in) |
+| [@piyushdhoka](https://github.com/piyushdhoka) | [@AadarshCanCode](https://github.com/AadarshCanCode) | [@varuninamdar](https://github.com/varuninamdar) |
+
+</div>
+
+---
+
+## 🌟 Acknowledgments
+
+- **OWASP** - Security frameworks and guidelines
+- **NIST** - Cybersecurity standards
+- **Google Gemini** - AI capabilities
+- **Supabase** - Database and authentication
+- **MongoDB** - NoSQL database
+- **shadcn/ui** - UI component library
+
+---
 
 ## 📄 License
 
 This project is licensed under the terms specified in the [LICENSE](./LICENSE) file.
 
+---
+
 ## 🤝 Contributing
 
-Contributions are welcome! Please open an issue or submit a pull request.
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
 
 ## 📧 Support
 
-For questions or support, reach out to the development team or open a GitHub issue.
+For questions or support:
+- 📧 Email: support@cybercoach.com
+- 🐛 Issues: [GitHub Issues](https://github.com/AadarshCanCode/VOIS_cybercoach/issues)
+- 💬 Discussions: [GitHub Discussions](https://github.com/AadarshCanCode/VOIS_cybercoach/discussions)
+
+---
+
+<div align="center">
+
+### Made with ❤️ by the VOIS CyberCoach Team
+
+**⭐ Star us on GitHub — it motivates us a lot!**
+
+[![GitHub stars](https://img.shields.io/github/stars/AadarshCanCode/VOIS_cybercoach?style=social)](https://github.com/AadarshCanCode/VOIS_cybercoach/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/AadarshCanCode/VOIS_cybercoach?style=social)](https://github.com/AadarshCanCode/VOIS_cybercoach/network/members)
+
+</div>
