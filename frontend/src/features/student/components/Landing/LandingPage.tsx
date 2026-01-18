@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Zap, ArrowRight, Terminal } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { ArrowRight, Terminal } from 'lucide-react';
 import { useAuth } from '@context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -18,6 +18,7 @@ import {
   MobileNavMenu,
 } from '@components/ui/resizable-navbar';
 import { StickyBanner } from '@components/ui/sticky-banner';
+import LandingTestimonials from './LandingTestimonials';
 
 const TabImage = ({ src }: { src: string }) => (
   <img
@@ -42,50 +43,7 @@ export const LandingPage: React.FC = () => {
   // interactive UI state
 
 
-  // testimonials carousel
-  const testimonials = useMemo(
-    () => [
-      {
-        name: 'Kailas Patil',
-        title: 'Lead Security Architect',
-        quote: 'Cybercoach is a game-changer for high-stakes defensive operations. Its fidelity is unmatched.',
-        initials: 'KP',
-      },
-      {
-        name: 'Shriram Dixit',
-        title: 'Red Team Lead',
-        quote: 'Finally, a platform that matches the intensity of real-world cyber warfare. The AI Interviewer is brutal yet brilliant.',
-        initials: 'SD',
-      },
-      {
-        name: 'Sujal Gundlapelli',
-        title: 'Security Researcher',
-        quote: "The seamless integration of threat intel into training ranges has significantly accelerated our response times.",
-        initials: 'SG',
-      },
-      {
-        name: 'Sanika Sadre',
-        title: 'SOC Manager',
-        quote: 'Monitoring student progress through the Unified Defense Initiative has never been more intuitive.',
-        initials: 'SS',
-      },
-      {
-        name: 'Abhijit Karji',
-        title: 'Cyber Education Specialist',
-        quote: 'Vois CyberCoach is the ultimate bridge between classroom theory and the digital frontlines.',
-        initials: 'AK',
-      },
-    ],
-    []
-  );
-  const [activeTestimonial, setActiveTestimonial] = useState(0);
 
-  useEffect(() => {
-    const t = setInterval(() => {
-      setActiveTestimonial((p) => (p + 1) % testimonials.length);
-    }, 5000);
-    return () => clearInterval(t);
-  }, [testimonials.length]);
 
   const handleGetStarted = (type: 'student' | 'teacher', tab?: string) => {
     if (user) {
@@ -170,6 +128,23 @@ export const LandingPage: React.FC = () => {
               ]}
             />
             <div className="flex items-center gap-3">
+              <NavbarButton
+                href="https://t.me/careerconnet_cyber_bot"
+                variant="outline"
+                className="hidden lg:flex items-center gap-2 border-blue-500/30 text-blue-400 hover:bg-blue-500/10 hover:border-blue-500"
+              >
+                <svg className="h-6 w-6" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="16" cy="16" r="14" fill="url(#telegram_gradient_nav)" />
+                  <path d="M22.9866 10.2088C23.1112 9.40332 22.3454 8.76755 21.6292 9.082L7.36482 15.3448C6.85123 15.5703 6.8888 16.3483 7.42147 16.5179L10.3631 17.4547C10.9246 17.6335 11.5325 17.541 12.0228 17.2023L18.655 12.6203C18.855 12.4821 19.073 12.7665 18.9021 12.9426L14.1281 17.8646C13.665 18.3421 13.7569 19.1512 14.314 19.5005L19.659 22.8523C20.2585 23.2282 21.0297 22.8506 21.1418 22.1261L22.9866 10.2088Z" fill="white" />
+                  <defs>
+                    <linearGradient id="telegram_gradient_nav" x1="16" y1="2" x2="16" y2="30" gradientUnits="userSpaceOnUse">
+                      <stop stopColor="#37BBFE" />
+                      <stop offset="1" stopColor="#007DBB" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <span>Try Bot</span>
+              </NavbarButton>
               <NavbarButton variant="primary" onClick={() => handleGetStarted('student')}>
                 {user ? 'Dashboard' : 'Register'}
               </NavbarButton>
@@ -211,6 +186,17 @@ export const LandingPage: React.FC = () => {
                 Testimonials
               </button>
               <div className="flex w-full flex-col gap-3 pt-4 border-t border-[#00FF88]/10">
+                <NavbarButton
+                  href="https://t.me/careerconnet_cyber_bot"
+                  variant="outline"
+                  className="w-full flex items-center justify-center gap-2 border-blue-500/30 text-blue-400"
+                >
+                  <svg className="h-6 w-6" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="16" cy="16" r="14" fill="#007DBB" />
+                    <path d="M22.9866 10.2088C23.1112 9.40332 22.3454 8.76755 21.6292 9.082L7.36482 15.3448C6.85123 15.5703 6.8888 16.3483 7.42147 16.5179L10.3631 17.4547C10.9246 17.6335 11.5325 17.541 12.0228 17.2023L18.655 12.6203C18.855 12.4821 19.073 12.7665 18.9021 12.9426L14.1281 17.8646C13.665 18.3421 13.7569 19.1512 14.314 19.5005L19.659 22.8523C20.2585 23.2282 21.0297 22.8506 21.1418 22.1261L22.9866 10.2088Z" fill="white" />
+                  </svg>
+                  <span>Try Telegram Bot</span>
+                </NavbarButton>
                 <NavbarButton
                   onClick={() => { setMobileOpen(false); handleGetStarted('student'); }}
                   variant="primary"
@@ -363,102 +349,24 @@ export const LandingPage: React.FC = () => {
 
 
 
-        {/* Global Cyber Forge Section - Simplified */}
-        <section className="py-24 px-6 bg-[#050505] relative overflow-hidden">
-          <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-[#00FF88]/20 to-transparent" />
 
-          <div className="max-w-4xl mx-auto text-center space-y-8 relative z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[#00FF88]/5 border border-[#00FF88]/20 text-[#00FF88] text-[10px] font-mono uppercase tracking-[0.2em] mx-auto">
-              Intelligence Uplink
-            </div>
-
-            <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter leading-none">
-              CYBERSEC <br />
-              <span className="text-[#00FF88]">UPDATE BOT</span>
-            </h2>
-
-            <p className="text-xl text-gray-400 leading-relaxed font-light max-w-2xl mx-auto">
-              Stay ahead of the curve with our dedicated Telegram intelligence bot. Get real-time cybersecurity updates, threat alerts, and career insights delivered directly to your device.
-            </p>
-
-            <div className="pt-8 flex justify-center">
-              <a
-                href="https://t.me/careerconnet_cyber_bot"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group relative inline-flex items-center gap-4 px-12 py-6 bg-[#00FF88] hover:bg-[#00CC66] text-black rounded-full font-black text-lg tracking-widest uppercase transition-all hover:scale-105 shadow-[0_0_30px_rgba(0,255,136,0.3)] overflow-hidden"
-              >
-                <svg className="h-8 w-8 relative z-10" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="16" cy="16" r="14" fill="url(#telegram_gradient)" />
-                  <path d="M22.9866 10.2088C23.1112 9.40332 22.3454 8.76755 21.6292 9.082L7.36482 15.3448C6.85123 15.5703 6.8888 16.3483 7.42147 16.5179L10.3631 17.4547C10.9246 17.6335 11.5325 17.541 12.0228 17.2023L18.655 12.6203C18.855 12.4821 19.073 12.7665 18.9021 12.9426L14.1281 17.8646C13.665 18.3421 13.7569 19.1512 14.314 19.5005L19.659 22.8523C20.2585 23.2282 21.0297 22.8506 21.1418 22.1261L22.9866 10.2088Z" fill="white" />
-                  <defs>
-                    <linearGradient id="telegram_gradient" x1="16" y1="2" x2="16" y2="30" gradientUnits="userSpaceOnUse">
-                      <stop stopColor="#37BBFE" />
-                      <stop offset="1" stopColor="#007DBB" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-                <span className="relative z-10">Open Telegram Bot</span>
-                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-              </a>
-            </div>
-          </div>
-
-          {/* Decorative background element */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-[#00FF88]/5 blur-[120px] rounded-full pointer-events-none" />
-        </section>
 
         {/* Testimonials */}
-        <section id="testimonials" className="py-20 px-6 relative overflow-hidden">
+        <section id="testimonials" className="py-24 px-6 relative overflow-hidden">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-linear-to-r from-transparent via-[#00FF88]/20 to-transparent" />
 
-          <div className="max-w-5xl mx-auto relative z-10">
-            <div className="text-center mb-12 space-y-3">
-              <div className="w-10 h-1 bg-[#00FF88] mx-auto" />
-              <h2 className="text-3xl md:text-4xl font-black text-white uppercase tracking-tighter">
+          <div className="max-w-6xl mx-auto relative z-10">
+            <div className="text-center mb-16 space-y-4">
+              <div className="w-12 h-1 bg-[#00FF88] mx-auto rounded-full" />
+              <h2 className="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter">
                 OPERATIONAL <span className="text-[#00FF88]">FEEDBACK</span>
               </h2>
+              <p className="text-gray-400 max-w-2xl mx-auto">
+                Voices from the frontlines of digital defense.
+              </p>
             </div>
 
-            <div className="relative">
-              <div className="bg-[#0A0F0A] border border-[#00FF88]/10 rounded-[2.5rem] p-8 md:p-16 shadow-2xl overflow-hidden group">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-[#00FF88]/5 blur-2xl rounded-full" />
-
-                <div className="relative z-10 space-y-8">
-                  <div className="flex justify-center gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Zap key={i} className="h-4 w-4 text-[#00FF88] fill-[#00FF88]" />
-                    ))}
-                  </div>
-
-                  <blockquote className="text-xl md:text-2xl font-light text-white leading-relaxed text-center italic">
-                    "{testimonials[activeTestimonial].quote}"
-                  </blockquote>
-
-                  <div className="flex flex-col md:flex-row items-center justify-center gap-6 pt-8 border-t border-white/5">
-                    <div className="w-16 h-16 bg-linear-to-br from-[#00FF88]/20 to-[#00FF88]/5 rounded-2xl border border-[#00FF88]/20 flex items-center justify-center text-xl font-black text-[#00FF88]">
-                      {testimonials[activeTestimonial].initials}
-                    </div>
-                    <div className="text-center md:text-left">
-                      <div className="text-xl font-black text-white uppercase tracking-tight">{testimonials[activeTestimonial].name}</div>
-                      <div className="text-[10px] font-mono text-[#00B37A] mt-1 tracking-widest uppercase opacity-60">{testimonials[activeTestimonial].title}</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Controls */}
-              <div className="flex justify-center gap-3 mt-8">
-                {testimonials.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setActiveTestimonial(i)}
-                    className={`h-1.5 transition-all duration-500 rounded-full ${i === activeTestimonial ? 'bg-[#00FF88] w-8' : 'bg-[#00FF88]/10 w-3'}`}
-                    aria-label={`Go to testimonial ${i + 1}`}
-                  />
-                ))}
-              </div>
-            </div>
+            <LandingTestimonials />
           </div>
         </section>
 
