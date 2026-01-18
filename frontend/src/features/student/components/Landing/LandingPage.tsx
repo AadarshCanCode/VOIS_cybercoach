@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Shield, Zap, ArrowRight, Terminal, Users, Activity } from 'lucide-react';
+import { Zap, ArrowRight, Terminal } from 'lucide-react';
 import { useAuth } from '@context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -17,6 +17,7 @@ import {
   MobileNavToggle,
   MobileNavMenu,
 } from '@components/ui/resizable-navbar';
+import { StickyBanner } from '@components/ui/sticky-banner';
 
 const TabImage = ({ src }: { src: string }) => (
   <img
@@ -32,24 +33,7 @@ const TabImage = ({ src }: { src: string }) => (
 
 
 
-const ActionCard: React.FC<{ icon: React.ReactNode; title: string; subtitle: string; description: string; onClick: () => void }> = ({ icon, title, subtitle, description, onClick }) => (
-  <button
-    onClick={onClick}
-    className="group relative flex flex-col items-center text-center p-8 bg-[#0A0F0A] border border-[#00FF88]/20 hover:border-[#00FF88] rounded-2xl transition-all hover:bg-[#00FF88]/5 hover:shadow-[0_0_50px_rgba(0,255,136,0.1)] hover:-translate-y-2 w-full"
-  >
-    <div className="absolute inset-0 bg-linear-to-b from-[#00FF88]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
-    <div className="mb-6 p-6 bg-[#00FF88]/10 rounded-full border border-[#00FF88]/20 group-hover:scale-110 transition-transform duration-300 shadow-[0_0_20px_rgba(0,255,136,0.1)]">
-      {icon}
-    </div>
-    <h3 className="text-2xl font-black text-white uppercase tracking-wide mb-2 group-hover:text-[#00FF88] transition-colors">{title}</h3>
-    <div className="text-xs font-mono text-[#00B37A] mb-4 tracking-widest">{subtitle}</div>
-    <p className="text-sm text-[#EAEAEA]/80 leading-relaxed max-w-xs">{description}</p>
 
-    <div className="mt-6 flex items-center gap-2 text-xs font-bold text-[#00FF88] uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
-      Initialize <ArrowRight className="h-3 w-3" />
-    </div>
-  </button>
-);
 
 export const LandingPage: React.FC = () => {
   const { user } = useAuth();
@@ -136,6 +120,17 @@ export const LandingPage: React.FC = () => {
       />
 
       <div className="min-h-screen bg-[#000000] text-[#EAEAEA] font-[system-ui] selection:bg-[#00FF88]/30">
+        <StickyBanner className="bg-blue-600 border-none">
+          <p className="text-sm font-medium text-white tracking-wide text-center px-4">
+            Announcing the Cybercoach Community. Connect with elite operatives and share tactical intel.{" "}
+            <button
+              onClick={() => navigate('/community')}
+              className="text-white font-black hover:underline ml-2 uppercase tracking-tighter"
+            >
+              Join Community &rarr;
+            </button>
+          </p>
+        </StickyBanner>
         {/* Grid Background */}
         <div className="fixed inset-0 bg-[linear-gradient(to_right,#00FF8805_1px,transparent_1px),linear-gradient(to_bottom,#00FF8805_1px,transparent_1px)] bg-size-[32px_32px] pointer-events-none" />
 
@@ -302,45 +297,9 @@ export const LandingPage: React.FC = () => {
           <div className="absolute top-0 left-0 w-full h-px bg-linear-to-r from-transparent via-[#00FF88]/20 to-transparent" />
 
           <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-black text-white uppercase tracking-tight mb-4">
-                Tactical <span className="text-[#00FF88]">Capabilities</span>
-              </h2>
-              <p className="text-[#00B37A] max-w-2xl mx-auto font-light">
-                Equip yourself with advanced tools and training modules designed for modern cyber warfare.
-              </p>
-            </div>
 
-            {/* Main Actions - Prominent Display */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24">
-              <ActionCard
-                icon={<Users className="h-10 w-10 text-[#00FF88]" />}
-                title="Join Network"
-                subtitle="ESTABLISH UPLINK"
-                description="Connect with elite operatives. Share intel, bounties, and strategies in the global feed."
-                onClick={() => navigate('/community')}
-              />
-              <ActionCard
-                icon={<Shield className="h-10 w-10 text-[#00FF88]" />}
-                title="Verify Target"
-                subtitle="SCAN DATABASE"
-                description="Validate company credentials and security clearance levels against the central registry."
-                onClick={() => navigate('/verify-target')}
-              />
-              <ActionCard
-                icon={<Activity className="h-10 w-10 text-[#00FF88]" />}
-                title="Analyze Target"
-                subtitle="VULNERABILITY SCAN"
-                description="Deploy AI-driven heuristic analysis on target domains to identify potential vectors."
-                onClick={() => navigate('/analyze-target')}
-              />
-            </div>
 
-            <div className="flex items-center gap-4 mb-12">
-              <div className="h-px bg-[#00FF88]/20 flex-1" />
-              <span className="text-xs font-mono text-[#00B37A] uppercase tracking-widest">System Modules</span>
-              <div className="h-px bg-[#00FF88]/20 flex-1" />
-            </div>
+
 
             <div className="h-[20rem] md:h-[40rem] [perspective:1000px] relative b flex flex-col max-w-5xl mx-auto w-full items-start justify-start my-40">
               <Tabs tabs={[
