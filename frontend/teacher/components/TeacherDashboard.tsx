@@ -22,7 +22,7 @@ export const TeacherDashboard: React.FC = () => {
 
   const fetchCourses = async () => {
     try {
-      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+      const apiBase = import.meta.env.VITE_API_URL || '';
       const response = await fetch(`${apiBase}/api/teacher/courses/${user?.email}`);
       if (response.ok) {
         const data = await response.json();
@@ -35,7 +35,7 @@ export const TeacherDashboard: React.FC = () => {
 
   const checkOnboardingStatus = async () => {
     try {
-      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+      const apiBase = import.meta.env.VITE_API_URL || '';
       const response = await fetch(`${apiBase}/api/teacher/profile/${user?.email}`);
       const data = await response.json();
       setIsOnboarded(data.exists);
@@ -53,7 +53,7 @@ export const TeacherDashboard: React.FC = () => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+      const apiBase = import.meta.env.VITE_API_URL || '';
       const response = await fetch(`${apiBase}/api/teacher/onboarding`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

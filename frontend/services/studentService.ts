@@ -117,7 +117,8 @@ class StudentService {
             const vuEmail = typeof localStorage !== 'undefined' ? localStorage.getItem('vu_student_email') : null;
             if (vuEmail) {
                 try {
-                    const response = await fetch(`http://localhost:4000/api/vu/student/${vuEmail}`);
+                    const apiBase = import.meta.env.VITE_API_URL || '';
+                    const response = await fetch(`${apiBase}/api/vu/student/${vuEmail}`);
                     if (response.ok) {
                         const student = await response.json();
                         if (student && student.progress && student.progress.length > 0) {

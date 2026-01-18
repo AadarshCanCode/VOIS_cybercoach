@@ -183,7 +183,7 @@ class CourseService {
   async getAllCourses(): Promise<Course[]> {
     try {
       console.log('Starting getAllCourses query from MongoDB...');
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+      const API_URL = import.meta.env.VITE_API_URL || '';
 
       const response = await fetch(`${API_URL}/api/teacher/courses/public/all`);
       if (!response.ok) {
@@ -221,7 +221,7 @@ class CourseService {
 
     try {
       // 1. Try fetching from MongoDB API (New System)
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+      const API_URL = import.meta.env.VITE_API_URL || '';
       const response = await fetch(`${API_URL}/api/teacher/courses/public/${id}`);
 
       if (response.ok) {

@@ -24,7 +24,7 @@ export const CourseAnalytics: React.FC<CourseAnalyticsProps> = ({ courseId, cour
 
     const fetchAnalytics = async () => {
         try {
-            const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+            const apiBase = import.meta.env.VITE_API_URL || '';
             const response = await fetch(`${apiBase}/api/teacher/analytics/${courseId}`);
             if (response.ok) {
                 const data = await response.json();

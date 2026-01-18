@@ -21,7 +21,7 @@ export const EnrollmentModal: React.FC<EnrollmentModalProps> = ({ courseId, cour
         setError(null);
 
         try {
-            const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+            const apiBase = import.meta.env.VITE_API_URL || '';
             const response = await fetch(`${apiBase}/api/teacher/enroll`, {
                 method: 'POST',
                 headers: {

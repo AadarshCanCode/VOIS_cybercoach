@@ -170,7 +170,7 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
 
     // Check if already enrolled
     try {
-      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+      const apiBase = import.meta.env.VITE_API_URL || '';
       const response = await fetch(`${apiBase}/api/teacher/enrollment/${courseId}/${user.email}`);
       const data = await response.json();
 

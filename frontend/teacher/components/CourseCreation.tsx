@@ -48,7 +48,7 @@ export const CourseCreation: React.FC<CourseCreationProps> = ({ onCancel, onSucc
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+      const apiBase = import.meta.env.VITE_API_URL || '';
       const response = await fetch(`${apiBase}/api/teacher/courses`, {
         method: 'POST',
         headers: {
