@@ -18,7 +18,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@shared/components/ui/dropdown-menu"
-import { User, LogOut, Settings, CreditCard } from "lucide-react"
+import { User, LogOut, CreditCard } from "lucide-react"
 
 interface DashboardHeaderProps {
     activeTab: string
@@ -37,8 +37,7 @@ export function DashboardHeader({ activeTab, onTabChange }: DashboardHeaderProps
             case 'videos': return 'Videos'
             case 'assessment': return 'Assessment'
             case 'profile': return 'Profile'
-            case 'pricing': return 'Pricing'
-            case 'notes': return 'Notes'
+
             default: return tab.charAt(0).toUpperCase() + tab.slice(1)
         }
     }
@@ -58,7 +57,10 @@ export function DashboardHeader({ activeTab, onTabChange }: DashboardHeaderProps
                                     onTabChange('dashboard');
                                 }}
                             >
-                                Cybercoach
+                                <div className="flex items-center gap-2">
+                                    <img src="/cybercoach-logo.png" alt="Logo" className="h-5 w-5 object-contain" />
+                                    <span>Cybercoach</span>
+                                </div>
                             </BreadcrumbLink>
                         </BreadcrumbItem>
                         <BreadcrumbSeparator className="hidden md:block" />
@@ -93,10 +95,6 @@ export function DashboardHeader({ activeTab, onTabChange }: DashboardHeaderProps
                         <DropdownMenuItem onClick={() => onTabChange('profile')}>
                             <User className="mr-2 h-4 w-4" />
                             <span>Profile</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onTabChange('notes')}>
-                            <Settings className="mr-2 h-4 w-4" />
-                            <span>Notes</span>
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => onTabChange('pricing')}>
                             <CreditCard className="mr-2 h-4 w-4" />

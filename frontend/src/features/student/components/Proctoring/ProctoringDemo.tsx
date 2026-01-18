@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import Proctoring from './Proctoring';
+import { Proctoring } from './ProctoringEngine';
 import ViolationNotification from './ViolationNotification';
 
 export const ProctoringDemo: React.FC = () => {

@@ -5,6 +5,7 @@ import 'dotenv/config';
 import studentRoutes from './features/student/routes/index.js';
 import vuRoutes from './routes/vu.routes.js';
 import aiRoutes from './routes/ai.routes.js';
+import imagekitRoutes from './routes/imagekit.routes.js';
 import connectDB from './shared/lib/mongodb.js';
 
 const app = express();
@@ -37,6 +38,7 @@ app.use(express.json({ limit: '1mb' }));
 app.use('/api/student', studentRoutes);
 app.use('/api/vu', vuRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/imagekit', imagekitRoutes);
 
 app.get('/', (_req: Request, res: Response): void => {
   res.json({

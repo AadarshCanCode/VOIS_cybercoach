@@ -63,11 +63,11 @@ export function AppSidebar({ activeTab, onTabChange, ...props }: AppSidebarProps
                     id: "videos",
                     icon: Video,
                 },
-                {
-                    title: "Assessment",
-                    id: "assessment",
-                    icon: ClipboardCheck,
-                },
+                // {
+                //     title: "Assessment",
+                //     id: "assessment",
+                //     icon: ClipboardCheck,
+                // },
             ],
         },
         {

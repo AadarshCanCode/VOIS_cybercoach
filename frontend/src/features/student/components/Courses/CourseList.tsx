@@ -1,31 +1,50 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Clock, Award, Lock, CheckCircle } from 'lucide-react';
-import { courseCategories, getCoursesByCategory, type CourseData } from '@data/courses';
-import { useAuth } from '@context/AuthContext';
+// import { useAuth } from '@context/AuthContext';
+
+export interface CourseData {
+  id: string;
+  title: string;
+  category: 'vishwakarma-university';
+  url: string;
+  description: string;
+  disclaimer: string;
+  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  duration: string;
+  skills: string[];
+}
+
+export interface CourseCategory {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  color: string;
+}
+
+const courseCategories: CourseCategory[] = [
+  {
+    id: 'vishwakarma-university',
+    title: 'Vishwakarma University',
+    description: 'Exclusive curriculum and specialized tracks from VU',
+    icon: '🎓',
+    color: 'from-purple-500/20 to-pink-500/20'
+  }
+];
 
 interface CourseListProps {
   onCourseSelect: (courseId: string) => void;
 }
 
 export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
-  const { user } = useAuth();
+  // const { user } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedCourse, setSelectedCourse] = useState<CourseData | null>(null);
 
-  // Admin role check is also likely to be removed if we are removing admin feature, but purely for this file, 
-  // if 'admin' role is still in types (which I haven't checked fully for backend, but for frontend types it might remain or be removed).
-  // I will assume for now we just want to remove teacher stuff.
-  // Wait, the user said "backend folder also contains teacher and admin", implying remove BOTH.
-  // Start with checking if user.role === 'admin' is valid. 
-  // user.role type was changed to just 'student' in frontend types.ts earlier. 
-  // So `user?.role === 'admin'` is actually a type error now.
-  const canAccessCourses = Boolean(user?.completedAssessment);
-
-
+  const canAccessCourses = true;
 
   // Course Disclaimer Modal
   if (selectedCourse) {
-    // Double-check access even in disclaimer view
     if (!canAccessCourses) {
       setSelectedCourse(null);
       return null;
@@ -34,7 +53,6 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
     return (
       <div className="p-6 min-h-screen animate-fade-in text-[#EAEAEA]">
         <div className="max-w-4xl mx-auto space-y-6">
-          {/* Back Button */}
           <button
             onClick={() => setSelectedCourse(null)}
             className="flex items-center space-x-2 text-[#00B37A] hover:text-[#00FF88] transition-colors group"
@@ -43,7 +61,6 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
             <span className="font-medium">Back to Courses</span>
           </button>
 
-          {/* Course Details Card */}
           <div className="bg-[#0A0F0A] rounded-xl border border-[#00FF88]/10 overflow-hidden">
             <div className="p-8">
               <div className="flex items-start justify-between mb-6">
@@ -70,7 +87,6 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
                 {selectedCourse.description}
               </p>
 
-              {/* Skills */}
               <div className="mb-6">
                 <h3 className="text-sm font-bold text-[#00FF88] uppercase tracking-wider mb-3">What You'll Learn</h3>
                 <div className="flex flex-wrap gap-2">
@@ -82,7 +98,6 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
                 </div>
               </div>
 
-              {/* Disclaimer */}
               <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 mb-6">
                 <div className="flex items-start space-x-3">
                   <div className="flex-shrink-0 mt-0.5">
@@ -99,7 +114,6 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
                 </div>
               </div>
 
-              {/* Action Button */}
               <button
                 onClick={() => {
                   if (selectedCourse.id === 'vu-web-security') {
@@ -124,23 +138,32 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
     );
   }
 
-
-
-
-
   // Show courses for selected category
   if (selectedCategory) {
-    // Special handling for teacher courses from database
-
-
-    // Original handling for external courses (cybersecurity, ai-ml)
-    const courses = getCoursesByCategory(selectedCategory);
     const category = courseCategories.find(c => c.id === selectedCategory);
+
+    // Define courses dynamically based on category
+    let courses: CourseData[] = [];
+
+    if (selectedCategory === 'vishwakarma-university') {
+      courses = [
+        {
+          id: 'vu-web-security',
+          title: 'Web Application Security',
+          category: 'vishwakarma-university',
+          url: '#',
+          description: 'Learn to identify and exploit vulnerabilities in web applications, understanding the OWASP Top 10 and secure coding practices, tailored for VU curriculum.',
+          disclaimer: 'Exclusive for VU students. This course contains practical exercises involving security testing.',
+          difficulty: 'Intermediate',
+          duration: '8 weeks',
+          skills: ['OWASP Top 10', 'SQL Injection', 'XSS', 'VU-Certified']
+        }
+      ];
+    }
 
     return (
       <div className="p-6 min-h-screen animate-fade-in text-[#EAEAEA]">
         <div className="max-w-6xl mx-auto space-y-8">
-          {/* Back Button */}
           <button
             onClick={() => setSelectedCategory(null)}
             className="flex items-center space-x-2 text-[#00B37A] hover:text-[#00FF88] transition-colors group"
@@ -149,7 +172,6 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
             <span className="font-medium">Back to Categories</span>
           </button>
 
-          {/* Category Header */}
           <div className="border-b border-[#00FF88]/10 pb-6">
             <h1 className="text-3xl font-black tracking-tighter text-white uppercase mb-2">
               <span className="mr-3">{category?.icon}</span>
@@ -158,16 +180,14 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
             <p className="text-[#00B37A] font-mono text-sm">{category?.description.toUpperCase()}</p>
           </div>
 
-          {/* Courses Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {courses.map((course) => (
+            {courses.length > 0 ? courses.map((course) => (
               <div
                 key={course.id}
                 onClick={() => canAccessCourses && setSelectedCourse(course)}
                 className={`bg-[#0A0F0A] rounded-xl border border-[#00FF88]/10 overflow-hidden group transition-all duration-300 relative ${canAccessCourses ? 'cursor-pointer hover:border-[#00FF88]/30' : 'opacity-40 cursor-not-allowed'
                   }`}
               >
-                {/* Lock Overlay for individual courses */}
                 {!canAccessCourses && (
                   <div className="absolute inset-0 bg-black/70 backdrop-blur-sm z-10 flex items-center justify-center">
                     <div className="text-center">
@@ -208,7 +228,6 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
                     )}
                   </div>
 
-                  {/* Skills Preview */}
                   <div className="mt-4 pt-4 border-t border-[#00FF88]/10">
                     <div className="flex flex-wrap gap-1.5">
                       {course.skills.slice(0, 3).map((skill, idx) => (
@@ -225,7 +244,11 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
                   </div>
                 </div>
               </div>
-            ))}
+            )) : (
+              <div className="col-span-full py-12 text-center text-muted-foreground">
+                <p>No courses available in this category yet.</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -236,7 +259,6 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
   return (
     <div className="p-6 min-h-screen animate-fade-in text-[#EAEAEA]">
       <div className="max-w-6xl mx-auto space-y-8">
-        {/* Header */}
         <div className="flex items-center justify-between border-b border-[#00FF88]/10 pb-6">
           <div>
             <h1 className="text-3xl font-black tracking-tighter text-white uppercase">
@@ -249,7 +271,6 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
           </div>
         </div>
 
-        {/* Assessment notice */}
         {!canAccessCourses && (
           <div className="bg-[#0A0F0A] border border-yellow-500/20 rounded-xl p-6 relative overflow-hidden group">
             <div className="absolute inset-0 bg-yellow-500/5 group-hover:bg-yellow-500/10 transition-colors" />
@@ -269,10 +290,9 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
           </div>
         )}
 
-        {/* Categories Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {courseCategories.map((category) => {
-            const courses = getCoursesByCategory(category.id);
+            const courses: any[] = []; // Placeholder
 
             return (
               <div
@@ -281,7 +301,6 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
                 className={`bg-gradient-to-br ${category.color} rounded-xl border border-[#00FF88]/10 overflow-hidden group transition-all duration-300 relative ${canAccessCourses ? 'cursor-pointer hover:border-[#00FF88]/30' : 'opacity-40 cursor-not-allowed'
                   }`}
               >
-                {/* Lock Overlay */}
                 {!canAccessCourses && (
                   <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-10 flex items-center justify-center">
                     <div className="text-center">
@@ -307,10 +326,12 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
                   </div>
 
                   <div className="space-y-3 mb-6">
-                    <div className="flex items-center space-x-2 text-sm text-[#EAEAEA]/60">
-                      <CheckCircle className="h-4 w-4 text-[#00FF88]" />
-                      <span>{courses.length} Comprehensive Courses</span>
-                    </div>
+                    {courses.length > 0 && (
+                      <div className="flex items-center space-x-2 text-sm text-[#EAEAEA]/60">
+                        <CheckCircle className="h-4 w-4 text-[#00FF88]" />
+                        <span>{courses.length} Comprehensive Courses</span>
+                      </div>
+                    )}
                     <div className="flex items-center space-x-2 text-sm text-[#EAEAEA]/60">
                       <Clock className="h-4 w-4 text-[#00FF88]" />
                       <span>Self-paced Learning</span>
@@ -321,7 +342,7 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
                     </div>
                   </div>
 
-                  {canAccessCourses && (
+                  {canAccessCourses && courses.length > 0 && (
                     <div className="flex items-center justify-between pt-4 border-t border-[#00FF88]/10">
                       <span className="text-[#00B37A] text-sm font-mono">EXPLORE {courses.length} COURSES</span>
                       <svg className="h-6 w-6 text-[#00FF88] group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">

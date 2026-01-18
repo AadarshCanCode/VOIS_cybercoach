@@ -3,8 +3,9 @@ import { useAuth } from '@context/AuthContext';
 import { LandingPage } from './Landing/LandingPage';
 import { Dashboard } from './Dashboard/Dashboard';
 import { DashboardHeader } from "@shared/components/layout/DashboardHeader"
-import { AssessmentTest } from './Assessment/AssessmentTest';
-import { ProctoringDemo } from './Assessment/ProctoringDemo';
+// import { AssessmentTest } from './Assessment/AssessmentTest'; // Removed
+// import { ProctoringDemo } from './Assessment/ProctoringDemo'; // Removed or kept if desired? User said keep proctoring.
+import { ProctoringDemo } from './Proctoring/ProctoringDemo';
 import { CourseList } from './Courses/CourseList';
 import { CourseDetail } from './Courses/CourseDetail';
 import { LabsList } from './Labs/LabsList';
@@ -13,7 +14,6 @@ import { Certificates } from './Certificates/Certificates';
 import { Profile } from './Profile/Profile';
 import { VideoLibrary } from './Video/VideoLibrary';
 import { TechnicalQuestions } from './TechnicalInterview/TechnicalQuestions';
-import { NotesTab } from './Notes/NotesTab';
 import { CommunityPage } from './Community/CommunityPage';
 import { SidebarInset, SidebarProvider } from "@shared/components/ui/sidebar"
 import { AppSidebar } from "@shared/components/layout/AppSidebar"
@@ -83,8 +83,7 @@ export const StudentAppContent: React.FC<StudentAppContentProps> = ({ initialTab
     switch (activeTab) {
       case 'dashboard':
         return <Dashboard onTabChange={setActiveTab} />;
-      case 'assessment':
-        return <AssessmentTest />;
+
       case 'proctor-demo':
         return <ProctoringDemo />;
       case 'courses':
@@ -97,8 +96,6 @@ export const StudentAppContent: React.FC<StudentAppContentProps> = ({ initialTab
         return <TechnicalQuestions />;
       case 'certificates':
         return <Certificates />;
-      case 'notes':
-        return <NotesTab />;
       case 'profile':
         return <Profile />;
       case 'community':

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Shield, Target, Award, Play, ChevronRight, Terminal, FileText, BookOpen, GraduationCap, Zap, Clock } from 'lucide-react';
+
+import { Shield, Award, Play, ChevronRight, Terminal, BookOpen, GraduationCap, Zap, Clock } from 'lucide-react';
 import { useAuth } from '@context/AuthContext';
 import { supabase } from '@lib/supabase';
 import { SEO } from '@components/SEO/SEO';
@@ -244,24 +245,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
             <CardTitle>Mission Quick Links</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-2">
-            <Button variant="outline" className="justify-between hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-all" onClick={() => onTabChange?.('assessment')}>
-              <div className="flex items-center gap-2">
-                <Target className="h-4 w-4" />
-                <span>Take Skills Assessment</span>
-              </div>
-              <ChevronRight className="h-4 w-4 opacity-50" />
-            </Button>
+
             <Button variant="outline" className="justify-between hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-all" onClick={() => onTabChange?.('certificates')}>
               <div className="flex items-center gap-2">
                 <Award className="h-4 w-4" />
                 <span>Download Certificates</span>
-              </div>
-              <ChevronRight className="h-4 w-4 opacity-50" />
-            </Button>
-            <Button variant="outline" className="justify-between hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-all" onClick={() => onTabChange?.('notes')}>
-              <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                <span>Personal Training Notes</span>
               </div>
               <ChevronRight className="h-4 w-4 opacity-50" />
             </Button>
