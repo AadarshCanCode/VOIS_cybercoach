@@ -9,7 +9,6 @@ An AI-powered cybersecurity education platform that transforms passive learning 
 
 
 ## Features
-
 ### 🎓 Learning & Education
 
 - **Adaptive Learning Paths** - AI-personalized curriculum that evolves based on performance
