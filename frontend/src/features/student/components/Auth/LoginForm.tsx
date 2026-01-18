@@ -1,11 +1,24 @@
-import React, { useState } from 'react';
-import { Lock, Mail, ArrowRight } from 'lucide-react';
-import { useAuth } from '@context/AuthContext';
-import { Button } from '@components/ui/button';
-import { Input } from '@components/ui/input';
-import { AuthLayout } from '@components/auth/AuthLayout';
-import { useNavigate, Link } from 'react-router-dom';
-import { SEO } from '@components/SEO/SEO';
+import React, { useState, useEffect } from "react"
+import { ArrowRight } from "lucide-react"
+import { useAuth } from "@context/AuthContext"
+import { useNavigate, Link } from "react-router-dom"
+import { SEO } from "@components/SEO/SEO"
+import { Button } from "@components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@components/ui/card"
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldSeparator,
+  FieldDescription,
+} from "@components/ui/field"
+import { Input } from "@components/ui/input"
 
 interface LoginFormProps {
   userType?: 'student' | 'teacher' | null;
@@ -16,155 +29,166 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   userType,
   onSuccess
 }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [role] = useState<'teacher' | 'student'>(userType || 'student');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const { login, loginWithGoogle } = useAuth();
-  const navigate = useNavigate();
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [role] = useState<'teacher' | 'student'>(userType || 'student')
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
+  const { login, loginWithGoogle } = useAuth()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const errorDescription = params.get('error_description')
+    const errorMsg = params.get('error')
+    if (errorDescription || errorMsg) {
+      setError(errorDescription || errorMsg || 'Authentication failed')
+      window.history.replaceState({}, document.title, window.location.pathname)
+    }
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setIsLoading(true);
+    e.preventDefault()
+    setError('')
+    setIsLoading(true)
 
     try {
-      await (login as (email: string, password: string, role: 'teacher' | 'student') => Promise<boolean>)(email, password, role);
+      await (login as (email: string, password: string, role: 'teacher' | 'student') => Promise<boolean>)(email, password, role)
       if (onSuccess) {
-        onSuccess();
+        onSuccess()
       } else {
-        navigate(role === 'teacher' ? '/teacher' : '/dashboard');
+        navigate(role === 'teacher' ? '/teacher' : '/dashboard')
       }
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Login failed');
+      setError(error instanceof Error ? error.message : 'Login failed')
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
-
-  // Check for OAuth errors in URL
-  React.useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const errorDescription = params.get('error_description');
-    const errorMsg = params.get('error');
-    if (errorDescription || errorMsg) {
-      setError(errorDescription || errorMsg || 'Authentication failed');
-      // Clean URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-  }, []);
+  }
 
   const handleGoogleLogin = async () => {
     try {
-      setIsLoading(true);
-      setError('');
-      await loginWithGoogle(role);
+      setIsLoading(true)
+      setError('')
+      await loginWithGoogle(role)
     } catch (err) {
-      setError('Google login failed');
-      setIsLoading(false);
+      setError('Google login failed')
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
-    <AuthLayout
-      title="Login"
-      subtitle={role === 'teacher' ? 'Teacher Login' : 'Student Login'}
-      className="max-w-md"
-    >
+    <>
       <SEO
         title="Login"
         description="Access your Cybercoach terminal. Sign in to continue your cybersecurity training and operations."
       />
-      <div className="bg-[#0A0F0A] border border-[#00FF88]/20 rounded-2xl p-8 shadow-[0_0_50px_rgba(0,255,136,0.05)] backdrop-blur-xl relative overflow-hidden group">
-        <div className="absolute inset-0 bg-linear-to-b from-[#00FF88]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+      <div className="dark bg-background flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
+        <div className="flex w-full max-w-sm flex-col gap-6">
+          <Link to="/" className="flex items-center gap-2 self-center font-medium group transition-all hover:scale-105 mb-2">
+            <div className="bg-primary text-primary-foreground flex size-10 items-center justify-center rounded-md group-hover:scale-110 transition-transform">
+              <img src="/cybercoach-logo.png" alt="Cybercoach" className="size-8" />
+            </div>
+            <div className="text-left">
+              <div className="text-xl font-black tracking-tighter text-white uppercase">Cyber <span className="text-[#00FF88]">Coach</span></div>
+            </div>
+          </Link>
 
-        {error && (
-          <div className="mb-6 bg-red-500/10 border border-red-500/20 rounded-lg p-4 animate-in fade-in slide-in-from-top-2">
-            <p className="text-red-500 text-xs font-mono uppercase tracking-widest text-center">{error}</p>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
-
-
-          <div className="space-y-4">
-            <Input
-              label="Email"
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="your@email.com"
-              leftIcon={<Mail className="h-4 w-4" />}
-            />
-
-            <Input
-              label="Password"
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              leftIcon={<Lock className="h-4 w-4" />}
-              showPasswordToggle={true}
-            />
-          </div>
-
-          <Button
-            type="submit"
-            isLoading={isLoading}
-            className="w-full h-12 bg-[#00FF88] text-black hover:bg-[#00CC66] font-black rounded-xl transition-all group"
-          >
-            {isLoading ? 'Logging in...' : (
-              <span className="flex items-center justify-center gap-2">
-                Login <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-              </span>
-            )}
-          </Button>
-
-          {role !== 'teacher' && (
-            <>
-              <div className="relative flex items-center justify-center my-4">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-[#00FF88]/10" />
+          <Card className="bg-zinc-900 border-zinc-800 shadow-2xl">
+            <CardHeader className="text-center space-y-1">
+              <CardTitle className="text-2xl font-bold text-white">Welcome back</CardTitle>
+              <CardDescription className="text-zinc-400">
+                Login with your Google account
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {error && (
+                <div className="mb-6 bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+                  <p className="text-red-500 text-xs font-mono uppercase tracking-widest text-center">{error}</p>
                 </div>
-                <div className="relative flex justify-center text-xs bg-[#0A0F0A] px-2 text-[#00B37A]">
-                  Or continue with
-                </div>
-              </div>
-
-              <Button
-                type="button"
-                onClick={handleGoogleLogin}
-                className="w-full h-12 bg-white text-black hover:bg-gray-100 font-bold rounded-xl transition-all flex items-center justify-center gap-3 group"
-              >
-                <svg className="w-5 h-5" viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                  <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                  <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                  <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-                </svg>
-                Login with Google
-              </Button>
-            </>
-          )}
-        </form>
-
-        {role !== 'teacher' && (
-          <div className="mt-8 pt-6 border-t border-[#00FF88]/10 flex flex-col items-center gap-4">
-            <p className="text-[#00B37A] text-xs">New user?</p>
-            <Link to="/signup" className="w-full relative z-20">
-              <Button
-                variant="outline"
-                className="w-full border-[#00FF88]/20 text-[#00FF88] hover:bg-[#00FF88]/10 font-bold rounded-xl transition-all"
-              >
-                Sign Up
-              </Button>
-            </Link>
-          </div>
-        )}
+              )}
+              <form onSubmit={handleSubmit}>
+                <FieldGroup className="gap-6">
+                  {role !== 'teacher' && (
+                    <>
+                      <Field>
+                        <Button
+                          variant="outline"
+                          type="button"
+                          className="w-full bg-zinc-900 border-zinc-800 text-white hover:bg-zinc-800 hover:text-white"
+                          onClick={handleGoogleLogin}
+                          disabled={isLoading}
+                        >
+                          <svg className="mr-2 size-4" viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
+                          </svg>
+                          Login with Google
+                        </Button>
+                      </Field>
+                      <FieldSeparator className="text-zinc-500">
+                        Or continue with
+                      </FieldSeparator>
+                    </>
+                  )}
+                  <div className="space-y-4">
+                    <Field>
+                      <FieldLabel htmlFor="email" className="text-white">Email</FieldLabel>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="m@example.com"
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        disabled={isLoading}
+                        className="bg-zinc-950 border-zinc-800 text-white focus:ring-0 focus:border-zinc-700"
+                      />
+                    </Field>
+                    <Field>
+                      <div className="flex items-center">
+                        <FieldLabel htmlFor="password" className="text-white">Password</FieldLabel>
+                        <Link
+                          to="/forgot-password"
+                          className="ml-auto text-sm text-white hover:underline underline-offset-4"
+                        >
+                          Forgot your password?
+                        </Link>
+                      </div>
+                      <Input
+                        id="password"
+                        type="password"
+                        required
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        disabled={isLoading}
+                        className="bg-zinc-950 border-zinc-800 text-white focus:ring-0 focus:border-zinc-700"
+                      />
+                    </Field>
+                  </div>
+                  <Field>
+                    <Button type="submit" className="w-full bg-white text-black hover:bg-zinc-200" disabled={isLoading}>
+                      {isLoading ? 'Logging in...' : (
+                        <span className="flex items-center justify-center gap-2">
+                          Login <ArrowRight className="h-4 w-4" />
+                        </span>
+                      )}
+                    </Button>
+                    {role !== 'teacher' && (
+                      <FieldDescription className="text-center text-zinc-400">
+                        Don&apos;t have an account? <Link to="/signup" className="text-white underline underline-offset-4">Sign up</Link>
+                      </FieldDescription>
+                    )}
+                  </Field>
+                </FieldGroup>
+              </form>
+            </CardContent>
+          </Card>
+          <FieldDescription className="px-6 text-center text-xs text-zinc-500">
+            By clicking continue, you agree to our <Link to="/terms" className="underline underline-offset-4">Terms of Service</Link>{" "}
+            and <Link to="/privacy" className="underline underline-offset-4">Privacy Policy</Link>.
+          </FieldDescription>
+        </div>
       </div>
-    </AuthLayout>
-  );
-};
+    </>
+  )
+}

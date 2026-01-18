@@ -32,11 +32,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, subtitl
 
         {children}
 
-        <div className="mt-8 text-center">
-          <p className="text-xs text-[#00B37A]/50 font-mono">
-            SECURE CONNECTION ESTABLISHED // V2.0.4
-          </p>
-        </div>
+
       </div>
     </div>
   );
