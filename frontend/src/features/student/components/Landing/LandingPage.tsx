@@ -64,7 +64,7 @@ export const LandingPage: React.FC = () => {
       {
         name: 'Kailas Patil',
         title: 'Lead Security Architect',
-        quote: 'The Cyber Forge is a game-changer for high-stakes defensive operations. Its fidelity is unmatched.',
+        quote: 'Cybercoach is a game-changer for high-stakes defensive operations. Its fidelity is unmatched.',
         initials: 'KP',
       },
       {
@@ -132,7 +132,6 @@ export const LandingPage: React.FC = () => {
   return (
     <>
       <SEO
-        title="Forge Your Edge"
         description="The elite tactical platform for unified cybersecurity defense. Master real-world threats with AI-powered labs and assessments."
       />
 
@@ -249,7 +248,7 @@ export const LandingPage: React.FC = () => {
                 </span>
               </h1>
               <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto leading-relaxed font-light tracking-wide">
-                The elite tactical platform for unified cybersecurity defense. Forge your edge in high-fidelity ranges.
+                The elite tactical platform for unified cybersecurity defense. Master real-world threats in high-fidelity ranges.
               </p>
             </div>
 

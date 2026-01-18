@@ -18,7 +18,9 @@ export const SEO: React.FC<SEOProps> = ({
     ogType,
     canonicalUrl,
 }) => {
-    const fullTitle = title ? `${title} | ${siteConfig.name}` : siteConfig.name;
+    const fullTitle = !title || title.toLowerCase() === siteConfig.name.toLowerCase()
+        ? siteConfig.name
+        : `${title} | ${siteConfig.name}`;
     const metaDescription = description || siteConfig.description;
     const metaKeywords = keywords ? `${siteConfig.keywords.join(', ')}, ${keywords.join(', ')}` : siteConfig.keywords.join(', ');
     const metaOgImage = ogImage || siteConfig.ogImage;
