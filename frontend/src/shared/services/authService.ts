@@ -60,7 +60,7 @@ function sanitizeUser(dbUser: DBUser): User {
 }
 
 class AuthService {
-  async login(credentials: { email: string; password: string; role: 'student' | 'teacher' }): Promise<User | null> {
+  async login(credentials: { email: string; password: string; role: 'student' }): Promise<User | null> {
     try {
       const { data: signInData, error: signInError } = await withTimeout(
         supabase.auth.signInWithPassword({
@@ -128,12 +128,6 @@ class AuthService {
         profileError = err;
       }
 
-      // Verify role matches credentials
-      if (profile && profile.role !== credentials.role) {
-        await supabase.auth.signOut();
-        throw new Error(`Access Denied: This email is registered as a ${profile.role}. Please login through the correct portal.`);
-      }
-
       const profileRow = profile ? (profile as DBUser) : undefined;
       let profileCopy: User;
 
@@ -187,9 +181,7 @@ class AuthService {
     email: string;
     password: string;
     name?: string;
-    role: 'student' | 'teacher';
-    bio?: string;
-    specialization?: string
+    role: 'student';
   }): Promise<User | null> {
     try {
       if (userData.password.length < 6) {
@@ -237,9 +229,9 @@ class AuthService {
         password_hash: 'SUPABASE_AUTH',
         level: 'beginner',
         completed_assessment: false,
-        bio: userData.bio || '',
-        specialization: userData.specialization || '',
-        experience_years: userData.role === 'student' ? null : '0-1'
+        bio: '',
+        specialization: '',
+        experience_years: null
       } as Record<string, unknown>;
 
       const { data: newUser, error: profileError } = await withTimeout(
@@ -298,10 +290,7 @@ class AuthService {
     }
   }
 
-  isTeacher() {
-    const user = this.getCurrentUser();
-    return user?.role === 'teacher';
-  }
+
 
   isStudent() {
     const user = this.getCurrentUser();
@@ -313,7 +302,7 @@ class AuthService {
     return user?.role === role;
   }
 
-  async loginWithGoogle(role: 'student' | 'teacher' = 'student'): Promise<void> {
+  async loginWithGoogle(role: 'student' = 'student'): Promise<void> {
     try {
       localStorage.setItem('auth_pending_role', role);
       localStorage.setItem('auth_pending_role_ts', Date.now().toString());

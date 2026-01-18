@@ -3,11 +3,42 @@ import { getStudentDashboardSummary } from '../services/studentService.js';
 // Imports removed
 import { markLabAsCompleted, getLabStats, isLabCompleted } from '../services/labService.js';
 
+import { Course } from '../../../shared/models/Course.js';
+
 const router = Router();
 
 router.get('/overview', (_req: Request, res: Response): void => {
   const summary = getStudentDashboardSummary();
   res.json(summary);
+});
+
+// -- Courses --
+router.get('/courses', async (_req: Request, res: Response) => {
+  try {
+    const courses = await Course.find({ published: true }).select('-teacherEmail'); // Exclude teacher email if private
+    res.json(courses);
+  } catch (error) {
+    console.error('Error fetching courses:', error);
+    res.status(500).json({ error: 'Failed to fetch courses' });
+  }
+});
+
+router.get('/courses/:id', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const course = await Course.findById(id);
+
+    if (!course) {
+      return res.status(404).json({ error: 'Course not found' });
+    }
+
+    // Determine if we should send modules (maybe only if enrolled? or public?)
+    // For now, sending full course details as per previous behavior
+    res.json(course);
+  } catch (error) {
+    console.error('Error fetching course:', error);
+    res.status(500).json({ error: 'Failed to fetch course' });
+  }
 });
 
 // Routes removed

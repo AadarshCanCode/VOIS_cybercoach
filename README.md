@@ -69,26 +69,7 @@ Transform passive learning into hands-on, job-ready cybersecurity skills with ad
 
 </td>
 </tr>
-<tr>
-<td width="50%">
 
-### 👨‍🏫 **Teacher Portal**
-- 🤖 **AI Course Generator** - Auto-generate outlines
-- 📦 **Module Management** - Organize content
-- 📊 **Student Analytics** - Track progress
-- ✏️ **Assessment Builder** - Custom quizzes
-
-</td>
-<td width="50%">
-
-### 🔧 **Admin Portal**
-- 📡 **Platform Monitoring** - System health
-- 🎥 **Proctoring Logs** - Review sessions
-- 👥 **User Management** - Role-based access
-- 🔌 **API Proxy Services** - Secure access
-
-</td>
-</tr>
 </table>
 
 ---
@@ -224,29 +205,7 @@ npm run dev:full
 
 </details>
 
-<details>
-<summary><b>Teacher Endpoints</b></summary>
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/teacher/overview` | Teacher dashboard |
-| `GET` | `/api/teacher/courses/:email` | Teacher's courses |
-| `POST` | `/api/teacher/courses` | Create new course |
-| `GET` | `/api/teacher/analytics/:courseId` | Course analytics |
-| `POST` | `/api/teacher/enroll` | Enroll student |
-
-</details>
-
-<details>
-<summary><b>Admin Endpoints</b></summary>
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/admin/status` | System status |
-| `GET` | `/api/admin/models` | Model availability |
-| `POST` | `/api/admin/proctor/logs` | Record proctoring events |
-
-</details>
 
 <details>
 <summary><b>AI & Utility Endpoints</b></summary>
@@ -283,18 +242,7 @@ graph LR
 5. **Practice Interviews** - AI-powered interview preparation
 6. **Apply for Jobs** - Browse verified job listings
 
-### 👨‍🏫 Teacher Workflow
 
-1. **Create Course** - Use AI to generate course outline
-2. **Add Modules** - Upload videos, create labs, write content
-3. **Publish** - Make course available to students
-4. **Monitor** - Track student progress and analytics
-
-### 🔧 Admin Workflow
-
-1. **Monitor System** - Check platform health
-2. **Review Logs** - Analyze proctoring sessions
-3. **Manage Users** - Handle permissions and roles
 
 ---
 
@@ -304,7 +252,6 @@ graph LR
 - 🔐 **CORS Configuration** - Secure cross-origin requests
 - 🔑 **Environment Variables** - Secrets never in code
 - 📝 **Type-Safe API** - TypeScript prevents runtime errors
-- ✅ **Authorized Testing Only** - Detective tools require consent
 - 🛡️ **Row Level Security** - Supabase RLS policies
 
 ---

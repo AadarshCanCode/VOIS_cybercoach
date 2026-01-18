@@ -41,7 +41,6 @@ PLATFORM FEATURES YOU SHOULD KNOW:
 
 4. **User Roles:**
    - Students: Access courses, labs, and assessments
-   - Teachers: Create courses and manage student progress
    - Admin: Platform administration and analytics
 
 YOUR PERSONALITY:

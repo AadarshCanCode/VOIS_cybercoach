@@ -3,9 +3,6 @@ import cors from 'cors';
 import 'dotenv/config';
 
 import studentRoutes from './features/student/routes/index.js';
-import teacherRoutes from './features/teacher/routes/index.js';
-import adminApiRoutes, { legacyRoutes as adminLegacyRoutes } from './features/admin/routes/index.js';
-import imagekitRoutes from './features/admin/routes/imagekitRoutes.js';
 import vuRoutes from './routes/vu.routes.js';
 import aiRoutes from './routes/ai.routes.js';
 import connectDB from './shared/lib/mongodb.js';
@@ -31,27 +28,20 @@ app.use(globalLimiter);
 app.use(cors({
   origin: [
     'http://localhost:5173',  // Main app dev
-    'http://localhost:5174',  // Admin app dev
     'https://sparkstudio.co.in',  // Main app prod
-    'https://admin.sparkstudio.co.in'  // Admin app prod
   ],
   credentials: true
 }));
 app.use(express.json({ limit: '1mb' }));
 
 app.use('/api/student', studentRoutes);
-app.use('/api/teacher', teacherRoutes);
-app.use('/api/admin', adminApiRoutes);
-app.use('/api/imagekit', imagekitRoutes);
 app.use('/api/vu', vuRoutes);
 app.use('/api/ai', aiRoutes);
-
-app.use('/', adminLegacyRoutes);
 
 app.get('/', (_req: Request, res: Response): void => {
   res.json({
     message: 'VOIS Hackathon API',
-    modules: ['student', 'teacher', 'admin']
+    modules: ['student']
   });
 });
 

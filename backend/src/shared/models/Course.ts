@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { teacherConnection } from '../lib/teacherDb.js';
+
 
 const questionSchema = new mongoose.Schema({
     question: { type: String, required: true },
@@ -25,4 +25,4 @@ const courseSchema = new mongoose.Schema({
     published: { type: Boolean, default: false }
 });
 
-export const Course = teacherConnection.model('Course', courseSchema);
+export const Course = mongoose.model('Course', courseSchema);

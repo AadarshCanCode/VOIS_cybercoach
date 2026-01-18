@@ -1,6 +1,5 @@
 import { useAuth } from '@context/AuthContext';
 import { StudentAppContent } from '@student/components/StudentAppContent';
-import { TeacherDashboard } from '@teacher/components/TeacherDashboard';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { LandingPage } from '@student/components/Landing/LandingPage';
 import { LoginForm } from '@student/components/Auth/LoginForm';
@@ -10,7 +9,7 @@ import { VerifyCertificate } from '@student/pages/VerifyCertificate';
 import { SEO } from './SEO/SEO';
 
 export const AppContent = () => {
-    const { user, loading, isTeacher } = useAuth();
+    const { user, loading } = useAuth();
     const navigate = useNavigate();
 
     if (loading) {
@@ -27,9 +26,7 @@ export const AppContent = () => {
             <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={
-                    user ? (
-                        isTeacher() ? <Navigate to="/teacher" replace /> : <StudentAppContent />
-                    ) : <LandingPage />
+                    user ? <StudentAppContent /> : <LandingPage />
                 } />
 
                 <Route path="/login" element={
@@ -49,10 +46,7 @@ export const AppContent = () => {
                     user ? <StudentAppContent initialTab="dashboard" /> : <Navigate to="/login" replace />
                 } />
 
-                {/* Protected Teacher Routes */}
-                <Route path="/teacher/*" element={
-                    user ? (isTeacher() ? <TeacherDashboard /> : <Navigate to="/" replace />) : <LoginForm userType="teacher" />
-                } />
+
 
                 {/* Fallback */}
                 <Route path="*" element={<Navigate to="/" replace />} />

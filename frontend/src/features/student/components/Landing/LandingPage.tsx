@@ -45,16 +45,12 @@ export const LandingPage: React.FC = () => {
 
 
 
-  const handleGetStarted = (type: 'student' | 'teacher', tab?: string) => {
+  const handleGetStarted = (tab?: string) => {
     if (user) {
-      if (type === 'teacher' && user.role === 'teacher') {
-        navigate('/teacher');
-      } else {
-        navigate('/dashboard');
-      }
+      navigate('/dashboard');
       return;
     }
-    navigate(`/login?type=${type}${tab ? `&tab=${tab}` : ''}`);
+    navigate(`/login${tab ? `?tab=${tab}` : ''}`);
   };
 
 
@@ -145,7 +141,7 @@ export const LandingPage: React.FC = () => {
                 </svg>
                 <span>Try Bot</span>
               </NavbarButton>
-              <NavbarButton variant="primary" onClick={() => handleGetStarted('student')}>
+              <NavbarButton variant="primary" onClick={() => handleGetStarted()}>
                 {user ? 'Dashboard' : 'Register'}
               </NavbarButton>
             </div>
@@ -198,7 +194,7 @@ export const LandingPage: React.FC = () => {
                   <span>Try Telegram Bot</span>
                 </NavbarButton>
                 <NavbarButton
-                  onClick={() => { setMobileOpen(false); handleGetStarted('student'); }}
+                  onClick={() => { setMobileOpen(false); handleGetStarted(); }}
                   variant="primary"
                   className="w-full"
                 >
@@ -235,7 +231,7 @@ export const LandingPage: React.FC = () => {
 
             <div className="flex flex-wrap gap-6 items-center justify-center">
               <button
-                onClick={() => handleGetStarted('student')}
+                onClick={() => handleGetStarted()}
                 className="group relative flex items-center gap-4 px-12 py-5 bg-[#00FF88] hover:bg-[#00CC66] text-black rounded-[2rem] font-black text-lg tracking-tight transition-all hover:scale-[1.05] active:scale-95 shadow-[0_0_50px_rgba(0,255,136,0.4)] overflow-hidden"
               >
                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />

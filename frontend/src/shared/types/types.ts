@@ -2,7 +2,7 @@ export interface User {
   id?: string;
   name?: string;
   email?: string;
-  role?: 'teacher' | 'student';
+  role?: 'student';
   level?: 'beginner' | 'intermediate' | 'advanced';
   certificates?: string[];
   completedAssessment?: boolean;
@@ -10,20 +10,12 @@ export interface User {
   updatedAt?: string;
 }
 
-// Some API endpoints return a lightweight teacher object
-export interface PartialTeacher {
-  name?: string;
-  email?: string;
-  profile_image?: string;
-}
-
 export interface Course {
   id: string;
   title: string;
   description: string;
   modules: Module[];
-  // teacher may be null when imported or absent; some endpoints return a lightweight PartialTeacher
-  teacher?: User | PartialTeacher | null;
+  teacher_name?: string;
   progress?: number;
   course_modules?: Module[];
 

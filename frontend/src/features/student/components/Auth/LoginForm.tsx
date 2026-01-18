@@ -21,17 +21,15 @@ import {
 import { Input } from "@components/ui/input"
 
 interface LoginFormProps {
-  userType?: 'student' | 'teacher' | null;
   onSuccess?: () => void;
 }
 
 export const LoginForm: React.FC<LoginFormProps> = ({
-  userType,
   onSuccess
 }) => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [role] = useState<'teacher' | 'student'>(userType || 'student')
+  const role = 'student' as const;
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const { login, loginWithGoogle } = useAuth()
@@ -53,11 +51,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     setIsLoading(true)
 
     try {
-      await (login as (email: string, password: string, role: 'teacher' | 'student') => Promise<boolean>)(email, password, role)
+      await (login as (email: string, password: string, role: 'student') => Promise<boolean>)(email, password, role)
       if (onSuccess) {
         onSuccess()
       } else {
-        navigate(role === 'teacher' ? '/teacher' : '/dashboard')
+        navigate('/dashboard')
       }
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Login failed')
@@ -109,27 +107,25 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               )}
               <form onSubmit={handleSubmit}>
                 <FieldGroup className="gap-6">
-                  {role !== 'teacher' && (
-                    <>
-                      <Field>
-                        <Button
-                          variant="outline"
-                          type="button"
-                          className="w-full bg-zinc-900 border-zinc-800 text-white hover:bg-zinc-800 hover:text-white"
-                          onClick={handleGoogleLogin}
-                          disabled={isLoading}
-                        >
-                          <svg className="mr-2 size-4" viewBox="0 0 24 24">
-                            <path fill="currentColor" d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
-                          </svg>
-                          Login with Google
-                        </Button>
-                      </Field>
-                      <FieldSeparator className="text-zinc-500">
-                        Or continue with
-                      </FieldSeparator>
-                    </>
-                  )}
+                  <>
+                    <Field>
+                      <Button
+                        variant="outline"
+                        type="button"
+                        className="w-full bg-zinc-900 border-zinc-800 text-white hover:bg-zinc-800 hover:text-white"
+                        onClick={handleGoogleLogin}
+                        disabled={isLoading}
+                      >
+                        <svg className="mr-2 size-4" viewBox="0 0 24 24">
+                          <path fill="currentColor" d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
+                        </svg>
+                        Login with Google
+                      </Button>
+                    </Field>
+                    <FieldSeparator className="text-zinc-500">
+                      Or continue with
+                    </FieldSeparator>
+                  </>
                   <div className="space-y-4">
                     <Field>
                       <FieldLabel htmlFor="email" className="text-white">Email</FieldLabel>
@@ -173,11 +169,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                         </span>
                       )}
                     </Button>
-                    {role !== 'teacher' && (
-                      <FieldDescription className="text-center text-zinc-400">
-                        Don&apos;t have an account? <Link to="/signup" className="text-white underline underline-offset-4">Sign up</Link>
-                      </FieldDescription>
-                    )}
+                    <FieldDescription className="text-center text-zinc-400">
+                      Don&apos;t have an account? <Link to="/signup" className="text-white underline underline-offset-4">Sign up</Link>
+                    </FieldDescription>
                   </Field>
                 </FieldGroup>
               </form>

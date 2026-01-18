@@ -1,7 +1,7 @@
 export interface CourseData {
   id: string;
   title: string;
-  category: 'cybersecurity' | 'ai-ml' | 'teacher-courses' | 'vishwakarma-university';
+  category: 'cybersecurity' | 'ai-ml' | 'vishwakarma-university';
   url: string;
   description: string;
   disclaimer: string;
@@ -33,13 +33,7 @@ export const courseCategories: CourseCategory[] = [
     icon: '🤖',
     color: 'from-blue-500/20 to-purple-500/20'
   },
-  {
-    id: 'teacher-courses',
-    title: 'Courses My Teacher',
-    description: 'Access courses created by your instructors and mentors',
-    icon: '👨‍🏫',
-    color: 'from-green-500/20 to-teal-500/20'
-  },
+
   {
     id: 'vishwakarma-university',
     title: 'Vishwakarma University',

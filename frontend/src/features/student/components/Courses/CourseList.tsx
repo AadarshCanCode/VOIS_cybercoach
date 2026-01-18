@@ -1,10 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowLeft, CheckCircle, Clock, Award, Lock } from 'lucide-react';
+import React, { useState } from 'react';
+import { ArrowLeft, Clock, Award, Lock, CheckCircle } from 'lucide-react';
 import { courseCategories, getCoursesByCategory, type CourseData } from '@data/courses';
 import { useAuth } from '@context/AuthContext';
-import { courseService } from '@services/courseService';
-import type { Course } from '@types';
-import { EnrollmentModal } from './EnrollmentModal';
 
 interface CourseListProps {
   onCourseSelect: (courseId: string) => void;
@@ -14,53 +11,17 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
   const { user } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedCourse, setSelectedCourse] = useState<CourseData | null>(null);
-  const [dbCourses, setDbCourses] = useState<Course[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  // Enrollment handling
-  const [showEnrollModal, setShowEnrollModal] = useState(false);
-  const [enrollCourse, setEnrollCourse] = useState<Course | null>(null);
+  // Admin role check is also likely to be removed if we are removing admin feature, but purely for this file, 
+  // if 'admin' role is still in types (which I haven't checked fully for backend, but for frontend types it might remain or be removed).
+  // I will assume for now we just want to remove teacher stuff.
+  // Wait, the user said "backend folder also contains teacher and admin", implying remove BOTH.
+  // Start with checking if user.role === 'admin' is valid. 
+  // user.role type was changed to just 'student' in frontend types.ts earlier. 
+  // So `user?.role === 'admin'` is actually a type error now.
+  const canAccessCourses = Boolean(user?.completedAssessment);
 
-  const canAccessCourses = Boolean(user?.completedAssessment) || user?.role === 'admin';
 
-  // Fetch database courses when teacher-courses category is selected
-  useEffect(() => {
-    if (selectedCategory === 'teacher-courses' && canAccessCourses) {
-      const fetchCourses = async () => {
-        setLoading(true);
-        setError(null);
-
-        // Shorter timeout since we handle errors gracefully now
-        const timeoutId = setTimeout(() => {
-          setLoading(false);
-          setDbCourses([]);
-          console.warn('Course fetch timed out after 20 seconds');
-        }, 20000);
-
-        try {
-          console.log('Fetching courses from database...');
-          const courses = await courseService.getAllCourses();
-          clearTimeout(timeoutId);
-
-          console.log('Courses fetched:', courses);
-          setDbCourses(courses || []);
-
-          if (!courses || courses.length === 0) {
-            console.log('No courses found in database');
-          }
-        } catch (error: any) {
-          clearTimeout(timeoutId);
-          console.error('Failed to fetch courses:', error);
-          setError(error.message || 'Failed to load courses');
-          setDbCourses([]);
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchCourses();
-    }
-  }, [selectedCategory, canAccessCourses]);
 
   // Course Disclaimer Modal
   if (selectedCourse) {
@@ -165,148 +126,12 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
 
 
 
-  const handleTeacherCourseSelect = async (courseId: string) => {
-    if (!user?.email) return;
 
-    // Check if already enrolled
-    try {
-      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-      const response = await fetch(`${apiBase}/api/teacher/enrollment/${courseId}/${user.email}`);
-      const data = await response.json();
-
-      if (data.enrolled) {
-        onCourseSelect(courseId);
-      } else {
-        // Find course details
-        const course = dbCourses.find(c => c.id === courseId);
-        if (course) {
-          setEnrollCourse(course);
-          setShowEnrollModal(true);
-        }
-      }
-    } catch (error) {
-      console.error('Failed to check enrollment:', error);
-      alert('Failed to verify enrollment status');
-    }
-  };
 
   // Show courses for selected category
   if (selectedCategory) {
     // Special handling for teacher courses from database
-    if (selectedCategory === 'teacher-courses') {
-      return (
-        <div className="p-6 min-h-screen animate-fade-in text-[#EAEAEA]">
-          <div className="max-w-6xl mx-auto space-y-8">
-            {/* Back Button */}
-            <button
-              onClick={() => setSelectedCategory(null)}
-              className="flex items-center space-x-2 text-[#00B37A] hover:text-[#00FF88] transition-colors group"
-            >
-              <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
-              <span className="font-medium">Back to Categories</span>
-            </button>
 
-            {/* Category Header */}
-            <div className="border-b border-[#00FF88]/10 pb-6">
-              <h1 className="text-3xl font-black tracking-tighter text-white uppercase mb-2">
-                <span className="mr-3">👨‍🏫</span>
-                Courses My Teacher
-              </h1>
-              <p className="text-[#00B37A] font-mono text-sm">ACCESS COURSES CREATED BY YOUR INSTRUCTORS</p>
-            </div>
-
-            {/* Loading State */}
-            {loading ? (
-              <div className="text-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#00FF88] mx-auto mb-4"></div>
-                <p className="text-[#00B37A] font-mono">LOADING COURSES...</p>
-              </div>
-            ) : error ? (
-              <div className="text-center py-12 bg-[#0A0F0A] rounded-xl border border-red-500/20 p-8">
-                <div className="mb-4">
-                  <svg className="h-16 w-16 text-red-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <p className="text-red-500 text-lg mb-2 font-bold">Error Loading Courses</p>
-                <p className="text-[#EAEAEA]/60 text-sm mb-4">{error}</p>
-                <button
-                  onClick={() => setSelectedCategory('teacher-courses')}
-                  className="px-4 py-2 bg-[#00FF88] text-black rounded-lg font-bold hover:bg-[#00CC66] transition-colors"
-                >
-                  Retry
-                </button>
-              </div>
-            ) : dbCourses.length === 0 ? (
-              <div className="text-center py-12 bg-[#0A0F0A] rounded-xl border border-[#00FF88]/10 p-8">
-                <p className="text-[#00B37A] text-lg mb-2">No courses available yet</p>
-                <p className="text-[#EAEAEA]/60 text-sm">Your teacher hasn't published any courses. Check back later!</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {dbCourses.map((course) => (
-                  <div
-                    key={course.id}
-                    onClick={() => handleTeacherCourseSelect(course.id)}
-                    className="bg-[#0A0F0A] rounded-xl border border-[#00FF88]/10 overflow-hidden group hover:border-[#00FF88]/30 transition-all duration-300 cursor-pointer"
-                  >
-                    <div className="p-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                          <h2 className="text-xl font-bold text-white mb-2 group-hover:text-[#00FF88] transition-colors">
-                            {course.title}
-                          </h2>
-                          <p className="text-[#00B37A] text-sm mb-4 line-clamp-2">
-                            {course.description}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3 text-xs text-[#EAEAEA]/60">
-                          <span className="px-2 py-1 rounded bg-[#00FF88]/10 text-[#00FF88]">
-                            {course.difficulty || 'Intermediate'}
-                          </span>
-                          <div className="flex items-center space-x-1">
-                            <Clock className="h-3 w-3" />
-                            <span>{course.estimated_hours || 10} hours</span>
-                          </div>
-                        </div>
-                        <div className="text-[#00FF88] text-sm font-bold group-hover:translate-x-1 transition-transform">
-                          {/* We don't know if locked or not until click, but can assume locked symbol if not yet enrolled? 
-                              For simplicity, just show arrow. */}
-                          Access Course →
-                        </div>
-                      </div>
-
-                      {/* Module Count */}
-                      <div className="mt-4 pt-4 border-t border-[#00FF88]/10">
-                        <div className="flex items-center space-x-2 text-sm text-[#EAEAEA]/60">
-                          <CheckCircle className="h-4 w-4 text-[#00FF88]" />
-                          <span>{(course.module_count || course.modules?.length || course.course_modules?.length || 0)} Modules</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {showEnrollModal && enrollCourse && (
-              <EnrollmentModal
-                courseId={enrollCourse.id}
-                courseTitle={enrollCourse.title}
-                onClose={() => setShowEnrollModal(false)}
-                onSuccess={() => {
-                  setShowEnrollModal(false);
-                  onCourseSelect(enrollCourse.id);
-                }}
-              />
-            )}
-          </div>
-        </div>
-      );
-    }
 
     // Original handling for external courses (cybersecurity, ai-ml)
     const courses = getCoursesByCategory(selectedCategory);

@@ -26,18 +26,6 @@
       "@student/*": [
         "src/features/student/*"
       ],
-      "@teacher": [
-        "src/features/teacher"
-      ],
-      "@teacher/*": [
-        "src/features/teacher/*"
-      ],
-      "@admin": [
-        "src/features/admin"
-      ],
-      "@admin/*": [
-        "src/features/admin/*"
-      ],
       "@shared/*": [
         "src/shared/*"
       ],

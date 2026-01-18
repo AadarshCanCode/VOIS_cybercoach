@@ -21,8 +21,6 @@ export default defineConfig(({ mode }) => {
         '@app': resolve(rootDir, 'src/app'),
         '@features': resolve(rootDir, 'src/features'),
         '@student': resolve(rootDir, 'src/features/student'),
-        '@teacher': resolve(rootDir, 'src/features/teacher'),
-        '@admin': resolve(rootDir, 'src/features/admin'),
         '@shared': resolve(rootDir, 'src/shared'),
         '@components': resolve(rootDir, 'src/shared/components'),
         '@services': resolve(rootDir, 'src/shared/services'),

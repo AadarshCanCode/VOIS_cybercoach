@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Shield, Target, Award, Activity, Play, ChevronRight, Terminal, FileText } from 'lucide-react';
+import { Shield, Target, Award, Play, ChevronRight, Terminal, FileText, BookOpen, GraduationCap, Zap, Clock } from 'lucide-react';
 import { useAuth } from '@context/AuthContext';
 import { supabase } from '@lib/supabase';
 import { SEO } from '@components/SEO/SEO';
 import { studentService, StudentStats, RecentActivity, ActiveOperation } from '@services/studentService';
 import { labApiService, LabStats } from '@services/labApiService';
-import { Card, CardContent, CardHeader, CardTitle } from '@components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@components/ui/card';
+import { Button } from '@components/ui/button';
 import { formatDistanceToNow } from 'date-fns';
+import { Progress } from '@shared/components/ui/progress';
+import { cn } from '@lib/utils';
+import { Skeleton } from '@components/ui/skeleton';
 
 interface DashboardProps {
   onTabChange?: (tab: string) => void;
@@ -14,6 +18,7 @@ interface DashboardProps {
 
 export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
   const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
   const [statsData, setStatsData] = useState<StudentStats>({
     coursesCompleted: 0,
     assessmentScore: null,
@@ -28,6 +33,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
   const loadData = async () => {
     if (!user?.id) return;
     try {
+      setLoading(true);
       const [newStats, newActivity, newActiveOp, newLabStats] = await Promise.all([
         studentService.getDashboardStats(user.id),
         studentService.getRecentActivity(user.id),
@@ -40,7 +46,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
       setLabStats(newLabStats);
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
-      // Set default/fallback values
       setStatsData({
         coursesCompleted: 0,
         assessmentScore: null,
@@ -54,6 +59,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
         completionPercentage: 0,
         completedLabIds: []
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -78,204 +85,208 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
   }, [user?.id]);
 
   return (
-    <div className="p-6 space-y-8 min-h-screen animate-fade-in text-[#EAEAEA]">
+    <div className="flex flex-col gap-6 p-4 md:p-8 animate-in fade-in duration-500">
       <SEO
-        title="Standard Dashboard"
-        description="Your central command unit for monitoring cybersecurity training progress, labs, and certificates."
+        title="Student Dashboard"
+        description="Monitor your cybersecurity training progress, labs, and achievements."
       />
-      {/* Header - Identity */}
-      <div className="flex items-center justify-between border-b border-[#00FF88]/10 pb-6">
-        <div>
-          <h1 className="text-3xl font-black tracking-tighter text-white uppercase">
-            Dashboard
-          </h1>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="text-right hidden md:block">
-            <p className="text-[10px] text-[#00B37A] uppercase tracking-widest">Clearance Level</p>
-            <p className="font-bold text-[#EAEAEA]">{user?.level || 'NOVICE'}</p>
-          </div>
-          <div className="h-10 w-10 rounded bg-[#00FF88]/10 border border-[#00FF88]/20 flex items-center justify-center">
-            <Shield className="h-5 w-5 text-[#00FF88]" />
-          </div>
-        </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card className="shadow-sm hover:shadow-md transition-all duration-200 border-border/50 hover:border-border">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Courses Completed</CardTitle>
+            <BookOpen className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {loading ? <Skeleton className="h-8 w-16" /> : <div className="text-2xl font-bold">{statsData.coursesCompleted}</div>}
+            <p className="text-xs text-muted-foreground">Across all security tracks</p>
+          </CardContent>
+        </Card>
+        <Card className="shadow-sm hover:shadow-md transition-all duration-200 border-border/50 hover:border-border">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Labs Finished</CardTitle>
+            <Terminal className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {loading ? <Skeleton className="h-8 w-16" /> : (
+              <div className="text-2xl font-bold">
+                {labStats ? `${labStats.completedLabs}/${labStats.totalLabs}` : `${statsData.liveLabsCompleted}/6`}
+              </div>
+            )}
+            <p className="text-xs text-muted-foreground">Hands-on hacking sessions</p>
+          </CardContent>
+        </Card>
+        <Card className="shadow-sm hover:shadow-md transition-all duration-200 border-border/50 hover:border-border">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Certificates</CardTitle>
+            <GraduationCap className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {loading ? <Skeleton className="h-8 w-16" /> : <div className="text-2xl font-bold">{statsData.certificatesEarned}</div>}
+            <p className="text-xs text-muted-foreground">Professional level validations</p>
+          </CardContent>
+        </Card>
+        <Card className="shadow-sm hover:shadow-md transition-all duration-200 border-border/50 hover:border-border">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Study Time</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {loading ? <Skeleton className="h-8 w-16" /> : <div className="text-2xl font-bold">{statsData.studyTime}</div>}
+            <p className="text-xs text-muted-foreground">Spent in training environment</p>
+          </CardContent>
+        </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Main Column */}
-        <div className="lg:col-span-8 space-y-8">
-
-          {/* Active Operation (Hero) */}
-          <div className="relative group overflow-hidden rounded-2xl border border-[#00FF88]/20 bg-[#0A0F0A]">
-            <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(0,255,136,0.05)_50%,transparent_75%,transparent_100%)] bg-size-[250%_250%,100%_100%] animate-[shimmer_3s_infinite]" />
-            <div className="relative p-8">
-              {activeOperation ? (
-                <>
-                  <div className="flex items-start justify-between mb-6">
-                    <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="relative flex h-2 w-2">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00FF88] opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00FF88]"></span>
-                        </span>
-                        <span className="text-xs font-bold text-[#00FF88] uppercase tracking-widest">Active Operation</span>
-                      </div>
-                      <h2 className="text-3xl font-bold text-white mb-2">{activeOperation.title}</h2>
-                      <p className="text-[#00B37A] max-w-lg">{activeOperation.description}</p>
-                      <p className="text-[#00B37A] text-sm mt-2">Current module: {activeOperation.currentModule}</p>
-                    </div>
-                    <div className="hidden md:block">
-                      <div className="h-16 w-16 rounded-full border-4 border-[#00FF88]/20 flex items-center justify-center">
-                        <span className="text-xl font-bold text-[#00FF88]">{activeOperation.progress}%</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-6">
-                    <div className="w-full bg-[#000000] rounded-full h-1.5 overflow-hidden border border-[#00FF88]/10">
-                      <div className="bg-[#00FF88] h-full rounded-full shadow-[0_0_10px_rgba(0,255,136,0.5)]" style={{ width: `${activeOperation.progress}%` }}></div>
-                    </div>
-
-                    <div className="flex gap-4">
-                      <button className="flex-1 bg-[#00FF88] hover:bg-[#00CC66] text-black font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition-all hover:shadow-[0_0_20px_rgba(0,255,136,0.3)]">
-                        <Play className="h-4 w-4 fill-current" />
-                        RESUME MISSION
-                      </button>
-                      <button className="px-4 py-3 rounded-lg border border-[#00FF88]/20 text-[#00FF88] hover:bg-[#00FF88]/10 transition-colors">
-                        <Terminal className="h-5 w-5" />
-                      </button>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <div className="text-center py-8">
-                  <h2 className="text-2xl font-bold text-white mb-4">No Active Operations</h2>
-                  <p className="text-[#00B37A] mb-8">Start a new course to begin your mission.</p>
-                  <button onClick={() => onTabChange?.('courses')} className="bg-[#00FF88] hover:bg-[#00CC66] text-black font-bold py-3 px-8 rounded-lg transition-all hover:shadow-[0_0_20px_rgba(0,255,136,0.3)]">
-                    BROWSE COURSES
-                  </button>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        <Card className="col-span-full lg:col-span-4 shadow-sm border-primary/20 bg-primary/5 hover:border-primary/40 transition-colors duration-200">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <CardTitle className="flex items-center gap-2">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                  </span>
+                  Active Operation
+                </CardTitle>
+                <CardDescription>Your current mission and learning objective</CardDescription>
+              </div>
+              <Zap className="h-5 w-5 text-primary" />
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {loading ? (
+              <div className="space-y-4">
+                <Skeleton className="h-8 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-3 w-full" />
+              </div>
+            ) : activeOperation ? (
+              <>
+                <div>
+                  <h3 className="text-xl font-bold mb-1">{activeOperation.title}</h3>
+                  <p className="text-sm text-muted-foreground">{activeOperation.description}</p>
                 </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Progress: {activeOperation.currentModule}</span>
+                    <span className="font-bold text-primary">{activeOperation.progress}%</span>
+                  </div>
+                  <Progress value={activeOperation.progress} className="h-2" />
+                </div>
+                <div className="flex gap-4">
+                  <Button className="flex-1" onClick={() => onTabChange?.('courses')}>
+                    <Play className="mr-2 h-4 w-4" /> Resume Mission
+                  </Button>
+                  <Button variant="outline" size="icon" onClick={() => onTabChange?.('labs')}>
+                    <Terminal className="h-4 w-4" />
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-10 text-center">
+                <p className="text-muted-foreground mb-4">No active operations detected.</p>
+                <Button onClick={() => onTabChange?.('courses')}>Browse Courses</Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="col-span-full lg:col-span-3 shadow-sm hover:shadow-md transition-all duration-200 border-border/50 hover:border-border">
+          <CardHeader>
+            <CardTitle>Recent Intel</CardTitle>
+            <CardDescription>Your latest training activities</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-8">
+              {loading ? (
+                <div className="space-y-6">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="flex gap-4">
+                      <Skeleton className="h-2 w-2 rounded-full mt-2" />
+                      <div className="space-y-2 flex-1">
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-3 w-1/3" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : activities.length > 0 ? (
+                activities.slice(0, 5).map((activity, index) => (
+                  <div key={index} className="flex items-start gap-4 group">
+                    <div className={cn(
+                      "mt-1 h-2 w-2 rounded-full transition-transform group-hover:scale-125",
+                      activity.type === 'completion' ? 'bg-primary' : 'bg-muted-foreground/30'
+                    )} />
+                    <div className="flex-1 space-y-1">
+                      <p className="text-sm font-medium leading-none group-hover:text-primary transition-colors">{activity.action}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {activity.created_at ? formatDistanceToNow(new Date(activity.created_at), { addSuffix: true }) : 'Recently'}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No recent activity.</p>
               )}
             </div>
-          </div>
+            <Button variant="ghost" className="w-full mt-6 text-xs text-muted-foreground hover:text-primary" onClick={() => onTabChange?.('profile')}>
+              View All History <ChevronRight className="ml-1 h-3 w-3" />
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
 
-          {/* Mission Progress */}
-          <Card variant="glass" className="border-[#00FF88]/10 bg-[#0A0F0A]">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-[#EAEAEA]">
-                <Activity className="h-5 w-5 text-[#00FF88]" />
-                Mission Progress
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {[
-                {
-                  label: 'Live Security Labs',
-                  progress: labStats ? (labStats.completedLabs / labStats.totalLabs) * 100 : (statsData.liveLabsCompleted / 6) * 100,
-                  total: labStats ? `${labStats.completedLabs}/${labStats.totalLabs}` : `${statsData.liveLabsCompleted}/6`,
-                  color: 'text-[#00CC66]',
-                  bar: 'bg-[#00CC66]'
-                },
-                { label: 'Skill Assessment', progress: user?.completedAssessment ? 100 : 0, total: user?.completedAssessment ? 'Complete' : 'Pending', color: 'text-[#00B37A]', bar: 'bg-[#00B37A]' }
-              ].map((item, i) => (
-                <div key={i} className="group">
-                  <div className="flex justify-between text-sm mb-2">
-                    <span className="text-[#EAEAEA] font-medium group-hover:text-[#00FF88] transition-colors">{item.label}</span>
-                    <span className="text-[#00B37A] font-mono text-xs">{item.total}</span>
-                  </div>
-                  <div className="w-full bg-[#000000] rounded-full h-1.5 overflow-hidden border border-[#00FF88]/10">
-                    <div className={`${item.bar} h-full rounded-full transition-all duration-1000`} style={{ width: `${item.progress}%` }}></div>
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Side Column */}
-        <div className="lg:col-span-4 space-y-8">
-
-          {/* Status Bar (Compact Stats) */}
-          <div className="grid grid-cols-2 gap-4">
-            <button onClick={() => onTabChange?.('courses')} className="bg-[#0A0F0A] border border-[#00FF88]/10 hover:border-[#00FF88]/30 p-4 rounded-xl cursor-pointer transition-all hover:bg-[#00FF88]/5">
-              <p className="text-[10px] text-[#00B37A] uppercase tracking-wider mb-1">Courses</p>
-              <p className="text-2xl font-bold text-white">{statsData.coursesCompleted}</p>
-            </button>
-            <button onClick={() => onTabChange?.('certificates')} className="bg-[#0A0F0A] border border-[#00FF88]/10 hover:border-[#00FF88]/30 p-4 rounded-xl cursor-pointer transition-all hover:bg-[#00FF88]/5">
-              <p className="text-[10px] text-[#00B37A] uppercase tracking-wider mb-1">Certificates</p>
-              <p className="text-2xl font-bold text-white">{statsData.certificatesEarned}</p>
-            </button>
-          </div>
-
-          {/* Quick Commands */}
-          <div className="space-y-3">
-            <h3 className="text-xs font-bold text-[#00B37A] uppercase tracking-widest px-1">Quick Commands</h3>
-            <button onClick={() => onTabChange?.('assessment')} className="w-full group bg-[#0A0F0A] hover:bg-[#00FF88]/5 border border-[#00FF88]/20 hover:border-[#00FF88]/50 p-4 rounded-xl flex items-center justify-between transition-all">
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded bg-[#00FF88]/10 flex items-center justify-center text-[#00FF88]">
-                  <Target className="h-4 w-4" />
-                </div>
-                <span className="font-bold text-[#EAEAEA] group-hover:text-white">Take Assessment</span>
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card className="shadow-sm hover:shadow-md transition-all duration-200 border-border/50 hover:border-border">
+          <CardHeader>
+            <CardTitle>Mission Quick Links</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-2">
+            <Button variant="outline" className="justify-between hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-all" onClick={() => onTabChange?.('assessment')}>
+              <div className="flex items-center gap-2">
+                <Target className="h-4 w-4" />
+                <span>Take Skills Assessment</span>
               </div>
-              <ChevronRight className="h-4 w-4 text-[#00B37A] group-hover:translate-x-1 transition-transform" />
-            </button>
-            <button onClick={() => onTabChange?.('certificates')} className="w-full group bg-[#0A0F0A] hover:bg-[#00FF88]/5 border border-[#00FF88]/20 hover:border-[#00FF88]/50 p-4 rounded-xl flex items-center justify-between transition-all">
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded bg-[#00FF88]/10 flex items-center justify-center text-[#00FF88]">
-                  <Award className="h-4 w-4" />
-                </div>
-                <span className="font-bold text-[#EAEAEA] group-hover:text-white">View Certificates</span>
+              <ChevronRight className="h-4 w-4 opacity-50" />
+            </Button>
+            <Button variant="outline" className="justify-between hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-all" onClick={() => onTabChange?.('certificates')}>
+              <div className="flex items-center gap-2">
+                <Award className="h-4 w-4" />
+                <span>Download Certificates</span>
               </div>
-              <ChevronRight className="h-4 w-4 text-[#00B37A] group-hover:translate-x-1 transition-transform" />
-            </button>
-            <button onClick={() => onTabChange?.('notes')} className="w-full group bg-[#0A0F0A] hover:bg-[#00FF88]/5 border border-[#00FF88]/20 hover:border-[#00FF88]/50 p-4 rounded-xl flex items-center justify-between transition-all">
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded bg-[#00FF88]/10 flex items-center justify-center text-[#00FF88]">
-                  <FileText className="h-4 w-4" />
-                </div>
-                <span className="font-bold text-[#EAEAEA] group-hover:text-white">Personal Notes</span>
+              <ChevronRight className="h-4 w-4 opacity-50" />
+            </Button>
+            <Button variant="outline" className="justify-between hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-all" onClick={() => onTabChange?.('notes')}>
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                <span>Personal Training Notes</span>
               </div>
-              <ChevronRight className="h-4 w-4 text-[#00B37A] group-hover:translate-x-1 transition-transform" />
-            </button>
-          </div>
+              <ChevronRight className="h-4 w-4 opacity-50" />
+            </Button>
+          </CardContent>
+        </Card>
 
-          {/* Intel Feed (Recent Activity) */}
-          <Card variant="glass" className="border-[#00FF88]/10 bg-[#0A0F0A]">
-            <CardHeader>
-              <CardTitle className="text-sm uppercase tracking-widest text-[#00B37A]">Intel Feed</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                {activities.length > 0 ? (
-                  activities.map((activity, index) => {
-                    let timeAgo = 'recently';
-                    try {
-                      if (activity.created_at) {
-                        timeAgo = formatDistanceToNow(new Date(activity.created_at), { addSuffix: true });
-                      }
-                    } catch (e) {
-                      console.warn('Invalid date for activity', activity);
-                    }
-                    return (
-                      <div key={index} className="relative pl-6 pb-1 last:pb-0 border-l border-[#00FF88]/10 last:border-0">
-                        <div className={`absolute -left-1.25 top-1.5 h-2.5 w-2.5 rounded-full ring-4 ring-black ${activity.type === 'completion' ? 'bg-[#00FF88]' :
-                          activity.type === 'start' ? 'bg-[#00CC66]' :
-                            'bg-[#00B37A]'
-                          }`} />
-                        <div>
-                          <p className="text-sm font-medium text-[#EAEAEA]">{activity.action}</p>
-                          <p className="text-[10px] text-[#00B37A] font-mono mt-0.5">{timeAgo}</p>
-                        </div>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <p className="text-[#00B37A] text-sm italic">No recent intel.</p>
-                )}
+        <Card className="shadow-sm hover:shadow-md transition-all duration-200 border-border/50 hover:border-border">
+          <CardHeader>
+            <CardTitle>Status</CardTitle>
+            <CardDescription>Security clearance and system access</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between border-b border-border/50 pb-4">
+              <span className="text-sm font-medium">Clearance Level</span>
+              <span className="text-sm font-bold text-primary uppercase">{user?.level || 'NOVICE'}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Shield className="h-4 w-4 text-primary" />
+                <span className="text-sm">Account Status</span>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+              <span className="text-xs font-medium px-2 py-0.5 bg-primary/10 text-primary rounded-full animate-pulse">ACTIVE</span>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

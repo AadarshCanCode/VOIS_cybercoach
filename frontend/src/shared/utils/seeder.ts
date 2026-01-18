@@ -47,12 +47,7 @@ const MODULE_TEMPLATE = (courseId: string, courseName: string, i: number) => ({
     is_published: true
 });
 
-const QUESTION_TEMPLATE = (courseId: string, i: number) => ({
-    course_id: courseId,
-    question_text: `Sample Question ${i} for this course?`,
-    options: ['Correct Answer', 'Wrong Option A', 'Wrong Option B', 'Wrong Option C'],
-    correct_answer: 0
-});
+
 
 export const runSeed = async (userId?: string) => {
     console.log('Starting Master Seed...');
@@ -67,7 +62,7 @@ export const runSeed = async (userId?: string) => {
     try {
         // 1. Upsert Courses
         console.log('Seeding Courses...');
-        const coursesPayload = COURSES.map(c => ({ ...c, teacher_id: finalUserId }));
+        const coursesPayload = COURSES.map(c => ({ ...c }));
         const { error: cErr } = await supabase.from('courses').upsert(coursesPayload, { onConflict: 'id' });
         if (cErr) throw new Error(`Courses failed: ${cErr.message}`);
 

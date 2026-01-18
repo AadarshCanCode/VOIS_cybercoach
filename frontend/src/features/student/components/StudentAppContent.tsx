@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@context/AuthContext';
-import { Header } from '@components/layout/Header';
-import { Sidebar } from '@components/layout/Sidebar';
 import { LandingPage } from './Landing/LandingPage';
 import { Dashboard } from './Dashboard/Dashboard';
-import { TeacherDashboard } from '@teacher/components/TeacherDashboard';
+import { DashboardHeader } from "@shared/components/layout/DashboardHeader"
 import { AssessmentTest } from './Assessment/AssessmentTest';
 import { ProctoringDemo } from './Assessment/ProctoringDemo';
 import { CourseList } from './Courses/CourseList';
@@ -17,6 +15,9 @@ import { VideoLibrary } from './Video/VideoLibrary';
 import { TechnicalQuestions } from './TechnicalInterview/TechnicalQuestions';
 import { NotesTab } from './Notes/NotesTab';
 import { CommunityPage } from './Community/CommunityPage';
+import { SidebarInset, SidebarProvider } from "@shared/components/ui/sidebar"
+import { AppSidebar } from "@shared/components/layout/AppSidebar"
+import { StickyBanner } from '@shared/components/ui/sticky-banner';
 import '../styles/student.css';
 
 interface StudentAppContentProps {
@@ -24,7 +25,7 @@ interface StudentAppContentProps {
 }
 
 export const StudentAppContent: React.FC<StudentAppContentProps> = ({ initialTab }) => {
-  const { user, isTeacher } = useAuth();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [selectedLabId, setSelectedLabId] = useState<string | null>(null);
@@ -35,12 +36,10 @@ export const StudentAppContent: React.FC<StudentAppContentProps> = ({ initialTab
     }
   }, [initialTab]);
 
-  // Listen for navigation events from assessment completion
   useEffect(() => {
     const handleNavigateToTab = (e: CustomEvent<{ tab: string; labId?: string }>) => {
       if (e.detail?.tab) {
         setActiveTab(e.detail.tab);
-        // Clear selected items unless specific ID provided
         setSelectedCourseId(null);
         if (e.detail.labId) {
           setSelectedLabId(e.detail.labId);
@@ -82,12 +81,6 @@ export const StudentAppContent: React.FC<StudentAppContentProps> = ({ initialTab
     }
 
     switch (activeTab) {
-      case 'analytics':
-        return <Dashboard onTabChange={setActiveTab} />;
-      case 'my-courses':
-      case 'create-course':
-      case 'students':
-        return isTeacher() ? <TeacherDashboard /> : <Dashboard onTabChange={setActiveTab} />;
       case 'dashboard':
         return <Dashboard onTabChange={setActiveTab} />;
       case 'assessment':
@@ -117,13 +110,36 @@ export const StudentAppContent: React.FC<StudentAppContentProps> = ({ initialTab
 
   const isFullPage = ['community', 'landing'].includes(activeTab);
 
+  if (isFullPage) {
+    return <main className="min-h-screen">{renderContent()}</main>;
+  }
+
   return (
-    <div className="min-h-screen bg-black">
-      <Header />
-      <div className="flex">
-        {!isFullPage && <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />}
-        <main className="flex-1">{renderContent()}</main>
+    <div className="flex flex-col min-h-screen">
+      <div className="sticky top-0 z-50">
+        <StickyBanner className="bg-blue-600 border-none shrink-0 pointer-events-auto">
+          <p className="text-xs font-medium text-white tracking-wide text-center px-4">
+            Announcing the Cybercoach Community. Connect with elite operatives and share tactical intel.{" "}
+            <button
+              onClick={() => setActiveTab('community')}
+              className="text-white font-black hover:underline ml-2 uppercase tracking-tighter"
+            >
+              Join Community &rarr;
+            </button>
+          </p>
+        </StickyBanner>
       </div>
+      <SidebarProvider className="dark w-full bg-background text-foreground">
+        <AppSidebar activeTab={activeTab} onTabChange={setActiveTab} />
+        <SidebarInset>
+          <div className="sticky top-0 z-40">
+            <DashboardHeader activeTab={activeTab} onTabChange={setActiveTab} />
+          </div>
+          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+            {renderContent()}
+          </div>
+        </SidebarInset>
+      </SidebarProvider>
     </div>
   );
 };

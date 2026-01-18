@@ -4,21 +4,18 @@ import type { User } from '@types';
 import { supabase } from '@lib/supabase';
 
 interface AuthContextValue {
-  user: (User & { role?: 'student' | 'teacher'; created_at?: string | Date }) | null;
+  user: (User & { role?: 'student'; created_at?: string | Date }) | null;
   loading: boolean;
-  login: (email: string, password: string, role?: 'student' | 'teacher') => Promise<boolean>;
-  loginWithGoogle: (role?: 'student' | 'teacher') => Promise<void>;
+  login: (email: string, password: string, role?: 'student') => Promise<boolean>;
+  loginWithGoogle: (role?: 'student') => Promise<void>;
   register: (
     email: string,
     password: string,
     name: string,
-    role: 'student' | 'teacher',
-    bio?: string,
-    specialization?: string
+    role: 'student'
   ) => Promise<boolean>;
   logout: () => Promise<void>;
   updateUser: (updates: Partial<User>) => void;
-  isTeacher: () => boolean;
   isStudent: () => boolean;
 }
 
@@ -94,7 +91,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  const login = async (email: string, password: string, role: 'student' | 'teacher' = 'student') => {
+  const login = async (email: string, password: string, role: 'student' = 'student') => {
     try {
       const credentials = { email, password, role };
       const loggedInUser = await authService.login(credentials);
@@ -107,7 +104,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const loginWithGoogle = async (role: 'student' | 'teacher' = 'student') => {
+  const loginWithGoogle = async (role: 'student' = 'student') => {
     try {
       await authService.loginWithGoogle(role);
     } catch (error) {
@@ -120,12 +117,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     email: string,
     password: string,
     name: string,
-    role: 'student' | 'teacher' = 'student',
-    bio?: string,
-    specialization?: string
+    role: 'student' = 'student'
   ) => {
     try {
-      const userData = { email, password, name, role, bio, specialization };
+      const userData = { email, password, name, role };
       const registeredUser = await authService.register(userData);
       setUser(registeredUser);
       return true;
@@ -153,16 +148,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const isTeacher = () => {
-    return user?.role === 'teacher';
-  };
-
   const isStudent = () => {
     return user?.role === 'student';
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, loginWithGoogle, register, logout, updateUser, isTeacher, isStudent }}>
+    <AuthContext.Provider value={{ user, loading, login, loginWithGoogle, register, logout, updateUser, isStudent }}>
       {children}
     </AuthContext.Provider>
   );

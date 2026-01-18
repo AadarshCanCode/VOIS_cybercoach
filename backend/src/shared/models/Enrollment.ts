@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { teacherConnection } from '../lib/teacherDb.js';
+
 
 const enrollmentSchema = new mongoose.Schema({
     studentEmail: { type: String, required: true },
@@ -12,4 +12,4 @@ const enrollmentSchema = new mongoose.Schema({
 // Composite index to prevent double enrollment
 enrollmentSchema.index({ studentEmail: 1, courseId: 1 }, { unique: true });
 
-export const Enrollment = teacherConnection.model('Enrollment', enrollmentSchema);
+export const Enrollment = mongoose.model('Enrollment', enrollmentSchema);

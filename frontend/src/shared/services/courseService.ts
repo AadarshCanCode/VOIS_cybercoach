@@ -44,7 +44,6 @@ class CourseService {
           category: courseData.category,
           difficulty: courseData.difficulty,
           estimated_hours: courseData.estimated_hours || 0,
-          teacher_id: courseData.teacher_id,
           // is_published: removed
           enrollment_count: 0,
           rating: 0,
@@ -136,56 +135,14 @@ class CourseService {
     }
   }
 
-  async getCoursesByTeacher(teacherId: string) {
-    try {
-      if (!teacherId) {
-        console.warn('getCoursesByTeacher called without teacherId');
-        return [];
-      }
 
-      // First get courses without join to avoid relationship issues
-      const { data: coursesData, error: coursesError } = await supabase
-        .from('courses')
-        .select('*')
-        .eq('teacher_id', teacherId)
-        .order('created_at', { ascending: false });
-
-      if (coursesError) {
-        console.error('Courses query error:', coursesError);
-        throw new Error(`Failed to fetch teacher courses: ${coursesError.message}`);
-      }
-
-      // Get teacher info separately
-      const { data: teacherData, error: teacherError } = await supabase
-        .from('users')
-        .select('name, email, profile_image')
-        .eq('id', teacherId)
-        .single();
-
-      if (teacherError) {
-        console.error('Teacher query error:', teacherError);
-        // Continue without teacher data if needed
-      }
-
-      // Combine the data
-      const coursesWithTeacher = coursesData?.map((course: Course) => ({
-        ...course,
-        teacher: teacherData || null
-      })) || [];
-
-      return coursesWithTeacher;
-    } catch (error) {
-      console.error('Get teacher courses error:', error);
-      throw error;
-    }
-  }
 
   async getAllCourses(): Promise<Course[]> {
     try {
       console.log('Starting getAllCourses query from MongoDB...');
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
-      const response = await fetch(`${API_URL}/api/teacher/courses/public/all`);
+      const response = await fetch(`${API_URL}/api/student/courses`);
       if (!response.ok) {
         throw new Error('Failed to fetch courses from backend');
       }
@@ -196,14 +153,13 @@ class CourseService {
       // Map backend fields to frontend interface if needed
       return courses.map((course: any) => ({
         ...course,
-        // Ensure mapping is correct
         id: course.id || course._id,
         module_count: course.modules?.length || 0,
         modules: (course.modules || []).map((m: any) => ({
           ...m,
           id: m.id || m._id
         })),
-        skills: [] // Mock skills as they are not in DB yet
+        skills: []
       }));
 
     } catch (error) {
@@ -222,7 +178,7 @@ class CourseService {
     try {
       // 1. Try fetching from MongoDB API (New System)
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-      const response = await fetch(`${API_URL}/api/teacher/courses/public/${id}`);
+      const response = await fetch(`${API_URL}/api/student/courses/${id}`);
 
       if (response.ok) {
         const course = await response.json();
@@ -463,17 +419,9 @@ class CourseService {
 
       if (email) {
         try {
-          await fetch(`${API_URL}/api/teacher/progress`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              studentEmail: email,
-              courseId,
-              moduleId,
-              completed,
-              quizScore
-            })
-          });
+          // Removed teacher/progress call. Falling back to Supabase/VU.
+          // await fetch(`${API_URL}/api/teacher/progress`, { ... });
+          console.log('Skipping MongoDB progress update (deprecated teacher endpoint). Using Supabase.');
           // We can return early if we want to fully migrate, but for safety we might also update Supabase if needed?
           // User requested "teacher should be able to progress", which is on MongoDB now.
           // So we prioritize MongoDB.
@@ -597,8 +545,7 @@ class CourseService {
         .select(`
           *,
           course:courses(
-            *,
-            teacher:users(name, profile_image)
+            *
           )
         `)
         .eq('user_id', userId)
