@@ -20,13 +20,13 @@ router.get('/jobs', async (_req: Request, res: Response) => {
 router.post('/verify-company', verifyCompanyController);
 
 // Lab endpoints
-router.post('/labs/:labId/complete', (req: Request, res: Response) => {
+router.post('/labs/:labId/complete', async (req: Request, res: Response) => {
   try {
     const { labId } = req.params;
     // In production, get studentId from authenticated user
     const studentId = req.body.studentId || 'demo-student';
-    
-    const completion = markLabAsCompleted(studentId, labId);
+
+    const completion = await markLabAsCompleted(studentId, labId);
     res.json({
       success: true,
       message: `Lab ${labId} marked as completed`,
@@ -37,25 +37,25 @@ router.post('/labs/:labId/complete', (req: Request, res: Response) => {
   }
 });
 
-router.get('/labs/stats', (req: Request, res: Response) => {
+router.get('/labs/stats', async (req: Request, res: Response) => {
   try {
     // In production, get studentId from authenticated user
     const studentId = req.query.studentId as string || 'demo-student';
-    
-    const stats = getLabStats(studentId);
+
+    const stats = await getLabStats(studentId);
     res.json(stats);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch lab stats' });
   }
 });
 
-router.get('/labs/:labId/status', (req: Request, res: Response) => {
+router.get('/labs/:labId/status', async (req: Request, res: Response) => {
   try {
     const { labId } = req.params;
     // In production, get studentId from authenticated user
     const studentId = req.query.studentId as string || 'demo-student';
-    
-    const completed = isLabCompleted(studentId, labId);
+
+    const completed = await isLabCompleted(studentId, labId);
     res.json({
       labId,
       completed,

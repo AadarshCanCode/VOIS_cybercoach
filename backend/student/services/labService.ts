@@ -1,37 +1,52 @@
 import { LabCompletion, LabStats } from '../models/labModel.js';
+import { supabase } from '../../lib/supabase.js';
 
-// In-memory storage for demo (in production, use database)
-const labCompletions: Map<string, LabCompletion> = new Map();
-const LAB_TOTAL = 6;
+const LAB_TOTAL = 17;
 
-export function markLabAsCompleted(studentId: string, labId: string): LabCompletion {
-  const id = `${studentId}-${labId}`;
-  
-  // Check if already completed
-  if (labCompletions.has(id)) {
-    return labCompletions.get(id)!;
+export async function markLabAsCompleted(studentId: string, labId: string): Promise<LabCompletion> {
+  const { data, error } = await supabase
+    .from('lab_completions')
+    .upsert(
+      {
+        user_id: studentId,
+        lab_id: labId,
+        completed: true,
+        completed_at: new Date().toISOString()
+      },
+      { onConflict: 'user_id,lab_id' }
+    )
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error marking lab as completed:', error);
+    throw error;
   }
-  
-  const completion: LabCompletion = {
-    id,
-    studentId,
-    labId,
-    completedAt: new Date().toISOString(),
-    createdAt: new Date().toISOString(),
+
+  return {
+    id: data.id,
+    studentId: data.user_id,
+    labId: data.lab_id,
+    completedAt: data.completed_at,
+    createdAt: data.created_at,
   };
-  
-  labCompletions.set(id, completion);
-  return completion;
 }
 
-export function getLabStats(studentId: string): LabStats {
-  const completedLabIds = Array.from(labCompletions.values())
-    .filter(completion => completion.studentId === studentId)
-    .map(completion => completion.labId);
-  
+export async function getLabStats(studentId: string): Promise<LabStats> {
+  const { data, error } = await supabase
+    .from('lab_completions')
+    .select('lab_id')
+    .eq('user_id', studentId);
+
+  if (error) {
+    console.error('Error fetching lab stats:', error);
+    throw error;
+  }
+
+  const completedLabIds = data ? data.map(row => row.lab_id) : [];
   const completedLabs = completedLabIds.length;
   const completionPercentage = (completedLabs / LAB_TOTAL) * 100;
-  
+
   return {
     totalLabs: LAB_TOTAL,
     completedLabs,
@@ -40,7 +55,18 @@ export function getLabStats(studentId: string): LabStats {
   };
 }
 
-export function isLabCompleted(studentId: string, labId: string): boolean {
-  const id = `${studentId}-${labId}`;
-  return labCompletions.has(id);
+export async function isLabCompleted(studentId: string, labId: string): Promise<boolean> {
+  const { data, error } = await supabase
+    .from('lab_completions')
+    .select('id')
+    .eq('user_id', studentId)
+    .eq('lab_id', labId)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Error checking lab completion:', error);
+    return false;
+  }
+
+  return !!data;
 }

@@ -21,24 +21,22 @@ export const LabViewer: React.FC<LabViewerProps> = ({ labId, onBack }) => {
     try {
       // Mark in localStorage for offline support
       markLabAsCompleted(labId);
-      
+
       // Also save to database
       await labApiService.markLabAsCompleted(labId);
-      
+
       setIsCompleted(true);
       setShowCompletionMessage(true);
       setTimeout(() => setShowCompletionMessage(false), 3000);
     } catch (error) {
       console.error('Error marking lab as completed:', error);
-      // Still mark as completed locally even if API fails
-      setIsCompleted(true);
-      setShowCompletionMessage(true);
-      setTimeout(() => setShowCompletionMessage(false), 3000);
+      // Do NOT mark as completed if API fails, so user knows it didn't save
+      alert('Failed to save lab completion. Please check your connection or backend server.');
     }
   };
 
   const lab = labs.find((l) => l.id === labId);
-  
+
   if (!lab) {
     return (
       <div className="p-6 min-h-screen bg-black">
@@ -169,7 +167,7 @@ export const LabViewer: React.FC<LabViewerProps> = ({ labId, onBack }) => {
               <span>Launch Lab Environment</span>
               <ExternalLink className="h-5 w-5" />
             </a>
-            
+
             {isCompleted ? (
               <button
                 disabled

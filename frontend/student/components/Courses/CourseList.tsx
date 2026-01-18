@@ -22,7 +22,8 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
   const [showEnrollModal, setShowEnrollModal] = useState(false);
   const [enrollCourse, setEnrollCourse] = useState<Course | null>(null);
 
-  const canAccessCourses = Boolean(user?.completedAssessment) || user?.role === 'admin';
+  // const canAccessCourses = Boolean(user?.completedAssessment) || user?.role === 'admin';
+  const canAccessCourses = true; // Unlocked for everyone
 
   // Fetch database courses when teacher-courses category is selected
   useEffect(() => {
@@ -424,8 +425,8 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
           </div>
         </div>
 
-        {/* Assessment notice */}
-        {!canAccessCourses && (
+        {/* Assessment notice - Removed */}
+        {/* {!canAccessCourses && (
           <div className="bg-[#0A0F0A] border border-yellow-500/20 rounded-xl p-6 relative overflow-hidden group">
             <div className="absolute inset-0 bg-yellow-500/5 group-hover:bg-yellow-500/10 transition-colors" />
             <div className="relative flex items-center space-x-4">
@@ -442,7 +443,7 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
               </div>
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Categories Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -456,8 +457,8 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
                 className={`bg-gradient-to-br ${category.color} rounded-xl border border-[#00FF88]/10 overflow-hidden group transition-all duration-300 relative ${canAccessCourses ? 'cursor-pointer hover:border-[#00FF88]/30' : 'opacity-40 cursor-not-allowed'
                   }`}
               >
-                {/* Lock Overlay */}
-                {!canAccessCourses && (
+                {/* Lock Overlay - Removed */}
+                {/* {!canAccessCourses && (
                   <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-10 flex items-center justify-center">
                     <div className="text-center">
                       <Lock className="h-16 w-16 text-white/40 mx-auto mb-3" />
@@ -465,7 +466,7 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
                       <p className="text-white/40 text-xs mt-1">Complete Assessment</p>
                     </div>
                   </div>
-                )}
+                )} */}
                 <div className="bg-[#0A0F0A]/80 backdrop-blur-sm p-8 h-full">
                   <div className="flex items-start justify-between mb-6">
                     <div className="flex items-center space-x-4">

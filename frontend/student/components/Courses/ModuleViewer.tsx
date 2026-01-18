@@ -125,7 +125,10 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           question: aiQuestion,
-          context: module?.title || 'Web Security'
+          context: `Course: ${course?.title || 'Cybersecurity'}
+Module: ${module?.title}
+Description: ${module?.description}
+Current Topic Content: ${module?.content?.substring(0, 500)}...`
         })
       });
 

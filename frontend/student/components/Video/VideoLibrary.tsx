@@ -273,7 +273,7 @@ export const VideoLibrary: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-12">
             {[
               { id: 'VU', label: 'VU Collection', count: vuVideos.length, icon: 'M 3 7 L 3 19 L 21 19 L 21 9 L 11 9 L 9 7 L 3 7 Z', color: '#00FF88', isLocked: false },
-              { id: 'Others', label: 'Others Database', count: otherVideos.length, icon: 'M 3 7 L 3 19 L 21 19 L 21 9 L 11 9 L 9 7 L 3 7 Z', color: '#00B37A', isLocked: true }
+              { id: 'Others', label: 'Others Database', count: otherVideos.length, icon: 'M 3 7 L 3 19 L 21 19 L 21 9 L 11 9 L 9 7 L 3 7 Z', color: '#00B37A', isLocked: false }
             ].map((folder) => (
               <button
                 key={folder.id}
@@ -297,8 +297,8 @@ export const VideoLibrary: React.FC = () => {
 
                 <div className="relative z-10">
                   <div className={`h-16 w-16 mb-6 rounded-xl bg-gradient-to-br border flex items-center justify-center transition-transform duration-500 ${folder.isLocked
-                      ? 'from-red-500/20 to-transparent border-red-500/20 text-red-500'
-                      : 'from-[#00FF88]/20 to-transparent border-[#00FF88]/20 text-[#00FF88] group-hover:scale-110'
+                    ? 'from-red-500/20 to-transparent border-red-500/20 text-red-500'
+                    : 'from-[#00FF88]/20 to-transparent border-[#00FF88]/20 text-[#00FF88] group-hover:scale-110'
                     }`}>
                     <svg className="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                       <path d="M3 7v12a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-8l-2-2H5a2 2 0 00-2 2z" />
@@ -310,8 +310,8 @@ export const VideoLibrary: React.FC = () => {
                   </p>
 
                   <div className={`mt-8 flex items-center gap-2 text-[10px] font-bold transition-all translate-x-[-10px] group-hover:translate-x-0 ${folder.isLocked
-                      ? 'text-red-500 opacity-100'
-                      : 'text-[#00FF88] opacity-0 group-hover:opacity-100'
+                    ? 'text-red-500 opacity-100'
+                    : 'text-[#00FF88] opacity-0 group-hover:opacity-100'
                     }`}>
                     {folder.isLocked ? 'ENCRYPTED' : 'ACCESS FILES'} <ChevronDown className={`h-3 w-3 -rotate-90 ${folder.isLocked ? 'hidden' : ''}`} />
                   </div>

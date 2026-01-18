@@ -186,9 +186,13 @@ router.post('/ask', async (req, res) => {
     
     If a user asks about anything else (cooking, politics, general life), STERNLY REFUSE and remind them to focus on the mission.
     
-    Current Module Context: ${context || 'General Web Security'}
+    Current Module Context:
+    ${context || 'General Web Security'}
     
-    Keep answers concise, technical yet accessible, and professional. Use "Operator" to address the user.`;
+    INSTRUCTIONS:
+    1. Use the above context (including course title, description, and content snippet) to inform your answer.
+    2. If the user's question is directly answered by the context, quote or paraphrase it.
+    3. Keep answers concise, technical yet accessible, and professional. Use "Operator" to address the user.`;
 
         const chatCompletion = await groq.chat.completions.create({
             messages: [
