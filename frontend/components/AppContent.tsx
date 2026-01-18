@@ -7,9 +7,7 @@ import { LandingPage } from '@student/components/Landing/LandingPage';
 import { LoginForm } from '@student/components/Auth/LoginForm';
 import { RegisterForm } from '@student/components/Auth/RegisterForm';
 import { AdminLogin } from '@admin/components/AdminLogin';
-import { CompanyVerification } from '@student/components/Verification/CompanyVerification';
 import { CommunityPage } from '@student/components/Community/CommunityPage';
-import { VulnerabilityAnalyzer } from '@student/components/Tools/VulnerabilityAnalyzer';
 import { VerifyCertificate } from '@student/pages/VerifyCertificate';
 import { SEO } from './SEO/SEO';
 
@@ -51,10 +49,8 @@ export const AppContent = () => {
                 } />
 
                 {/* Public Tool Routes */}
-                <Route path="/verify-target" element={<CompanyVerification />} />
                 <Route path="/verify/:userId" element={<VerifyCertificate />} />
                 <Route path="/community" element={<CommunityPage onBack={() => navigate('/')} />} />
-                <Route path="/analyze-target" element={<VulnerabilityAnalyzer />} />
 
                 {/* Protected Student Routes */}
                 <Route path="/dashboard" element={

@@ -1,7 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { getStudentDashboardSummary } from '../services/studentService.js';
-import { verifyCompanyController } from '../controllers/verificationController.js';
-import { getScrapedJobs } from '../services/jobService.js';
+// Imports removed
 import { markLabAsCompleted, getLabStats, isLabCompleted } from '../services/labService.js';
 
 const router = Router();
@@ -11,13 +10,7 @@ router.get('/overview', (_req: Request, res: Response): void => {
   res.json(summary);
 });
 
-router.get('/jobs', async (_req: Request, res: Response) => {
-  console.log('[Jobs] Received request for job listings');
-  const jobs = await getScrapedJobs();
-  res.json(jobs);
-});
-
-router.post('/verify-company', verifyCompanyController);
+// Routes removed
 
 // Lab endpoints
 router.post('/labs/:labId/complete', (req: Request, res: Response) => {
@@ -25,7 +18,7 @@ router.post('/labs/:labId/complete', (req: Request, res: Response) => {
     const { labId } = req.params;
     // In production, get studentId from authenticated user
     const studentId = req.body.studentId || 'demo-student';
-    
+
     const completion = markLabAsCompleted(studentId, labId);
     res.json({
       success: true,
@@ -41,7 +34,7 @@ router.get('/labs/stats', (req: Request, res: Response) => {
   try {
     // In production, get studentId from authenticated user
     const studentId = req.query.studentId as string || 'demo-student';
-    
+
     const stats = getLabStats(studentId);
     res.json(stats);
   } catch (error) {
@@ -54,7 +47,7 @@ router.get('/labs/:labId/status', (req: Request, res: Response) => {
     const { labId } = req.params;
     // In production, get studentId from authenticated user
     const studentId = req.query.studentId as string || 'demo-student';
-    
+
     const completed = isLabCompleted(studentId, labId);
     res.json({
       labId,

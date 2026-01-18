@@ -4,13 +4,10 @@ import {
     BookOpen,
     Video,
     Terminal,
-    FileText,
     User,
     LogOut,
     ChevronRight,
     ChevronLeft,
-    Briefcase,
-    Bot,
     ClipboardCheck,
     Shield,
     Users
@@ -33,9 +30,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
         { id: 'labs', label: 'Labs', icon: Terminal },
         { id: 'community', label: 'Community', icon: Users },
         { id: 'videos', label: 'Videos', icon: Video },
-        { id: 'career', label: 'Career', icon: Briefcase },
-        { id: 'interview', label: 'AI Interview', icon: Bot },
-        { id: 'resume', label: 'Resume', icon: FileText },
         { id: 'assessment', label: 'Assessment', icon: ClipboardCheck },
     ];
 

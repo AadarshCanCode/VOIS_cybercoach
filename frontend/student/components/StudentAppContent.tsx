@@ -18,12 +18,7 @@ import { VideoLibrary } from './Video/VideoLibrary';
 import { TechnicalQuestions } from './TechnicalInterview/TechnicalQuestions';
 import { NotesTab } from './Notes/NotesTab';
 import { CommunityPage } from './Community/CommunityPage';
-import { CompanyVerification } from './Verification/CompanyVerification';
-import { JobsBoard } from './Career/JobsBoard';
-import { InterviewBot } from './Career/InterviewBot';
-import { ResumeGenerator } from './Career/ResumeGenerator';
 import { PricingPage } from './Subscription/PricingPage';
-import { VulnerabilityAnalyzer } from './Tools/VulnerabilityAnalyzer';
 import '../styles/student.css';
 
 interface StudentAppContentProps {
@@ -117,24 +112,14 @@ export const StudentAppContent: React.FC<StudentAppContentProps> = ({ initialTab
         return <Profile />;
       case 'community':
         return <CommunityPage onBack={() => setActiveTab('dashboard')} />;
-      case 'verification':
-        return <CompanyVerification />;
-      case 'career':
-        return <JobsBoard />;
-      case 'interview':
-        return <InterviewBot />;
-      case 'resume':
-        return <ResumeGenerator />;
       case 'pricing':
         return <PricingPage />;
-      case 'analyzer':
-        return <VulnerabilityAnalyzer />;
       default:
         return <Dashboard onTabChange={setActiveTab} />;
     }
   };
 
-  const isFullPage = ['community', 'verification', 'landing', 'analyzer'].includes(activeTab);
+  const isFullPage = ['community', 'landing'].includes(activeTab);
 
   return (
     <div className="min-h-screen bg-black">
