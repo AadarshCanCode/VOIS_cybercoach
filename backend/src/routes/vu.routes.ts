@@ -1,5 +1,5 @@
 import express from 'express';
-import VUStudent from '../models/VUStudent.js';
+import VUStudent from '../shared/models/VUStudent.js';
 
 const router = express.Router();
 

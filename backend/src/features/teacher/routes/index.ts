@@ -1,8 +1,8 @@
 import { Router, Request, Response } from 'express';
-import { Teacher } from '../../models/Teacher.js';
-import { Course } from '../../models/Course.js';
-import { Enrollment } from '../../models/Enrollment.js';
-import { StudentProgress } from '../../models/StudentProgress.js';
+import { Teacher } from '../../../shared/models/Teacher.js';
+import { Course } from '../../../shared/models/Course.js';
+import { Enrollment } from '../../../shared/models/Enrollment.js';
+import { StudentProgress } from '../../../shared/models/StudentProgress.js';
 
 const router = Router();
 

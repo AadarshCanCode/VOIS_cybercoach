@@ -2,13 +2,13 @@ import express, { type Request, type Response } from 'express';
 import cors from 'cors';
 import 'dotenv/config';
 
-import studentRoutes from './student/routes/index.js';
-import teacherRoutes from './teacher/routes/index.js';
-import adminApiRoutes, { legacyRoutes as adminLegacyRoutes } from './admin/routes/index.js';
-import imagekitRoutes from './admin/routes/imagekitRoutes.js';
-import vuRoutes from './routes/vuRoutes.js';
-import aiRoutes from './routes/aiRoutes.js';
-import connectDB from './lib/mongodb.js';
+import studentRoutes from './features/student/routes/index.js';
+import teacherRoutes from './features/teacher/routes/index.js';
+import adminApiRoutes, { legacyRoutes as adminLegacyRoutes } from './features/admin/routes/index.js';
+import imagekitRoutes from './features/admin/routes/imagekitRoutes.js';
+import vuRoutes from './routes/vu.routes.js';
+import aiRoutes from './routes/ai.routes.js';
+import connectDB from './shared/lib/mongodb.js';
 
 const app = express();
 const parsedPort = Number.parseInt(process.env.PORT ?? '', 10);
