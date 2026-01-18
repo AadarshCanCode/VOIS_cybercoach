@@ -2,7 +2,7 @@ export interface User {
   id?: string;
   name?: string;
   email?: string;
-  role?: 'teacher' | 'student';
+  role?: 'admin' | 'teacher' | 'student';
   level?: 'beginner' | 'intermediate' | 'advanced';
   certificates?: string[];
   completedAssessment?: boolean;

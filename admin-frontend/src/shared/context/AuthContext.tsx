@@ -4,20 +4,21 @@ import type { User } from '@types';
 import { supabase } from '@lib/supabase';
 
 interface AuthContextValue {
-  user: (User & { role?: 'student' | 'teacher'; created_at?: string | Date }) | null;
+  user: (User & { role?: 'student' | 'teacher' | 'admin'; created_at?: string | Date }) | null;
   loading: boolean;
-  login: (email: string, password: string, role?: 'student' | 'teacher') => Promise<boolean>;
+  login: (email: string, password: string, role?: 'student' | 'teacher' | 'admin') => Promise<boolean>;
   loginWithGoogle: (role?: 'student' | 'teacher') => Promise<void>;
   register: (
     email: string,
     password: string,
     name: string,
-    role: 'student' | 'teacher',
+    role: 'student' | 'teacher' | 'admin',
     bio?: string,
     specialization?: string
   ) => Promise<boolean>;
   logout: () => Promise<void>;
   updateUser: (updates: Partial<User>) => void;
+  isAdmin: () => boolean;
   isTeacher: () => boolean;
   isStudent: () => boolean;
 }
@@ -44,15 +45,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         if (session) {
           // If we have a session, sync with our DB to get role/profile
-          const syncedUser = await authService.handleAuthStateChange(session) as AuthContextValue['user'];
-          if (mounted && syncedUser && syncedUser.role !== 'admin' as any) {
+          const syncedUser = await authService.handleAuthStateChange(session);
+          if (mounted && syncedUser) {
             setUser(syncedUser);
           }
         } else {
           // Fallback: Check localStorage if no Supabase session (though usually they sync)
           // or just clear it if we trust Supabase as single source of truth
-          const localUser = authService.getCurrentUser() as AuthContextValue['user'];
-          if (mounted && localUser && localUser.role !== 'admin' as any) {
+          const localUser = authService.getCurrentUser();
+          if (mounted && localUser) {
+            // Optional: Validate local user? For now, trust it but maybe background re-verify
             setUser(localUser);
           }
         }
@@ -72,8 +74,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         if (session) {
           try {
-            const syncedUser = await authService.handleAuthStateChange(session) as AuthContextValue['user'];
-            if (syncedUser && syncedUser.role !== 'admin' as any) {
+            const syncedUser = await authService.handleAuthStateChange(session);
+            if (syncedUser) {
               setUser(syncedUser);
             }
           } catch (error: any) {
@@ -94,7 +96,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  const login = async (email: string, password: string, role: 'student' | 'teacher' = 'student') => {
+  const login = async (email: string, password: string, role: 'student' | 'teacher' | 'admin' = 'student') => {
     try {
       const credentials = { email, password, role };
       const loggedInUser = await authService.login(credentials);
@@ -120,7 +122,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     email: string,
     password: string,
     name: string,
-    role: 'student' | 'teacher' = 'student',
+    role: 'student' | 'teacher' | 'admin' = 'student',
     bio?: string,
     specialization?: string
   ) => {
@@ -153,6 +155,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const isAdmin = () => {
+    return user?.role === 'admin';
+  };
+
   const isTeacher = () => {
     return user?.role === 'teacher';
   };
@@ -162,7 +168,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, loginWithGoogle, register, logout, updateUser, isTeacher, isStudent }}>
+    <AuthContext.Provider value={{ user, loading, login, loginWithGoogle, register, logout, updateUser, isAdmin, isTeacher, isStudent }}>
       {children}
     </AuthContext.Provider>
   );

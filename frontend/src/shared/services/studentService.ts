@@ -245,6 +245,22 @@ class StudentService {
         }
     }
 
+    // Course Notes Methods (Official)
+    async getAllNotes(): Promise<any[]> {
+        try {
+            const { data, error } = await supabase
+                .from('notes')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            return data || [];
+        } catch (error) {
+            console.error('Get all official notes error:', error);
+            throw error;
+        }
+    }
+
     // Personal Notes Methods
     async getPersonalNotes(userId: string): Promise<any[]> {
         try {

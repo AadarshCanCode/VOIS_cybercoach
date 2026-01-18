@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Download, Search, Filter, Plus, Upload, BookOpen, Trash2, Link as LinkIcon, ExternalLink } from 'lucide-react';
-import { adminService } from '@services/adminService';
 import { studentService } from '@services/studentService';
 import { useAuth } from '@context/AuthContext';
 
@@ -31,9 +30,8 @@ export const NotesTab: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCourse, setSelectedCourse] = useState('all');
   const [loading, setLoading] = useState(true);
-  const [showUploadForm, setShowUploadForm] = useState(false);
   const [showPersonalUploadForm, setShowPersonalUploadForm] = useState(false);
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
 
   useEffect(() => {
     loadNotes();
@@ -50,7 +48,7 @@ export const NotesTab: React.FC = () => {
   const loadNotes = async () => {
     try {
       setLoading(true);
-      const data = await adminService.getAllNotes();
+      const data = await studentService.getAllNotes();
       setNotes(data);
     } catch (error) {
       console.error('Failed to load notes:', error);
@@ -60,9 +58,9 @@ export const NotesTab: React.FC = () => {
   };
 
   const loadPersonalNotes = async () => {
-    if (!user) return;
+    if (!user || !user.id) return;
     try {
-      const data = await studentService.getPersonalNotes(user.id);
+      const data = await studentService.getPersonalNotes(user.id!);
       setPersonalNotes(data);
     } catch (error) {
       console.error('Failed to load personal notes:', error);
@@ -102,19 +100,6 @@ export const NotesTab: React.FC = () => {
 
   const courses = [...new Set(notes.map(note => note.course_id))];
 
-  // showUploadForm is allowed only for admins
-  if (showUploadForm && isAdmin() && user) {
-    return (
-      <NoteUploadForm
-        onSave={(newNote) => {
-          setNotes([newNote, ...notes]);
-          setShowUploadForm(false);
-        }}
-        onCancel={() => setShowUploadForm(false)}
-      />
-    );
-  }
-
   if (showPersonalUploadForm && user) {
     return (
       <PersonalNoteUploadForm
@@ -140,15 +125,6 @@ export const NotesTab: React.FC = () => {
             <p className="text-[#00B37A] font-mono text-sm mt-1">OPERATIONAL INTELLIGENCE</p>
           </div>
           <div className="flex items-center gap-4">
-            {activeTab === 'official' && isAdmin() && (
-              <button
-                onClick={() => setShowUploadForm(true)}
-                className="flex items-center space-x-2 bg-[#00FF88] text-black px-4 py-2 rounded-lg hover:bg-[#00CC66] transition-all shadow-[0_0_20px_rgba(0,255,136,0.3)] font-bold text-sm"
-              >
-                <Plus className="h-4 w-4" />
-                <span>UPLOAD INTEL</span>
-              </button>
-            )}
             {activeTab === 'personal' && (
               <button
                 onClick={() => setShowPersonalUploadForm(true)}
@@ -169,8 +145,8 @@ export const NotesTab: React.FC = () => {
           <button
             onClick={() => setActiveTab('official')}
             className={`pb-3 px-4 text-sm font-bold uppercase tracking-wider transition-colors border-b-2 ${activeTab === 'official'
-                ? 'border-[#00FF88] text-[#00FF88]'
-                : 'border-transparent text-[#EAEAEA]/50 hover:text-[#EAEAEA]'
+              ? 'border-[#00FF88] text-[#00FF88]'
+              : 'border-transparent text-[#EAEAEA]/50 hover:text-[#EAEAEA]'
               }`}
           >
             Official Intel
@@ -178,8 +154,8 @@ export const NotesTab: React.FC = () => {
           <button
             onClick={() => setActiveTab('personal')}
             className={`pb-3 px-4 text-sm font-bold uppercase tracking-wider transition-colors border-b-2 ${activeTab === 'personal'
-                ? 'border-[#00FF88] text-[#00FF88]'
-                : 'border-transparent text-[#EAEAEA]/50 hover:text-[#EAEAEA]'
+              ? 'border-[#00FF88] text-[#00FF88]'
+              : 'border-transparent text-[#EAEAEA]/50 hover:text-[#EAEAEA]'
               }`}
           >
             Personal Logs
@@ -366,188 +342,6 @@ export const NotesTab: React.FC = () => {
   );
 };
 
-// Note Upload Form Component (Admin Only)
-interface NoteUploadFormProps {
-  onSave: (note: Note) => void;
-  onCancel: () => void;
-}
-
-const NoteUploadForm: React.FC<NoteUploadFormProps> = ({ onSave, onCancel }) => {
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    module_id: '',
-    course_id: ''
-  });
-  const [pdfFile, setPdfFile] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const { user } = useAuth();
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && file.type === 'application/pdf') {
-      setPdfFile(file);
-    } else {
-      alert('Please select a PDF file');
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!pdfFile) {
-      alert('Please select a PDF file');
-      return;
-    }
-
-    try {
-      setUploading(true);
-
-      // Upload PDF file
-      const pdfUrl = await adminService.uploadFile(pdfFile, 'notes');
-
-      // Create note record
-      const newNote = await adminService.createNote({
-        ...formData,
-        pdf_url: pdfUrl,
-        admin_id: user!.id
-      });
-
-      onSave(newNote);
-    } catch (error) {
-      console.error('Upload failed:', error);
-      alert('Failed to upload note');
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  return (
-    <div className="p-6 min-h-screen bg-black text-[#EAEAEA]">
-      <div className="max-w-2xl mx-auto">
-        <div className="flex items-center justify-between mb-8 border-b border-[#00FF88]/10 pb-6">
-          <h1 className="text-3xl font-black tracking-tighter text-white uppercase">
-            Upload <span className="text-[#00FF88]">Intel</span>
-          </h1>
-          <button
-            onClick={onCancel}
-            className="text-[#00B37A] hover:text-white transition-colors font-mono uppercase tracking-wider text-sm"
-          >
-            Abort
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="bg-[#0A0F0A] border border-[#00FF88]/10 rounded-xl p-8 space-y-6 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-[#00FF88]/5 to-transparent pointer-events-none" />
-
-          <div className="relative z-10 space-y-6">
-            <div>
-              <label className="block text-xs font-bold text-[#00B37A] uppercase tracking-widest mb-2">
-                File Designation
-              </label>
-              <input
-                type="text"
-                value={formData.title}
-                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                className="w-full px-4 py-3 border border-[#00FF88]/20 bg-black text-[#EAEAEA] rounded-lg focus:outline-none focus:border-[#00FF88] focus:shadow-[0_0_15px_rgba(0,255,136,0.1)] font-mono text-sm"
-                placeholder="e.g., SQL INJECTION PROTOCOLS"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-[#00B37A] uppercase tracking-widest mb-2">
-                Content Summary
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                rows={3}
-                className="w-full px-4 py-3 border border-[#00FF88]/20 bg-black text-[#EAEAEA] rounded-lg focus:outline-none focus:border-[#00FF88] focus:shadow-[0_0_15px_rgba(0,255,136,0.1)] font-mono text-sm"
-                placeholder="Brief intelligence summary..."
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-xs font-bold text-[#00B37A] uppercase tracking-widest mb-2">
-                  Course ID
-                </label>
-                <input
-                  type="text"
-                  value={formData.course_id}
-                  onChange={(e) => setFormData(prev => ({ ...prev, course_id: e.target.value }))}
-                  className="w-full px-4 py-3 border border-[#00FF88]/20 bg-black text-[#EAEAEA] rounded-lg focus:outline-none focus:border-[#00FF88] focus:shadow-[0_0_15px_rgba(0,255,136,0.1)] font-mono text-sm"
-                  placeholder="e.g., owasp-top-10"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-[#00B37A] uppercase tracking-widest mb-2">
-                  Module ID
-                </label>
-                <input
-                  type="text"
-                  value={formData.module_id}
-                  onChange={(e) => setFormData(prev => ({ ...prev, module_id: e.target.value }))}
-                  className="w-full px-4 py-3 border border-[#00FF88]/20 bg-black text-[#EAEAEA] rounded-lg focus:outline-none focus:border-[#00FF88] focus:shadow-[0_0_15px_rgba(0,255,136,0.1)] font-mono text-sm"
-                  placeholder="e.g., module-1"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-[#00B37A] uppercase tracking-widest mb-2">
-                Encrypted Payload (PDF)
-              </label>
-              <input
-                type="file"
-                onChange={handleFileChange}
-                accept=".pdf"
-                className="w-full px-4 py-3 border border-[#00FF88]/20 bg-black text-[#EAEAEA] rounded-lg focus:outline-none focus:border-[#00FF88] file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[#00FF88]/10 file:text-[#00FF88] hover:file:bg-[#00FF88]/20 font-mono text-sm"
-                required
-              />
-              {pdfFile && (
-                <p className="text-xs text-[#00FF88] mt-2 font-mono">SELECTED: {pdfFile.name}</p>
-              )}
-            </div>
-
-            <div className="flex justify-end space-x-4 pt-4 border-t border-[#00FF88]/10">
-              <button
-                type="button"
-                onClick={onCancel}
-                className="px-6 py-2 border border-[#00FF88]/20 text-[#00B37A] rounded-lg hover:bg-[#00FF88]/5 transition-colors font-mono uppercase tracking-wider text-sm"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={uploading}
-                className="px-6 py-2 bg-[#00FF88] text-black rounded-lg hover:bg-[#00CC66] disabled:opacity-50 transition-all shadow-[0_0_20px_rgba(0,255,136,0.3)] font-bold uppercase tracking-wide flex items-center space-x-2"
-              >
-                {uploading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-black"></div>
-                    <span>ENCRYPTING...</span>
-                  </>
-                ) : (
-                  <>
-                    <Upload className="h-4 w-4" />
-                    <span>UPLOAD</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-};
-
 // Personal Note Upload Form
 interface PersonalNoteUploadFormProps {
   onSave: (note: PersonalNote) => void;
@@ -575,7 +369,7 @@ const PersonalNoteUploadForm: React.FC<PersonalNoteUploadFormProps> = ({ onSave,
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user || !user.id) return;
 
     if (formData.type === 'pdf' && !pdfFile) {
       alert('Please select a PDF file');
@@ -596,7 +390,7 @@ const PersonalNoteUploadForm: React.FC<PersonalNoteUploadFormProps> = ({ onSave,
       }
 
       const newNote = await studentService.addPersonalNote({
-        user_id: user.id,
+        user_id: user.id!,
         title: formData.title,
         type: formData.type,
         content_url: contentUrl
@@ -653,8 +447,8 @@ const PersonalNoteUploadForm: React.FC<PersonalNoteUploadFormProps> = ({ onSave,
                   type="button"
                   onClick={() => setFormData(prev => ({ ...prev, type: 'link' }))}
                   className={`flex-1 py-3 rounded-lg border font-mono uppercase tracking-wider text-sm transition-all ${formData.type === 'link'
-                      ? 'bg-[#00FF88]/10 border-[#00FF88] text-[#00FF88]'
-                      : 'bg-black border-[#00FF88]/20 text-[#00B37A] hover:border-[#00FF88]/50'
+                    ? 'bg-[#00FF88]/10 border-[#00FF88] text-[#00FF88]'
+                    : 'bg-black border-[#00FF88]/20 text-[#00B37A] hover:border-[#00FF88]/50'
                     }`}
                 >
                   External Link
@@ -663,8 +457,8 @@ const PersonalNoteUploadForm: React.FC<PersonalNoteUploadFormProps> = ({ onSave,
                   type="button"
                   onClick={() => setFormData(prev => ({ ...prev, type: 'pdf' }))}
                   className={`flex-1 py-3 rounded-lg border font-mono uppercase tracking-wider text-sm transition-all ${formData.type === 'pdf'
-                      ? 'bg-[#00FF88]/10 border-[#00FF88] text-[#00FF88]'
-                      : 'bg-black border-[#00FF88]/20 text-[#00B37A] hover:border-[#00FF88]/50'
+                    ? 'bg-[#00FF88]/10 border-[#00FF88] text-[#00FF88]'
+                    : 'bg-black border-[#00FF88]/20 text-[#00B37A] hover:border-[#00FF88]/50'
                     }`}
                 >
                   PDF Document

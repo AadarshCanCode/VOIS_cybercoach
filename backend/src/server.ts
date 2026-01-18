@@ -28,7 +28,15 @@ const globalLimiter = rateLimit({
 });
 
 app.use(globalLimiter);
-app.use(cors());
+app.use(cors({
+  origin: [
+    'http://localhost:5173',  // Main app dev
+    'http://localhost:5174',  // Admin app dev
+    'https://sparkstudio.co.in',  // Main app prod
+    'https://admin.sparkstudio.co.in'  // Admin app prod
+  ],
+  credentials: true
+}));
 app.use(express.json({ limit: '1mb' }));
 
 app.use('/api/student', studentRoutes);

@@ -60,7 +60,7 @@ function sanitizeUser(dbUser: DBUser): User {
 }
 
 class AuthService {
-  async login(credentials: { email: string; password: string; role: 'student' | 'teacher' }): Promise<User | null> {
+  async login(credentials: { email: string; password: string; role: string }): Promise<User | null> {
     try {
       const { data: signInData, error: signInError } = await withTimeout(
         supabase.auth.signInWithPassword({
@@ -131,7 +131,7 @@ class AuthService {
       // Verify role matches credentials
       if (profile && profile.role !== credentials.role) {
         await supabase.auth.signOut();
-        throw new Error(`Access Denied: This email is registered as a ${profile.role}. Please login through the correct portal.`);
+        throw new Error(`Access Denied: This email is registered as a ${profile.role}. Please login as a ${profile.role}.`);
       }
 
       const profileRow = profile ? (profile as DBUser) : undefined;
@@ -187,7 +187,7 @@ class AuthService {
     email: string;
     password: string;
     name?: string;
-    role: 'student' | 'teacher';
+    role: string;
     bio?: string;
     specialization?: string
   }): Promise<User | null> {
@@ -236,7 +236,7 @@ class AuthService {
         role: userData.role,
         password_hash: 'SUPABASE_AUTH',
         level: 'beginner',
-        completed_assessment: false,
+        completed_assessment: userData.role === 'admin',
         bio: userData.bio || '',
         specialization: userData.specialization || '',
         experience_years: userData.role === 'student' ? null : '0-1'
@@ -296,6 +296,11 @@ class AuthService {
       console.error('Failed to parse user from local storage:', e);
       return null;
     }
+  }
+
+  isAdmin() {
+    const user = this.getCurrentUser();
+    return user?.role === 'admin';
   }
 
   isTeacher() {

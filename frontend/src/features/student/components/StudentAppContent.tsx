@@ -9,7 +9,6 @@ import { AssessmentTest } from './Assessment/AssessmentTest';
 import { ProctoringDemo } from './Assessment/ProctoringDemo';
 import { CourseList } from './Courses/CourseList';
 import { CourseDetail } from './Courses/CourseDetail';
-import { AssessmentAnalytics } from '@admin/components/AssessmentAnalytics';
 import { LabsList } from './Labs/LabsList';
 import { LabViewer } from './Labs/LabViewer';
 import { Certificates } from './Certificates/Certificates';
@@ -25,7 +24,7 @@ interface StudentAppContentProps {
 }
 
 export const StudentAppContent: React.FC<StudentAppContentProps> = ({ initialTab }) => {
-  const { user, isAdmin, isTeacher } = useAuth();
+  const { user, isTeacher } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [selectedLabId, setSelectedLabId] = useState<string | null>(null);
@@ -84,7 +83,7 @@ export const StudentAppContent: React.FC<StudentAppContentProps> = ({ initialTab
 
     switch (activeTab) {
       case 'analytics':
-        return isAdmin() ? <AssessmentAnalytics /> : <Dashboard onTabChange={setActiveTab} />;
+        return <Dashboard onTabChange={setActiveTab} />;
       case 'my-courses':
       case 'create-course':
       case 'students':
@@ -92,7 +91,7 @@ export const StudentAppContent: React.FC<StudentAppContentProps> = ({ initialTab
       case 'dashboard':
         return <Dashboard onTabChange={setActiveTab} />;
       case 'assessment':
-        return isAdmin() ? <AssessmentAnalytics /> : <AssessmentTest />;
+        return <AssessmentTest />;
       case 'proctor-demo':
         return <ProctoringDemo />;
       case 'courses':
