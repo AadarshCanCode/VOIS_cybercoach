@@ -8,6 +8,7 @@ export interface User {
   completedAssessment?: boolean;
   createdAt?: string;
   updatedAt?: string;
+  avatar_url?: string;
 }
 
 export interface Course {

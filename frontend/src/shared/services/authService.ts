@@ -139,6 +139,7 @@ class AuthService {
           email: sessionUser.email!,
           name: sessionUser.user_metadata?.full_name || sessionUser.email?.split('@')[0] || 'User',
           role: credentials.role,
+          avatar_url: sessionUser.user_metadata?.avatar_url || sessionUser.user_metadata?.picture,
           completedAssessment: false,
           level: 'beginner'
         } as User;
@@ -150,6 +151,7 @@ class AuthService {
             email: sessionUser.email,
             name: profileCopy.name,
             role: credentials.role,
+            avatar_url: profileCopy.avatar_url,
             password_hash: 'SUPABASE_AUTH'
           }]);
         }
@@ -421,6 +423,7 @@ class AuthService {
         name: metadata.full_name || user.email?.split('@')[0] || 'User',
         role: role,
         level: 'beginner',
+        avatar_url: metadata.avatar_url || metadata.picture,
         created_at: new Date().toISOString()
       };
 
@@ -431,6 +434,7 @@ class AuthService {
               .from('users')
               .upsert([{
                 ...placeholderUser,
+                avatar_url: metadata.avatar_url || metadata.picture,
                 password_hash: 'SUPABASE_AUTH'
               }]);
           } catch (e) {
