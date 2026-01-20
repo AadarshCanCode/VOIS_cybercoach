@@ -1,10 +1,9 @@
+
 import React, { useEffect, useState } from 'react';
-import { ArrowRight, Terminal } from 'lucide-react';
 import { useAuth } from '@context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 // UI Components
-import { Tabs } from '@components/ui/tabs';
 import { SEO } from '@components/SEO/SEO';
 import {
   Navbar,
@@ -18,42 +17,25 @@ import {
   MobileNavMenu,
 } from '@components/ui/resizable-navbar';
 import { StickyBanner } from '@components/ui/sticky-banner';
+
+// Sections
+import { LandingHero } from './LandingHero';
+import { LandingFeatures } from './LandingFeatures';
+import { LandingFooter } from './LandingFooter';
 import LandingTestimonials from './LandingTestimonials';
-
-const TabImage = ({ src }: { src: string }) => (
-  <img
-    src={src}
-    alt="Cyber Intel"
-    width="1000"
-    height="1000"
-    className="object-cover object-left-top h-[60%] md:h-[90%] absolute -bottom-10 inset-x-0 w-[90%] rounded-xl mx-auto"
-  />
-);
-
-
-
-
-
 
 
 export const LandingPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // interactive UI state
-
-
-
-
   const handleGetStarted = (tab?: string) => {
     if (user) {
       navigate('/dashboard');
       return;
     }
-    navigate(`/login${tab ? `?tab=${tab}` : ''}`);
+    navigate(`/ login${tab ? `?tab=${tab}` : ''} `);
   };
-
-
 
   // navbar mobile state
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -70,33 +52,21 @@ export const LandingPage: React.FC = () => {
   return (
     <>
       <SEO
-        description="The elite tactical platform for unified cybersecurity defense. Master real-world threats with AI-powered labs and assessments."
+        description="Master cybersecurity with comprehensive training, virtual labs, and career support. Join CyberCoach today."
       />
 
-      <div className="min-h-screen bg-[#000000] text-[#EAEAEA] font-[system-ui] selection:bg-[#00FF88]/30">
-        <StickyBanner className="bg-blue-600 border-none">
-          <p className="text-sm font-medium text-white tracking-wide text-center px-4">
-            Announcing the Cybercoach Community. Connect with elite operatives and share tactical intel.{" "}
+      <div className="min-h-screen bg-black text-zinc-100 font-sans selection:bg-[#00FF88]/30">
+        <StickyBanner className="bg-zinc-900 border-b border-zinc-800">
+          <p className="text-sm font-medium text-zinc-300 tracking-wide text-center px-4">
+            Join the CyberCoach Community. Connect with students and mentors.{" "}
             <button
               onClick={() => navigate('/community')}
-              className="text-white font-black hover:underline ml-2 uppercase tracking-tighter"
+              className="text-[#00FF88] font-bold hover:underline ml-2"
             >
               Join Community &rarr;
             </button>
           </p>
         </StickyBanner>
-        {/* Grid Background */}
-        <div className="fixed inset-0 bg-[linear-gradient(to_right,#00FF8805_1px,transparent_1px),linear-gradient(to_bottom,#00FF8805_1px,transparent_1px)] bg-size-[32px_32px] pointer-events-none" />
-
-        {/* Animated Blobs */}
-        <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#00FF88]/10 blur-[120px] rounded-full animate-blob" />
-          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#00FF88]/10 blur-[120px] rounded-full animate-blob animation-delay-2000" />
-          <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] bg-[#00FF88]/5 blur-[100px] rounded-full animate-blob animation-delay-4000" />
-        </div>
-
-        {/* Radial Gradient Glow */}
-        <div className="fixed top-0 left-1/2 -translate-x-1/2 w-250 h-150 bg-linear-to-b from-[#00FF88]/15 to-transparent blur-[120px] rounded-full pointer-events-none" />
 
         {/* Nav */}
         <Navbar>
@@ -114,7 +84,7 @@ export const LandingPage: React.FC = () => {
                   }
                 },
                 {
-                  name: 'Testimonials',
+                  name: 'Reviews',
                   link: '#testimonials',
                   onClick: () => {
                     const el = document.getElementById('testimonials');
@@ -124,9 +94,8 @@ export const LandingPage: React.FC = () => {
               ]}
             />
             <div className="flex items-center gap-3">
-
               <NavbarButton variant="primary" onClick={() => handleGetStarted()}>
-                {user ? 'Dashboard' : 'Register'}
+                {user ? 'Go to Dashboard' : 'Get Started'}
               </NavbarButton>
             </div>
           </NavBody>
@@ -151,7 +120,7 @@ export const LandingPage: React.FC = () => {
                   const el = document.getElementById('features');
                   if (el) el.scrollIntoView({ behavior: 'smooth' });
                 }}
-                className="text-[#EAEAEA] hover:text-[#00FF88] transition-colors text-sm font-bold uppercase tracking-wider"
+                className="text-zinc-300 hover:text-[#00FF88] transition-colors text-sm font-medium"
               >
                 Features
               </button>
@@ -161,202 +130,39 @@ export const LandingPage: React.FC = () => {
                   const el = document.getElementById('testimonials');
                   if (el) el.scrollIntoView({ behavior: 'smooth' });
                 }}
-                className="text-[#EAEAEA] hover:text-[#00FF88] transition-colors text-sm font-bold uppercase tracking-wider"
+                className="text-zinc-300 hover:text-[#00FF88] transition-colors text-sm font-medium"
               >
-                Testimonials
+                Reviews
               </button>
-              <div className="flex w-full flex-col gap-3 pt-4 border-t border-[#00FF88]/10">
-
+              <div className="flex w-full flex-col gap-3 pt-4 border-t border-zinc-800">
                 <NavbarButton
                   onClick={() => { setMobileOpen(false); handleGetStarted(); }}
                   variant="primary"
                   className="w-full"
                 >
-                  {user ? 'Dashboard' : 'Register'}
+                  {user ? 'Dashboard' : 'Get Started'}
                 </NavbarButton>
               </div>
             </MobileNavMenu>
           </MobileNav>
         </Navbar>
 
-        {/* Hero */}
-        <section className="relative pt-20 pb-12 px-6 overflow-hidden flex items-center">
-          {/* Background Decorative Elements */}
-          <div className="absolute top-1/4 left-1/4 w-125 h-125 bg-[#00FF88]/5 blur-[150px] rounded-full pointer-events-none animate-pulse" />
-          <div className="absolute bottom-1/4 right-1/4 w-125 h-125 bg-[#00CC66]/5 blur-[150px] rounded-full pointer-events-none animate-pulse delay-1000" />
+        <LandingHero />
 
-          <div className="max-w-5xl mx-auto flex flex-col items-center text-center relative z-10 w-full space-y-12">
+        <LandingFeatures />
 
-
-
-
-
-            <div className="space-y-6">
-              <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-white leading-[0.85] uppercase">
-                MASTER THE <br />
-                <span className="text-transparent bg-clip-text bg-linear-to-r from-[#00FF88] via-[#00FF88] to-[#00CC66] filter drop-shadow-[0_0_20px_rgba(0,255,136,0.5)]">
-                  DEFENSE
-                </span>
-              </h1>
-              <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto leading-relaxed font-light tracking-wide">
-                The elite tactical platform for unified cybersecurity defense. Master real-world threats in high-fidelity ranges.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap gap-6 items-center justify-center">
-              <button
-                onClick={() => handleGetStarted()}
-                className="group relative flex items-center gap-4 px-12 py-5 bg-[#00FF88] hover:bg-[#00CC66] text-black rounded-[2rem] font-black text-lg tracking-tight transition-all hover:scale-[1.05] active:scale-95 shadow-[0_0_50px_rgba(0,255,136,0.4)] overflow-hidden"
-              >
-                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-                <Terminal className="h-6 w-6 relative z-10" />
-                <span className="relative z-10">{user ? 'ACCESS TERMINAL' : 'REGISTER'}</span>
-                <ArrowRight className="h-6 w-6 group-hover:translate-x-2 transition-transform relative z-10" />
-              </button>
-            </div>
-
-
-
-            {/* Operational Founders - Moved to Bottom */}
-            <div className="pt-10 w-full max-w-4xl mx-auto">
-              <div className="mb-4 text-[#00FF88] font-mono text-xs tracking-[0.2em] uppercase opacity-70">
-                OPERATIONAL FOUNDERS
-              </div>
-              <div className="flex flex-wrap justify-center gap-4">
-                {[
-                  { name: 'Piyush Dhoka', url: 'https://piyush.sparkstudio.co.in' },
-                  { name: 'Aadarsh Pathre', url: 'https://aadarsh.sparkstudio.co.in' },
-                  { name: 'Varun Inamdar', url: 'https://varun.sparkstudio.co.in' },
-                  { name: 'Vedant Pandhare', url: 'https://www.linkedin.com/in/vedant-pandhare' }
-                ].map((founder) => (
-                  <a
-                    key={founder.name}
-                    href={founder.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group flex items-center gap-3 px-5 py-3 bg-[#00FF88]/5 border border-[#00FF88]/20 rounded-xl hover:bg-[#00FF88]/10 transition-all hover:scale-105"
-                  >
-                    <span className="text-white font-bold leading-none">{founder.name.split(' ').map((n, i) => <span key={i} className={i === 0 ? "" : "block"}>{n} </span>)}</span>
-                    <ArrowRight className="h-4 w-4 text-[#00FF88] group-hover:translate-x-1 transition-transform" />
-                  </a>
-                ))}
-              </div>
-            </div>
-
-
-
-          </div>
-        </section>
-
-        {/* Features */}
-        < section id="features" className="py-24 px-6 bg-[#050505] relative" >
-          <div className="absolute top-0 left-0 w-full h-px bg-linear-to-r from-transparent via-[#00FF88]/20 to-transparent" />
-
-          <div className="max-w-7xl mx-auto">
-
-
-
-
-            <div className="h-[20rem] md:h-[40rem] [perspective:1000px] relative b flex flex-col max-w-5xl mx-auto w-full items-start justify-start my-40">
-              <Tabs tabs={[
-                {
-                  title: "Tactical Dashboard",
-                  value: "dashboard",
-                  content: (
-                    <div className="w-full overflow-hidden relative h-full rounded-2xl p-10 text-xl md:text-4xl font-bold text-black bg-linear-to-br from-[#00FF88] to-[#00B37A]">
-                      <p>Tactical Overview</p>
-                      <TabImage src="/tabs/dashboard.png" />
-                    </div>
-                  ),
-                },
-                {
-                  title: "Combat Labs",
-                  value: "labs",
-                  content: (
-                    <div className="w-full overflow-hidden relative h-full rounded-2xl p-10 text-xl md:text-4xl font-bold text-black bg-linear-to-br from-[#00FF88] to-[#00B37A]">
-                      <p>Combat Simulations</p>
-                      <TabImage src="/tabs/course.png" />
-                    </div>
-                  ),
-                },
-
-                {
-                  title: "Resume Engine",
-                  value: "resume",
-                  content: (
-                    <div className="w-full overflow-hidden relative h-full rounded-2xl p-10 text-xl md:text-4xl font-bold text-black bg-linear-to-br from-[#00FF88] to-[#00B37A]">
-                      <p>Resume Protocol</p>
-                      <TabImage src="/tabs/resume.png" />
-                    </div>
-                  ),
-                },
-                {
-                  title: "Career Vault",
-                  value: "career",
-                  content: (
-                    <div className="w-full overflow-hidden relative h-full rounded-2xl p-10 text-xl md:text-4xl font-bold text-black bg-linear-to-br from-[#00FF88] to-[#00B37A]">
-                      <p>Career Vault</p>
-                      <TabImage src="/tabs/career.png" />
-                    </div>
-                  ),
-                },
-              ]} />
-            </div>
-          </div>
-        </section >
-
-
-
-
-
-
-
-
-        {/* Testimonials */}
-        <section id="testimonials" className="py-24 px-6 relative overflow-hidden">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-linear-to-r from-transparent via-[#00FF88]/20 to-transparent" />
-
-          <div className="max-w-6xl mx-auto relative z-10">
-            <div className="text-center mb-16 space-y-4">
-              <div className="w-12 h-1 bg-[#00FF88] mx-auto rounded-full" />
-              <h2 className="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter">
-                OPERATIONAL <span className="text-[#00FF88]">FEEDBACK</span>
-              </h2>
-              <p className="text-gray-400 max-w-2xl mx-auto">
-                Voices from the frontlines of digital defense.
-              </p>
-            </div>
-
-            <LandingTestimonials />
-          </div>
-        </section>
-
-
+        {/* Testimonials - Self Contained */}
+        <div id="testimonials">
+          <LandingTestimonials />
+        </div>
 
         {/* Footer */}
-        <footer className="py-12 px-6 border-t border-[#00FF88]/10 bg-[#050505] relative z-10">
-          <div className="max-w-5xl mx-auto">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-              {/* Logo & Brand */}
-              <div className="flex items-center gap-3">
-                <img src="/cybercoach-logo.png" alt="Cybercoach" className="h-8 w-8" />
-                <span className="text-lg font-black tracking-tight text-white uppercase">
-                  Cyber<span className="text-[#00FF88]">coach</span>
-                </span>
-              </div>
-
-
-
-              {/* Status Indicator */}
-              <div className="flex items-center gap-2 text-[10px] font-mono text-[#00FF88]/60 uppercase tracking-widest">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#00FF88] shadow-[0_0_8px_#00FF88] animate-pulse" />
-                System Online
-              </div>
-            </div>
-          </div>
+        {/* Footer Area */}
+        <footer className="bg-black border-t border-zinc-900">
+          <LandingFooter />
         </footer>
 
-      </div >
+      </div>
     </>
   );
 };
