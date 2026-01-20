@@ -42,7 +42,6 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
 
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(false);
-  const [vuStudentDetails, setVuStudentDetails] = useState<any>(null);
 
 
 
@@ -117,18 +116,10 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
       try {
         const data = await courseService.getCourseById(courseId);
         if (mounted && data) {
-          // VU Student Check
-          if (data.category === 'vishwakarma-university') {
-            const email = localStorage.getItem('vu_student_email');
-            if (email) {
-              const student = await courseService.getVUStudent(email);
-              if (student) setVuStudentDetails(student);
-            }
-          }
 
           if (user?.id) {
             try {
-              const progress = await courseService.getUserProgress(user.id, courseId) as any[] | null;
+              const progress = await courseService.getUserProgress(user.id) as any[] | null;
               const moduleProgress = (progress || []).reduce((acc: any, p: any) => {
                 if (p.module_id) acc[p.module_id] = p;
                 return acc;
@@ -175,6 +166,20 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
     load();
     return () => { mounted = false; };
   }, [courseId, user?.id]);
+
+  // Handle Mermaid Rendering
+  useEffect(() => {
+    if (activeTab === 'content' && course && !loading) {
+      const timer = setTimeout(() => {
+        try {
+          mermaid.contentLoaded();
+        } catch (e) {
+          console.error('Mermaid rendering failed:', e);
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [activeTab, course, loading]);
 
   const module: Module | undefined = (course?.course_modules ?? course?.modules ?? []).find((m: Module) => m.id === moduleId);
 
@@ -230,7 +235,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
       setCourse({ ...course });
 
       if (user?.id) {
-        await courseService.updateProgress(user.id, courseId, moduleId, true, module.testScore ?? undefined);
+        await courseService.updateProgress(user.id, moduleId, true, module.testScore ?? undefined);
         await learningPathService.rebalance(user.id, courseId);
         // inform parent to refresh progress
         if (onModuleStatusChange) onModuleStatusChange();
@@ -246,7 +251,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
       if (user?.id) {
 
         for (const m of allModules) {
-          await courseService.updateProgress(user.id, courseId, m.id, true, m.testScore ?? undefined);
+          await courseService.updateProgress(user.id, m.id, true, m.testScore ?? undefined);
         }
 
         // inform parent to refresh progress, then show certificate
@@ -269,7 +274,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
     // Persist progress and trigger rebalance
     try {
       if (user?.id) {
-        await courseService.updateProgress(user.id, courseId, moduleId, true, score);
+        await courseService.updateProgress(user.id, moduleId, true, score);
         await learningPathService.rebalance(user.id, courseId);
         if (onModuleStatusChange) onModuleStatusChange();
       }
@@ -305,15 +310,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
       (_match, videoId) => `<div class="aspect-video w-full my-8 bg-black/50 rounded-xl overflow-hidden border border-[#00FF88]/20 shadow-[0_0_20px_rgba(0,255,136,0.1)] group"><iframe src="https://www.youtube.com/embed/${videoId}" class="w-full h-full" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`
     );
 
-    // 1. Headers & Lists (Markdown) - Relies on \n
-    content = content
-      .replace(/^# (.+)$/gm, '<h1 class="text-2xl font-bold mb-4 text-white">$1</h1>')
-      .replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold mb-3 mt-6 text-white">$1</h2>')
-      .replace(/^### (.+)$/gm, '<h3 class="text-lg font-bold mb-2 mt-4 text-[#00FF88]">$1</h3>')
-      .replace(/^- (.+)$/gm, '<li class="ml-4 text-[#00B37A] list-disc list-inside">$1</li>')
-      .replace(/^(\d+)\. (.+)$/gm, '<li class="ml-4 text-[#00B37A] list-decimal list-inside">$2</li>');
-
-    // 2. Code Blocks (Mermaid & Generic) - Tokenize to protect from <br/>
+    // 1. Code Blocks (Mermaid & Generic) - Tokenize early to protect them
     const tokens: string[] = [];
     const saveToken = (text: string) => {
       tokens.push(text);
@@ -328,16 +325,43 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
       return saveToken(`<pre class="bg-black border border-[#00FF88]/20 p-4 rounded-lg my-4 overflow-x-auto"><code class="text-[#00FF88] font-mono">${code.trim().replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`);
     });
 
-    // 3. Replace remaining Newlines
-    content = content.replace(/\n/g, '<br/>');
+    // 2. Bold & Italics
+    content = content
+      .replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/___(.*?)___/g, '<strong><em>$1</em></strong>')
+      .replace(/__(.*?)__/g, '<strong>$1</strong>')
+      .replace(/_(.*?)_/g, '<em>$1</em>');
 
-    // 4. Restore tokens
+    // 3. Headers & Lists (Markdown) - Relies on \n
+    content = content
+      .replace(/^# (.+)$/gm, '<h1 class="text-3xl font-bold mb-6 mt-8 text-white border-b border-[#00FF88]/20 pb-2">$1</h1>')
+      .replace(/^## (.+)$/gm, '<h2 class="text-2xl font-bold mb-4 mt-8 text-white">$1</h2>')
+      .replace(/^### (.+)$/gm, '<h3 class="text-xl font-bold mb-3 mt-6 text-[#00FF88]">$1</h3>')
+      .replace(/^#### (.+)$/gm, '<h4 class="text-lg font-bold mb-2 mt-4 text-[#00FF88]">$1</h4>')
+      .replace(/^- (.+)$/gm, '<li class="ml-6 mb-2 text-[#EAEAEA] list-disc marker:text-[#00FF88]">$1</li>')
+      .replace(/^\* (.+)$/gm, '<li class="ml-6 mb-2 text-[#EAEAEA] list-disc marker:text-[#00FF88]">$1</li>')
+      .replace(/^(\d+)\. (.+)$/gm, '<li class="ml-6 mb-2 text-[#EAEAEA] list-decimal marker:text-[#00FF88]">$2</li>');
+
+    // 4. Inline Code
+    content = content.replace(/`([^`]+)`/g, '<code class="bg-[#00FF88]/10 px-1.5 py-0.5 rounded text-[#00FF88] font-mono border border-[#00FF88]/20">$1</code>');
+
+    // 5. Paragraphs - Split by double newlines and wrap in <p>
+    // First, preserve single newlines for <br/> if needed, or just let paragraphs handle it.
+    // For now, let's just handle double newlines as paragraph breaks.
+    const blocks = content.split(/\n\s*\n/);
+    content = blocks.map(block => {
+      if (block.trim().startsWith('<h') || block.trim().startsWith('<li') || block.trim().startsWith('<pre') || block.trim().startsWith('<div') || block.trim().startsWith('__TOKEN')) {
+        return block;
+      }
+      return `<p class="mb-4 leading-relaxed text-[#EAEAEA]/80">${block.trim().replace(/\n/g, '<br/>')}</p>`;
+    }).join('\n');
+
+    // 6. Restore tokens
     tokens.forEach((token, index) => {
       content = content.replace(`__TOKEN_${index}__`, token);
     });
-
-    // 5. Inline Stylings (backticks)
-    content = content.replace(/`([^`]+)`/g, '<code class="bg-black/50 px-1.5 py-0.5 rounded text-[#00FF88] font-mono">$1</code>');
 
     return content;
   };
@@ -573,10 +597,10 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
             isOpen={showCertificate}
             onClose={() => setShowCertificate(false)}
             courseName={course.title}
-            studentName={vuStudentDetails?.name || user.name || 'Student'}
+            studentName={user.name || 'Student'}
             completionDate={new Date()}
-            facultyName={vuStudentDetails?.faculty_name}
-            isVU={!!vuStudentDetails}
+            facultyName=""
+            isVU={false}
           />
         )}
 

@@ -277,9 +277,12 @@ class CourseService {
             const response = await fetch(publicUrl);
             if (response.ok) {
               content = await response.text();
+            } else {
+              content = `Error: Could not load module content (HTTP ${response.status})`;
             }
           } catch (e) {
             console.error(`Failed to fetch module content from CDN for ${module.id}:`, e);
+            content = 'Error: Connection failed while loading module content';
           }
         }
 
@@ -300,74 +303,9 @@ class CourseService {
   // Progress Tracking
 
 
-  async registerVUStudent(data: any) {
+  async getUserProgress(userId: string) {
     try {
-      const API_URL = import.meta.env.VITE_API_URL || '';
-      const targetUrl = `${API_URL}/api/vu/register`;
-      console.log('Registering at:', targetUrl);
-
-      const response = await fetch(targetUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      });
-
-      const text = await response.text();
-      console.log('Registration Response Status:', response.status);
-      console.log('Registration Response Body:', text);
-
-      if (!response.ok) {
-        try {
-          const err = JSON.parse(text);
-          throw new Error(err.message || 'Failed to register');
-        } catch (e) {
-          console.error('Registration failed with non-JSON response:', text);
-          throw new Error(`Registration failed (${response.status}): ${text.substring(0, 50)}...`);
-        }
-      }
-      return text ? JSON.parse(text) : {};
-    } catch (error) {
-      console.error('VU Registration error:', error);
-      throw error;
-    }
-  }
-
-  async getVUStudent(email: string) {
-    try {
-      const API_URL = import.meta.env.VITE_API_URL || '';
-      const response = await fetch(`${API_URL}/api/vu/student/${email}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch VU student details');
-      }
-      return await response.json();
-    } catch (error) {
-      console.error('Get VU Student error:', error);
-      return null;
-    }
-  }
-
-  async getUserProgress(userId: string, courseId: string) {
-    try {
-      // Handle static VU courses using MongoDB API
-      if (courseId === 'vu-web-security') {
-        const email = localStorage.getItem('vu_student_email');
-        if (!email) return []; // Not registered locally yet
-
-        try {
-          const API_URL = import.meta.env.VITE_API_URL || '';
-          const response = await fetch(`${API_URL}/api/vu/progress/${email}/${courseId}`);
-          if (response.ok) {
-            return await response.json();
-          }
-          return [];
-        } catch (e) {
-          console.error('Failed to fetch VU progress:', e);
-          return [];
-        }
-      }
-
+      // For all courses, fetch from module_progress
       const { data, error } = await supabase
         .from('module_progress')
         .select('*')
@@ -381,47 +319,9 @@ class CourseService {
     }
   }
 
-  async updateProgress(userId: string, courseId: string, moduleId: string, completed: boolean, quizScore?: number) {
+  async updateProgress(userId: string, moduleId: string, completed: boolean, quizScore?: number) {
     try {
-      const API_URL = import.meta.env.VITE_API_URL || '';
-
-      // 1. Try Saving to MongoDB (New System)
-      // We try this for ALL courses, including VU ones if migrated, or just generic ones.
-      // If it fails (e.g. legacy), we fall back.
-
-      const user = await supabase.auth.getUser();
-      const email = user.data.user?.email || localStorage.getItem('vu_student_email');
-
-      if (email) {
-        try {
-          // Removed teacher/progress call. Falling back to Supabase/VU.
-          // await fetch(`${API_URL}/api/teacher/progress`, { ... });
-          console.log('Skipping MongoDB progress update (deprecated teacher endpoint). Using Supabase.');
-          // We can return early if we want to fully migrate, but for safety we might also update Supabase if needed?
-          // User requested "teacher should be able to progress", which is on MongoDB now.
-          // So we prioritize MongoDB.
-        } catch (e) {
-          console.error('Failed to save progress to MongoDB:', e);
-        }
-      }
-
-      // 2. Legacy / VU Specific handling (checking if it matches special ID)
-      if (courseId === 'vu-web-security' && email) {
-        await fetch(`${API_URL}/api/vu/progress`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            vu_email: email,
-            course_id: courseId,
-            module_id: moduleId,
-            completed,
-            quiz_score: quizScore
-          })
-        });
-        return;
-      }
-
-      // 3. Fallback to Supabase for Legacy Courses
+      // Save progress to Supabase
       const updates: any = {
         student_id: userId,
         module_id: moduleId,
@@ -429,13 +329,16 @@ class CourseService {
         completed_at: new Date().toISOString()
       };
 
+      if (quizScore !== undefined) {
+        updates.quiz_score = quizScore;
+      }
+
       const { error } = await supabase
         .from('module_progress')
         .upsert([updates]);
 
       if (error) {
-        // Don't throw if we already saved to MongoDB successfully, just warn
-        console.warn(`Supabase progress update failed: ${error.message}`);
+        throw new Error(`Supabase progress update failed: ${error.message}`);
       }
     } catch (error) {
       console.error('Update progress error:', error);

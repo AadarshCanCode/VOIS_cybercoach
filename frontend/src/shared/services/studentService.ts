@@ -111,52 +111,6 @@ class StudentService {
 
     async getActiveOperation(userId: string): Promise<ActiveOperation | null> {
         try {
-            // Check for VU Student (MongoDB)
-            const vuEmail = typeof localStorage !== 'undefined' ? localStorage.getItem('vu_student_email') : null;
-            if (vuEmail) {
-                try {
-                    const response = await fetch(`http://localhost:4000/api/vu/student/${vuEmail}`);
-                    if (response.ok) {
-                        const student = await response.json();
-                        if (student && student.progress && student.progress.length > 0) {
-                            // Find most recent activity
-                            const sortedProgress = student.progress.sort((a: any, b: any) =>
-                                new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime()
-                            );
-
-                            const latest = sortedProgress[0];
-
-                            // Hardcoded details for the single VU course for now to avoid circular dependency or complex imports
-                            let courseTitle = 'Unknown Course';
-                            let totalModules = 1;
-                            let moduleTitle = 'Unknown Module';
-                            let courseDesc = 'Continuing Education';
-
-                            if (latest.course_id === 'vu-web-security') {
-                                courseTitle = 'Web Application Security';
-                                courseDesc = 'Learn to identify and exploit vulnerabilities in web applications.';
-                                totalModules = 11;
-                                moduleTitle = `Module ${latest.module_id.replace('vu-mod-', '')}`;
-                            }
-
-                            // Calculate progress for this course
-                            const courseProgressItems = student.progress.filter((p: any) => p.course_id === latest.course_id && p.completed);
-                            const percent = Math.round((courseProgressItems.length / totalModules) * 100);
-
-                            return {
-                                courseId: latest.course_id,
-                                title: courseTitle,
-                                description: courseDesc,
-                                currentModule: moduleTitle,
-                                progress: percent,
-                                lastAccessed: latest.completed_at
-                            };
-                        }
-                    }
-                } catch (err) {
-                    console.error('Failed to fetch VU active operation:', err);
-                }
-            }
 
             // Get the most recently accessed uncompleted course
             const { data: progressData, error: progressError } = await supabase

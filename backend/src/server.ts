@@ -3,16 +3,11 @@ import cors from 'cors';
 import 'dotenv/config';
 
 import studentRoutes from './features/student/routes/index.js';
-import vuRoutes from './routes/vu.routes.js';
-
 import imagekitRoutes from './routes/imagekit.routes.js';
-import connectDB from './shared/lib/mongodb.js';
 
 const app = express();
 const parsedPort = Number.parseInt(process.env.PORT ?? '', 10);
 const PORT = Number.isFinite(parsedPort) && parsedPort > 0 ? parsedPort : 4000;
-
-connectDB();
 
 import rateLimit from 'express-rate-limit';
 
@@ -36,7 +31,6 @@ app.use(cors({
 app.use(express.json({ limit: '1mb' }));
 
 app.use('/api/student', studentRoutes);
-app.use('/api/vu', vuRoutes);
 
 app.use('/api/imagekit', imagekitRoutes);
 

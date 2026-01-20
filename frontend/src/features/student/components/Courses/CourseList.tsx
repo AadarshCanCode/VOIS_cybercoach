@@ -142,15 +142,13 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
 
               <button
                 onClick={() => {
-                  if (selectedCourse.id === 'vu-web-security') {
-                    onCourseSelect(selectedCourse.id);
-                    return;
-                  }
                   if (selectedCourse.url && selectedCourse.url !== '#') {
                     window.open(selectedCourse.url, '_blank');
+                  } else {
+                    onCourseSelect(selectedCourse.id);
                   }
                 }}
-                className={`w-full bg-[#00FF88] text-black px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#00CC66] hover:shadow-[0_0_20px_rgba(0,255,136,0.3)] transition-all flex items-center justify-center space-x-2 ${selectedCourse.url === '#' && selectedCourse.id !== 'vu-web-security' ? 'cursor-default opacity-80 hover:bg-[#00FF88] hover:shadow-none' : ''}`}
+                className="w-full bg-[#00FF88] text-black px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#00CC66] hover:shadow-[0_0_20px_rgba(0,255,136,0.3)] transition-all flex items-center justify-center space-x-2"
               >
                 <span>{selectedCourse.id === 'vu-web-security' ? 'Enter Course' : 'Start Course'}</span>
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

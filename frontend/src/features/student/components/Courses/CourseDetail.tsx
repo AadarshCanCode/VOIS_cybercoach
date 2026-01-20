@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Play, CheckCircle, Clock, FileText, FlaskRound as Flask, Award, Terminal, Lock } from 'lucide-react';
 import { ModuleViewer } from './ModuleViewer';
 import { courseService } from '@services/courseService';
-import { VURegistrationModal } from './VURegistrationModal';
 import type { Course, Module } from '@types';
 import { useAuth } from '@context/AuthContext';
 
@@ -29,7 +28,6 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(false);
-  const [showVURegistration, setShowVURegistration] = useState(false);
   const { user } = useAuth();
 
 
@@ -42,16 +40,8 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
         // merge user progress if available
         if (mounted && data) {
           if (user?.id) {
-            // Check for VU Registration
-            if (data.category === 'vishwakarma-university') {
-              const vuEmail = localStorage.getItem('vu_student_email');
-              if (!vuEmail) {
-                setShowVURegistration(true);
-              }
-            }
-
             try {
-              const progress = await courseService.getUserProgress(user.id, courseId) as ProgressRow[] | null;
+              const progress = await courseService.getUserProgress(user.id) as ProgressRow[] | null;
               const moduleProgress = (progress || []).reduce((acc: Record<string, ProgressRow>, p: ProgressRow) => {
                 if (p.module_id) acc[p.module_id] = p;
                 return acc;
@@ -129,7 +119,7 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
       const data = await courseService.getCourseById(courseId);
       if (data) {
         if (user?.id) {
-          const progress = await courseService.getUserProgress(user.id, courseId) as ProgressRow[] | null;
+          const progress = await courseService.getUserProgress(user.id) as ProgressRow[] | null;
           const moduleProgress = (progress || []).reduce((acc: Record<string, ProgressRow>, p: ProgressRow) => {
             if (p.module_id) acc[p.module_id] = p;
             return acc;
@@ -371,20 +361,6 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
         </div>
       </div>
 
-      <VURegistrationModal
-        isOpen={showVURegistration}
-        onClose={() => {
-          // If they close without registering, they can't access, so maybe just force open or redirect back?
-          // For now, let them see the course but if they click modules... actually logic above blocks it?
-          // No, we are blocking access via the modal overlay primarily.
-          // Let's redirect back if they cancel
-          onBack();
-        }}
-        onSuccess={() => {
-          setShowVURegistration(false);
-          refreshCourse();
-        }}
-      />
     </div>
   );
 };
