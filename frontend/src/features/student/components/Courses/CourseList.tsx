@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Clock, Award, Lock, CheckCircle } from 'lucide-react';
-// import { useAuth } from '@context/AuthContext';
+import { courseService } from '@services/courseService';
+import type { Course } from '@types';
 
 export interface CourseData {
   id: string;
@@ -32,6 +33,14 @@ const courseCategories: CourseCategory[] = [
   }
 ];
 
+const DYNAMIC_CATEGORY: CourseCategory = {
+  id: 'cyber-ops',
+  title: 'Cyber Operations',
+  description: 'AI-generated specialized training missions',
+  icon: '⚡',
+  color: 'from-green-500/20 to-emerald-500/20'
+};
+
 interface CourseListProps {
   onCourseSelect: (courseId: string) => void;
 }
@@ -40,6 +49,23 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
   // const { user } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedCourse, setSelectedCourse] = useState<CourseData | null>(null);
+  const [dynamicCourses, setDynamicCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      setLoading(true);
+      try {
+        const courses = await courseService.getAllCourses();
+        setDynamicCourses(courses);
+      } catch (e) {
+        console.error('Failed to fetch dynamic courses:', e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCourses();
+  }, []);
 
   const canAccessCourses = true;
 
@@ -159,6 +185,18 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
           skills: ['OWASP Top 10', 'SQL Injection', 'XSS', 'VU-Certified']
         }
       ];
+    } else if (selectedCategory === 'cyber-ops') {
+      courses = dynamicCourses.map(c => ({
+        id: c.id,
+        title: c.title,
+        category: 'vishwakarma-university' as any, // Mock for now
+        url: '#',
+        description: c.description || 'No description available.',
+        disclaimer: 'This mission is dynamically generated. Exercise caution during practical sessions.',
+        difficulty: (c.difficulty ? (c.difficulty.charAt(0).toUpperCase() + c.difficulty.slice(1)) : 'Beginner') as any,
+        duration: c.estimated_hours ? `${c.estimated_hours} hours` : 'Self-paced',
+        skills: c.category ? [c.category] : ['Cybersecurity']
+      }));
     }
 
     return (
@@ -267,7 +305,11 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
             <p className="text-[#00B37A] font-mono text-sm mt-1">CHOOSE YOUR SPECIALIZATION</p>
           </div>
           <div className="h-10 w-10 rounded bg-[#00FF88]/10 border border-[#00FF88]/20 flex items-center justify-center">
-            <Award className="h-5 w-5 text-[#00FF88]" />
+            {loading ? (
+              <div className="animate-spin h-5 w-5 border-2 border-[#00FF88] border-t-transparent rounded-full" />
+            ) : (
+              <Award className="h-5 w-5 text-[#00FF88]" />
+            )}
           </div>
         </div>
 
@@ -291,8 +333,10 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {courseCategories.map((category) => {
-            const courses: any[] = []; // Placeholder
+          {[...courseCategories, ...(dynamicCourses.length > 0 ? [DYNAMIC_CATEGORY] : [])].map((category) => {
+            const coursesCount = category.id === 'cyber-ops'
+              ? dynamicCourses.length
+              : (category.id === 'vishwakarma-university' ? 1 : 0);
 
             return (
               <div
@@ -326,10 +370,10 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
                   </div>
 
                   <div className="space-y-3 mb-6">
-                    {courses.length > 0 && (
+                    {coursesCount > 0 && (
                       <div className="flex items-center space-x-2 text-sm text-[#EAEAEA]/60">
                         <CheckCircle className="h-4 w-4 text-[#00FF88]" />
-                        <span>{courses.length} Comprehensive Courses</span>
+                        <span>{coursesCount} Comprehensive Courses</span>
                       </div>
                     )}
                     <div className="flex items-center space-x-2 text-sm text-[#EAEAEA]/60">
@@ -342,9 +386,9 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
                     </div>
                   </div>
 
-                  {canAccessCourses && courses.length > 0 && (
+                  {canAccessCourses && coursesCount > 0 && (
                     <div className="flex items-center justify-between pt-4 border-t border-[#00FF88]/10">
-                      <span className="text-[#00B37A] text-sm font-mono">EXPLORE {courses.length} COURSES</span>
+                      <span className="text-[#00B37A] text-sm font-mono">EXPLORE {coursesCount} COURSES</span>
                       <svg className="h-6 w-6 text-[#00FF88] group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                       </svg>

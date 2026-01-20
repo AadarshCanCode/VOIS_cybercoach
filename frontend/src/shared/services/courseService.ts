@@ -139,29 +139,21 @@ class CourseService {
 
   async getAllCourses(): Promise<Course[]> {
     try {
-      console.log('Starting getAllCourses query from MongoDB...');
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+      console.log('Fetching courses from Supabase...');
+      const { data, error } = await supabase
+        .from('courses')
+        .select('*')
+        .eq('is_published', true)
+        .order('created_at', { ascending: false });
 
-      const response = await fetch(`${API_URL}/api/student/courses`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch courses from backend');
-      }
+      if (error) throw new Error(`Failed to fetch courses: ${error.message}`);
 
-      const courses = await response.json();
-      console.log(`Successfully fetched ${courses.length} courses from MongoDB`);
-
-      // Map backend fields to frontend interface if needed
-      return courses.map((course: any) => ({
+      return (data || []).map((course: any) => ({
         ...course,
-        id: course.id || course._id,
-        module_count: course.modules?.length || 0,
-        modules: (course.modules || []).map((m: any) => ({
-          ...m,
-          id: m.id || m._id
-        })),
+        module_count: 0, // Will be updated if fetched with modules
+        modules: [],
         skills: []
       }));
-
     } catch (error) {
       console.error('Get all courses error:', error);
       return [];
@@ -176,64 +168,21 @@ class CourseService {
     }
 
     try {
-      // 1. Try fetching from MongoDB API (New System)
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-      const response = await fetch(`${API_URL}/api/student/courses/${id}`);
-
-      if (response.ok) {
-        const course = await response.json();
-        // Ensure id is set and modules are present with correct ID mapping
-        return {
-          ...course,
-          id: course.id || course._id,
-          modules: (course.modules || []).map((m: any) => ({
-            ...m,
-            id: m.id || m._id
-          }))
-        };
-      }
-
-      // 2. Fallback to Supabase (Old System)
-      // This allows legacy courses to still work if needed
-      console.warn('Course not found in MongoDB, trying Supabase fallback...');
-
+      // 1. Fetch from Supabase
       const { data: course, error: courseError } = await supabase
         .from('courses')
         .select('*')
         .eq('id', id)
         .single();
 
-      if (courseError) throw new Error(`Failed to fetch course: ${courseError.message}`);
+      if (courseError) {
+        console.error('Supabase error fetching course:', courseError);
+        return null;
+      }
       if (!course) return null;
 
-      let modules = [];
-
-      // Hybrid Storage Retrieval...
-      if (course.content_json_url) {
-        try {
-          const response = await fetch(course.content_json_url);
-          if (response.ok) {
-            const jsonContent = await response.json();
-            if (jsonContent.modules && Array.isArray(jsonContent.modules)) {
-              modules = jsonContent.modules;
-            }
-          }
-        } catch (fetchErr) {
-          console.error('Failed to fetch hybrid content:', fetchErr);
-        }
-      }
-
-      if (modules.length === 0) {
-        const { data: sqlModules, error: moduleError } = await supabase
-          .from('modules')
-          .select('*')
-          .eq('course_id', id)
-          .order('order', { ascending: true });
-
-        if (!moduleError && sqlModules) {
-          modules = sqlModules;
-        }
-      }
+      // 2. Fetch Modules
+      const modules = await this.getModulesByCourse(id);
 
       return {
         ...course,
@@ -310,11 +259,38 @@ class CourseService {
         .from('modules')
         .select('*')
         .eq('course_id', courseId)
-        // .eq('is_published', true) // Removed
         .order('module_order', { ascending: true });
 
       if (error) throw new Error(`Failed to fetch modules: ${error.message}`);
-      return data;
+
+      // Resolve content for modules that have a file path
+      const resolvedModules = await Promise.all((data || []).map(async (module: any) => {
+        let content = module.content_markdown || '';
+
+        // If content_markdown is a file path (ends with .md), fetch it from CDN
+        if (content.endsWith('.md')) {
+          try {
+            const { data: { publicUrl } } = supabase.storage
+              .from('courses')
+              .getPublicUrl(content);
+
+            const response = await fetch(publicUrl);
+            if (response.ok) {
+              content = await response.text();
+            }
+          } catch (e) {
+            console.error(`Failed to fetch module content from CDN for ${module.id}:`, e);
+          }
+        }
+
+        return {
+          ...module,
+          content: content, // Map to content field used by UI
+          order: module.module_order // Map to order field used by UI
+        };
+      }));
+
+      return resolvedModules;
     } catch (error) {
       console.error('Get modules error:', error);
       throw error;
