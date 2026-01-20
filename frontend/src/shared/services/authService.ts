@@ -3,10 +3,10 @@ import type { User } from '@types';
 
 type DBUser = {
   id: string;
-  email: string;
-  name?: string | null;
+  full_name?: string | null;
   role?: string;
-  password_hash?: string | null;
+  created_at?: string;
+  is_active?: boolean;
   [key: string]: unknown;
 };
 
@@ -36,27 +36,15 @@ function generateUUID(): string {
   });
 }
 
-function sanitizeUser(dbUser: DBUser): User {
-  const copy: Record<string, unknown> = { ...dbUser };
-
-  // Transform DB fields to frontend CamelCase
-  if ('completed_assessment' in copy) {
-    copy['completedAssessment'] = copy['completed_assessment'];
-    delete copy['completed_assessment'];
-  }
-
-  // Handle other potential mappings if needed
-  if ('created_at' in copy) {
-    copy['createdAt'] = copy['created_at'];
-    delete copy['created_at'];
-  }
-
-  // remove password_hash if present
-  if ('password_hash' in copy) {
-    delete copy['password_hash'];
-  }
-
-  return copy as unknown as User;
+function sanitizeUser(dbUser: DBUser, email?: string): User {
+  return {
+    id: dbUser.id,
+    name: dbUser.full_name || email?.split('@')[0] || 'User',
+    email: email || '',
+    role: dbUser.role as 'student' | 'admin' | 'teacher',
+    created_at: dbUser.created_at,
+    avatar_url: (dbUser as any).avatar_url,
+  };
 }
 
 class AuthService {
@@ -132,7 +120,7 @@ class AuthService {
       let profileCopy: User;
 
       if (profileRow) {
-        profileCopy = sanitizeUser(profileRow);
+        profileCopy = sanitizeUser(profileRow, sessionUser.email);
       } else {
         profileCopy = {
           id: sessionUser.id,
@@ -140,19 +128,14 @@ class AuthService {
           name: sessionUser.user_metadata?.full_name || sessionUser.email?.split('@')[0] || 'User',
           role: credentials.role,
           avatar_url: sessionUser.user_metadata?.avatar_url || sessionUser.user_metadata?.picture,
-          completedAssessment: false,
-          level: 'beginner'
         } as User;
 
-        // Try to create the profile in background if it's missing (not on timeout)
+        // Try to create the profile in background if it's missing
         if (!profileError) {
-          supabase.from('users').upsert([{
+          supabase.from('profiles').upsert([{
             id: sessionUser.id,
-            email: sessionUser.email,
-            name: profileCopy.name,
+            full_name: profileCopy.name,
             role: credentials.role,
-            avatar_url: profileCopy.avatar_url,
-            password_hash: 'SUPABASE_AUTH'
           }]);
         }
       }
@@ -349,9 +332,9 @@ class AuthService {
       while (attempts < 3) {
         const result = await withTimeout(
           supabase
-            .from('users')
+            .from('profiles')
             .select('*')
-            .eq('email', user.email?.toLowerCase() || '')
+            .eq('id', user.id)
             .maybeSingle() as unknown as Promise<any>,
           5000,
           `Profile fetch attempt ${attempts + 1}`
@@ -361,12 +344,6 @@ class AuthService {
           profile = result.data;
           profileError = null;
           break;
-        }
-
-        if (result.error) {
-          profileError = result.error;
-          // Don't retry on fatal errors, but maybe retry on connection issues?
-          // For now, simple retry logic
         }
 
         attempts++;
@@ -391,7 +368,7 @@ class AuthService {
         throw new Error(`Access Denied: You already have a ${profile.role} account.`);
       }
 
-      const userCopy = sanitizeUser(profile as DBUser);
+      const userCopy = sanitizeUser(profile as DBUser, user.email);
       localStorage.setItem('cyberSecUser', JSON.stringify(userCopy));
       return userCopy;
     }
@@ -431,11 +408,11 @@ class AuthService {
         const createProfile = async () => {
           try {
             await supabase
-              .from('users')
+              .from('profiles')
               .upsert([{
-                ...placeholderUser,
-                avatar_url: metadata.avatar_url || metadata.picture,
-                password_hash: 'SUPABASE_AUTH'
+                id: user.id,
+                full_name: placeholderUser.name,
+                role: role,
               }]);
           } catch (e) {
             // Silently fail

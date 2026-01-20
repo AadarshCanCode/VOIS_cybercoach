@@ -1,14 +1,10 @@
 export interface User {
-  id?: string;
-  name?: string;
-  email?: string;
-  role?: 'student';
-  level?: 'beginner' | 'intermediate' | 'advanced';
-  certificates?: string[];
-  completedAssessment?: boolean;
-  createdAt?: string;
-  updatedAt?: string;
+  id: string;
+  name: string;
+  email: string;
+  role: 'student' | 'admin' | 'teacher';
   avatar_url?: string;
+  created_at?: string;
 }
 
 export interface Course {

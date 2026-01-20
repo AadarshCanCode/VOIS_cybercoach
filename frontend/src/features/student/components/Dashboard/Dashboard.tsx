@@ -22,7 +22,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
   const [loading, setLoading] = useState(true);
   const [statsData, setStatsData] = useState<StudentStats>({
     coursesCompleted: 0,
-    assessmentScore: null,
     certificatesEarned: 0,
     liveLabsCompleted: 0,
     studyTime: '0 hours'
@@ -49,7 +48,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
       console.error('Failed to load dashboard data:', error);
       setStatsData({
         coursesCompleted: 0,
-        assessmentScore: null,
         certificatesEarned: 0,
         liveLabsCompleted: 0,
         studyTime: '0 hours'
@@ -72,10 +70,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
 
     const channel = supabase
       .channel('student-dashboard')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'user_progress', filter: `user_id=eq.${user.id}` }, () => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'module_progress', filter: `student_id=eq.${user.id}` }, () => {
         loadData();
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'certificates', filter: `user_id=eq.${user.id}` }, () => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'certificates', filter: `student_id=eq.${user.id}` }, () => {
         loadData();
       })
       .subscribe();
@@ -264,7 +262,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between border-b border-border/50 pb-4">
               <span className="text-sm font-medium">Clearance Level</span>
-              <span className="text-sm font-bold text-primary uppercase">{user?.level || 'NOVICE'}</span>
+              <span className="text-sm font-bold text-primary uppercase">AUTHORIZED</span>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">

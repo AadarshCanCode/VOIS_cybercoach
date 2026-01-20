@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { User, Award, BookOpen, Target, Clock, Star, Shield, Activity, Terminal, Download, Share2 } from 'lucide-react';
 import { useAuth } from '@context/AuthContext';
 import { courseService } from '@services/courseService';
+import { studentService } from '@services/studentService';
 import { CertificateModal } from '../Certificates/CertificateModal';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@components/ui/card';
 import { Button } from '@components/ui/button';
@@ -22,6 +23,7 @@ export const Profile: React.FC = () => {
     hoursActive: 0
   });
   const [courseProgress, setCourseProgress] = useState<{ title: string, progress: number }[]>([]);
+  const [certificates, setCertificates] = useState<any[]>([]);
   const [vuDetails, setVuDetails] = useState<any>(null);
 
   const [viewCertificate, setViewCertificate] = useState<{
@@ -31,63 +33,48 @@ export const Profile: React.FC = () => {
   } | null>(null);
 
   useEffect(() => {
-    const fetchVuDataOnly = async () => {
-      // 1. Check for VU Student (MongoDB) - Primary & Only Source as requested
-      const vuEmail = typeof localStorage !== 'undefined' ? localStorage.getItem('vu_student_email') : null;
-
-      if (!vuEmail) {
-        setLoading(false);
-        return; // No VU account connected
-      }
-
+    if (!user?.id) return;
+    const loadAllData = async () => {
+      setLoading(true);
       try {
-        setLoading(true);
-        const vuStudent = await courseService.getVUStudent(vuEmail);
-
-        if (vuStudent) {
-          setVuDetails(vuStudent);
-
-          // Calculate VU Progress specifically for the know VU course(s)
-          // Currently hardcoded to 'vu-web-security' as the main VU offering
-          const vuTotal = 11;
-          const vuCompleted = (vuStudent.progress || []).filter((p: any) => p.course_id === 'vu-web-security' && p.completed).length;
-          const percent = Math.round((vuCompleted / vuTotal) * 100);
-
-          setCourseProgress([{
-            title: 'Web Application Security',
-            progress: percent
-          }]);
-
-          setStats({
-            totalModules: 11, // Total for this course
-            completedModules: vuCompleted,
-            coursesEnrolled: 1, // Focus on this specific verified program
-            certificatesEarned: user?.certificates?.length || 0, // Still use auth user for certificate storage if needed, or could fetch from VU
-            hoursActive: Math.round((vuCompleted * 2) + 12)
-          });
+        const certs = await studentService.getCertificates(user.id);
+        setCertificates(certs);
+        const vuEmail = typeof localStorage !== 'undefined' ? localStorage.getItem('vu_student_email') : null;
+        if (vuEmail) {
+          const vuStudent = await courseService.getVUStudent(vuEmail);
+          if (vuStudent) {
+            setVuDetails(vuStudent);
+            const vuTotal = 11;
+            const vuCompleted = (vuStudent.progress || []).filter((p: any) => p.course_id === 'vu-web-security' && p.completed).length;
+            const percent = Math.round((vuCompleted / vuTotal) * 100);
+            setCourseProgress([{ title: 'Web Application Security', progress: percent }]);
+            setStats({
+              totalModules: 11,
+              completedModules: vuCompleted,
+              coursesEnrolled: 1,
+              certificatesEarned: certs.length,
+              hoursActive: Math.round((vuCompleted * 2) + 12)
+            });
+          }
         }
       } catch (err) {
-        console.error("VU profile fetch error:", err);
+        console.error("Profile load error:", err);
       } finally {
         setLoading(false);
       }
     };
-
-    fetchVuDataOnly();
-  }, [user]);
+    loadAllData();
+  }, [user?.id]);
 
   if (!user) return null;
 
-  // Safe user access for achievements (Extended with VU data awareness)
-  const extendedUser = user as any;
-  const userLevel = extendedUser.level || 'beginner';
   // Mission readiness based on the loaded VU stats
   const missionReadiness = stats.totalModules > 0
     ? Math.round((stats.completedModules / stats.totalModules) * 100)
     : 0;
 
   const achievements = [
-    { id: 1, title: 'First Steps', description: 'Completed your first assessment', icon: Target, earned: extendedUser.completedAssessment },
+    { id: 1, title: 'First Steps', description: 'Enrolled in your first course', icon: Target, earned: stats.coursesEnrolled > 0 },
     { id: 2, title: 'Knowledge Seeker', description: 'Completed 3 course modules', icon: BookOpen, earned: stats.completedModules >= 3 },
     { id: 3, title: 'Lab Expert', description: 'Completed 5 hands-on labs', icon: Star, earned: false },
     { id: 4, title: 'Security Pro', description: 'Earned your first certificate', icon: Award, earned: stats.certificatesEarned > 0 },
@@ -119,7 +106,7 @@ export const Profile: React.FC = () => {
               <div className="flex flex-wrap items-center gap-3">
                 <h1 className="text-3xl font-bold tracking-tight">{vuDetails?.name || user.name}</h1>
                 <Badge variant="outline" className="text-primary border-primary/20 bg-primary/5 uppercase tracking-wider text-[10px]">
-                  {userLevel} Clearance
+                  AUTHORIZED OPERATIVE
                 </Badge>
               </div>
 
@@ -261,16 +248,16 @@ export const Profile: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {user.certificates && user.certificates.length > 0 ? (
-                user.certificates.map((certUrl: string, idx: number) => {
+              {certificates && certificates.length > 0 ? (
+                certificates.map((cert: any, idx: number) => {
+                  const certUrl = cert.certificate_url;
                   const filename = certUrl.split('/').pop() || "";
                   const parts = filename.split('_');
                   let displayTitle = "Classified Operation";
                   if (parts.length >= 2) {
                     displayTitle = parts[1].replace(/%20/g, ' ');
                   }
-                  const timestamp = parseInt(parts[2]?.split('.')[0] || '0');
-                  const completionDate = timestamp ? new Date(timestamp) : new Date();
+                  const completionDate = cert.issued_at ? new Date(cert.issued_at) : new Date();
 
                   return (
                     <div key={idx} className="flex items-center justify-between p-3 rounded-lg border border-border/50 hover:bg-muted/50 transition-colors">

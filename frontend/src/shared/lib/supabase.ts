@@ -30,7 +30,7 @@ export const supabase = createClient(supabaseUrl as string, supabaseAnonKey as s
 
 export async function testSupabaseConnection(): Promise<void> {
   try {
-    const { error } = await supabase.from('users').select('id').limit(1);
+    const { error } = await supabase.from('profiles').select('id').limit(1);
     if (error) {
       // Not fatal here; just surface helpful error
       throw new Error(`Supabase connectivity ok but query failed: ${error.message}`);

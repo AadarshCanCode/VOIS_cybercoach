@@ -24,7 +24,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
   isVU = false
 }) => {
   const certificateRef = useRef<HTMLDivElement>(null);
-  const { user, updateUser } = useAuth();
+  const { user } = useAuth();
   const [isGenerating, setIsGenerating] = React.useState(false);
 
   const generateBlob = async (): Promise<Blob | null> => {
@@ -60,18 +60,18 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
       return;
     }
 
-    const { data: publicData } = supabase.storage.from('certificates').getPublicUrl(filePath);
-    const publicUrl = publicData?.publicUrl ?? '';
+    // const { data: publicData } = supabase.storage.from('certificates').getPublicUrl(filePath);
+    // const publicUrl = publicData?.publicUrl ?? '';
 
-    // Update user record
-    const { data: userRow } = await supabase.from('users').select('certificates').eq('id', userId).maybeSingle();
-    const existing = userRow?.certificates ?? [];
+    // Update certificates table
+    const { data: courseRow } = await supabase.from('courses').select('id').ilike('title', courseName).maybeSingle();
+    const courseId = courseRow?.id;
 
-    // Double check we didn't race condition add it
-    if (!existing.some((c: string) => c.includes(sanitizedCourse))) {
-      const newArr = Array.isArray(existing) ? [...existing, publicUrl] : [publicUrl];
-      await supabase.from('users').update({ certificates: newArr }).eq('id', userId);
-      if (updateUser) updateUser({ certificates: newArr });
+    if (courseId) {
+      await supabase.from('certificates').upsert([{
+        student_id: userId,
+        course_id: courseId
+      }]);
     }
   };
 
@@ -80,10 +80,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
   // Auto-save effect
   React.useEffect(() => {
     if (isOpen && user && certificateRef.current) {
-      const sanitizedCourse = courseName.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_-]/g, '');
-      const hasCertificate = user.certificates?.some(cert => cert.includes(sanitizedCourse));
-
-      if (!hasCertificate && !isGenerating) {
+      if (!isGenerating) {
         setIsGenerating(true);
         // Delay slightly to ensure fonts/images render
         const timer = setTimeout(async () => {
@@ -113,12 +110,8 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
       }
 
       // Upload PNG to Supabase for Profile (Background task - Non-blocking)
-      const sanitizedCourse = courseName.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_-]/g, '');
-      const hasCertificate = user?.certificates?.some(cert => cert.includes(sanitizedCourse));
-      if (!hasCertificate) {
-        console.log("Triggering background upload...");
-        uploadAndSave(blob).catch(err => console.error("Background upload failed:", err));
-      }
+      console.log("Triggering background upload...");
+      uploadAndSave(blob).catch(err => console.error("Background upload failed:", err));
 
       // Generate PDF for User Download
       console.log("Importing jsPDF...");

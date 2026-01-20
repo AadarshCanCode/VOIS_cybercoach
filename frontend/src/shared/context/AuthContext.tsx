@@ -4,7 +4,7 @@ import type { User } from '@types';
 import { supabase } from '@lib/supabase';
 
 interface AuthContextValue {
-  user: (User & { role?: 'student'; created_at?: string | Date }) | null;
+  user: User | null;
   loading: boolean;
   login: (email: string, password: string, role?: 'student') => Promise<boolean>;
   loginWithGoogle: (role?: 'student') => Promise<void>;

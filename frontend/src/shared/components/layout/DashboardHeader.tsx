@@ -35,7 +35,6 @@ export function DashboardHeader({ activeTab, onTabChange }: DashboardHeaderProps
             case 'labs': return 'Labs'
             case 'community': return 'Community'
             case 'videos': return 'Videos'
-            case 'assessment': return 'Assessment'
             case 'profile': return 'Profile'
 
             default: return tab.charAt(0).toUpperCase() + tab.slice(1)
@@ -78,7 +77,7 @@ export function DashboardHeader({ activeTab, onTabChange }: DashboardHeaderProps
                             <div className="hidden text-right md:block">
                                 <p className="text-xs font-bold text-foreground">{user?.name}</p>
                                 <p className="text-[10px] text-muted-foreground uppercase tracking-widest leading-none">
-                                    {user?.level || "Novice"}
+                                    Operator
                                 </p>
                             </div>
                             <Avatar className="h-8 w-8 border border-border">

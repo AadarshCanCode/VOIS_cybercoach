@@ -3,8 +3,6 @@ import { useAuth } from '@context/AuthContext';
 import { LandingPage } from './Landing/LandingPage';
 import { Dashboard } from './Dashboard/Dashboard';
 import { DashboardHeader } from "@shared/components/layout/DashboardHeader"
-// import { AssessmentTest } from './Assessment/AssessmentTest'; // Removed
-// import { ProctoringDemo } from './Assessment/ProctoringDemo'; // Removed or kept if desired? User said keep proctoring.
 import { ProctoringDemo } from './Proctoring/ProctoringDemo';
 import { CourseList } from './Courses/CourseList';
 import { CourseDetail } from './Courses/CourseDetail';
@@ -13,7 +11,7 @@ import { LabViewer } from './Labs/LabViewer';
 import { Certificates } from './Certificates/Certificates';
 import { Profile } from './Profile/Profile';
 import { VideoLibrary } from './Video/VideoLibrary';
-import { TechnicalQuestions } from './TechnicalInterview/TechnicalQuestions';
+
 import { CommunityPage } from './Community/CommunityPage';
 import { SidebarInset, SidebarProvider } from "@shared/components/ui/sidebar"
 import { AppSidebar } from "@shared/components/layout/AppSidebar"
@@ -92,8 +90,7 @@ export const StudentAppContent: React.FC<StudentAppContentProps> = ({ initialTab
         return <VideoLibrary />;
       case 'labs':
         return <LabsList onLabSelect={handleLabSelect} />;
-      case 'technical':
-        return <TechnicalQuestions />;
+
       case 'certificates':
         return <Certificates />;
       case 'profile':

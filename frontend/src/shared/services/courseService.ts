@@ -393,10 +393,9 @@ class CourseService {
       }
 
       const { data, error } = await supabase
-        .from('user_progress')
+        .from('module_progress')
         .select('*')
-        .eq('user_id', userId)
-        .eq('course_id', courseId);
+        .eq('student_id', userId);
 
       if (error) throw new Error(`Failed to fetch user progress: ${error.message}`);
       return data;
@@ -448,19 +447,14 @@ class CourseService {
 
       // 3. Fallback to Supabase for Legacy Courses
       const updates: any = {
-        user_id: userId,
-        course_id: courseId,
+        student_id: userId,
         module_id: moduleId,
         completed,
-        updated_at: new Date().toISOString()
+        completed_at: new Date().toISOString()
       };
 
-      if (quizScore !== undefined) {
-        updates.quiz_score = quizScore;
-      }
-
       const { error } = await supabase
-        .from('user_progress')
+        .from('module_progress')
         .upsert([updates]);
 
       if (error) {
@@ -493,9 +487,9 @@ class CourseService {
 
       // Avoid double-enrollments
       const { data: existing, error: existingErr } = await supabase
-        .from('course_enrollments')
+        .from('enrollments')
         .select('*')
-        .eq('user_id', userId)
+        .eq('student_id', userId)
         .eq('course_id', courseId)
         .maybeSingle();
 
@@ -506,30 +500,12 @@ class CourseService {
       if (existing) return existing;
 
       const { data: inserted, error: insertErr } = await supabase
-        .from('course_enrollments')
-        .insert([{ user_id: userId, course_id: courseId }])
+        .from('enrollments')
+        .insert([{ student_id: userId, course_id: courseId }])
         .select()
         .single();
 
       if (insertErr) throw new Error(`Failed to enroll in course: ${insertErr.message}`);
-
-      // Increment enrollment_count on courses table
-      try {
-        const { error: updateErr } = await supabase
-          .from('courses')
-          .update({ enrollment_count: (inserted.enrollment_count ?? 0) + 1 })
-          .eq('id', courseId)
-          .select()
-          .single();
-        if (updateErr) {
-          // fallback: try to increment by fetching the course value and updating
-          const { data: courseRow } = await supabase.from('courses').select('enrollment_count').eq('id', courseId).maybeSingle();
-          const newCount = (courseRow?.enrollment_count ?? 0) + 1;
-          await supabase.from('courses').update({ enrollment_count: newCount }).eq('id', courseId);
-        }
-      } catch (e) {
-        console.warn('Failed to increment course enrollment_count (non-fatal):', e);
-      }
 
       return inserted;
     } catch (error) {
@@ -541,14 +517,14 @@ class CourseService {
   async getUserEnrollments(userId: string) {
     try {
       const { data, error } = await supabase
-        .from('course_enrollments')
+        .from('enrollments')
         .select(`
           *,
           course:courses(
             *
           )
         `)
-        .eq('user_id', userId)
+        .eq('student_id', userId)
         .order('enrolled_at', { ascending: false });
 
       if (error) throw new Error(`Failed to fetch enrollments: ${error.message}`);

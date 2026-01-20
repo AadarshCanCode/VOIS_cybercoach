@@ -13,9 +13,4 @@ export interface Lab {
   completed: boolean;
 }
 
-export interface ChatMessage {
-  id: string;
-  message: string;
-  isUser: boolean;
-  timestamp: Date;
-}
+

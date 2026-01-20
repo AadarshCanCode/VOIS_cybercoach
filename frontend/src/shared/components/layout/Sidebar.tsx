@@ -8,7 +8,6 @@ import {
     LogOut,
     ChevronRight,
     ChevronLeft,
-    ClipboardCheck,
     Shield,
     Users
 } from 'lucide-react';
@@ -30,7 +29,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
         { id: 'labs', label: 'Labs', icon: Terminal },
         { id: 'community', label: 'Community', icon: Users },
         { id: 'videos', label: 'Videos', icon: Video },
-        { id: 'assessment', label: 'Assessment', icon: ClipboardCheck },
     ];
 
 

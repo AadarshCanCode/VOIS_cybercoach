@@ -2,7 +2,6 @@ import { supabase } from '@lib/supabase';
 
 export interface StudentStats {
     coursesCompleted: number;
-    assessmentScore: number | null;
     certificatesEarned: number;
     liveLabsCompleted: number;
     studyTime: string; // This might need to be calculated or stored
@@ -36,9 +35,9 @@ class StudentService {
         try {
             // Get completed courses count
             const { count: coursesCompleted, error: coursesError } = await supabase
-                .from('user_progress')
+                .from('module_progress')
                 .select('*', { count: 'exact', head: true })
-                .eq('user_id', userId)
+                .eq('student_id', userId)
                 .eq('completed', true);
 
             if (coursesError) throw new Error(`Failed to fetch completed courses: ${coursesError.message}`);
@@ -47,7 +46,7 @@ class StudentService {
             const { count: certificatesEarned, error: certsError } = await supabase
                 .from('certificates')
                 .select('*', { count: 'exact', head: true })
-                .eq('user_id', userId);
+                .eq('student_id', userId);
 
             if (certsError && certsError.code !== 'PGRST116') { // Ignore if table doesn't exist yet
                 console.warn('Certificates table might not exist or error fetching:', certsError);
@@ -55,19 +54,18 @@ class StudentService {
 
             // Try to get study time from user_progress aggregate (sum of time spent)
             const { data: progressData } = await supabase
-                .from('user_progress')
-                .select('progress')
-                .eq('user_id', userId);
+                .from('module_progress')
+                .select('id')
+                .eq('student_id', userId);
 
-            // Estimate study time based on progress (rough estimate: 1 progress point = 1 minute)
-            const totalProgress = progressData?.reduce((sum, p) => sum + (p.progress || 0), 0) || 0;
-            const estimatedMinutes = totalProgress * 2; // 2 minutes per progress point
+            // Estimate study time based on completed modules (rough estimate: 1 module = 10 minutes)
+            const completedModules = progressData?.length || 0;
+            const estimatedMinutes = completedModules * 10;
             const hours = Math.floor(estimatedMinutes / 60);
             const studyTime = hours > 0 ? `${hours} hours` : `${estimatedMinutes} mins`;
 
             return {
                 coursesCompleted: coursesCompleted || 0,
-                assessmentScore: null, // Assessment scores tracked separately in assessment results
                 certificatesEarned: certificatesEarned || 0,
                 liveLabsCompleted: 0, // Placeholder for now, or fetch from a future labs table
                 studyTime
@@ -82,15 +80,15 @@ class StudentService {
         try {
             // Fetch recent progress updates
             const { data: progressData, error: progressError } = await supabase
-                .from('user_progress')
+                .from('module_progress')
                 .select(`
           id,
-          updated_at,
+          completed_at,
           completed,
-          course:courses(title)
+          module:modules(title)
         `)
-                .eq('user_id', userId)
-                .order('updated_at', { ascending: false })
+                .eq('student_id', userId)
+                .order('completed_at', { ascending: false })
                 .limit(5);
 
             if (progressError) throw new Error(`Failed to fetch recent activity: ${progressError.message}`);
@@ -99,8 +97,8 @@ class StudentService {
             // This is a simplified version. In a real app, you might union multiple tables (logs, certs, etc.)
             const activities: RecentActivity[] = progressData.map((item: any) => ({
                 id: item.id,
-                action: item.completed ? `Completed ${item.course?.title}` : `Started ${item.course?.title}`,
-                created_at: item.updated_at,
+                action: item.completed ? `Completed ${item.module?.title}` : `Started ${item.module?.title}`,
+                created_at: item.completed_at || new Date().toISOString(),
                 type: item.completed ? 'completion' : 'start'
             }));
 
@@ -162,15 +160,14 @@ class StudentService {
 
             // Get the most recently accessed uncompleted course
             const { data: progressData, error: progressError } = await supabase
-                .from('user_progress')
+                .from('module_progress')
                 .select(`
-                    updated_at,
-                    course_id,
+                    completed_at,
                     module_id
                 `)
-                .eq('user_id', userId)
+                .eq('student_id', userId)
                 .eq('completed', false)
-                .order('updated_at', { ascending: false })
+                .order('completed_at', { ascending: false })
                 .limit(1)
                 .maybeSingle() as any;
 
@@ -183,26 +180,13 @@ class StudentService {
 
             if (!progressData || !progressData.course) return null;
 
-            // Get progress for this course
-            const { data: completionData, error: completionError } = await supabase
-                .rpc('get_module_completion', {
-                    course_id: (progressData.course as any).id,
-                    user_id: userId
-                });
-
-            if (completionError) {
-                console.warn('Failed to fetch completion stats, defaulting to 0:', completionError);
-            }
-
-            const progress = completionData && completionData.length > 0 ? completionData[0].progress : 0;
-
             return {
-                courseId: progressData.course_id || '',
+                courseId: '',
                 title: 'Continuing Session',
                 description: 'Pick up where you left off',
                 currentModule: 'In Progress',
-                progress: progress || 0,
-                lastAccessed: progressData.updated_at
+                progress: 0,
+                lastAccessed: progressData?.completed_at || new Date().toISOString()
             };
         } catch (error) {
             console.error('Get active operation error:', error);
@@ -245,7 +229,21 @@ class StudentService {
         }
     }
 
+    async getCertificates(userId: string): Promise<any[]> {
+        try {
+            const { data, error } = await supabase
+                .from('certificates')
+                .select('*')
+                .eq('student_id', userId)
+                .order('issued_at', { ascending: false });
 
+            if (error) throw error;
+            return data || [];
+        } catch (error) {
+            console.error('Get certificates error:', error);
+            return [];
+        }
+    }
 }
 
 export const studentService = new StudentService();

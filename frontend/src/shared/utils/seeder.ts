@@ -40,11 +40,9 @@ const COURSES = [
 
 const MODULE_TEMPLATE = (courseId: string, courseName: string, i: number) => ({
     title: `Module ${i}: ${courseName} - Part ${i}`,
-    description: `Detailed study of ${courseName} concepts, focusing on section ${i}.`,
-    content: `Lorem ipsum content for module ${i} of ${courseName}...`,
+    content_markdown: `Lorem ipsum content for module ${i} of ${courseName}...`,
     course_id: courseId,
-    order: i,
-    is_published: true
+    module_order: i
 });
 
 
@@ -80,7 +78,7 @@ export const runSeed = async (userId?: string) => {
                 allModules.push({
                     ...MODULE_TEMPLATE(c.id, c.title, i),
                     title: title,
-                    order: i
+                    module_order: i
                 });
             }
         });
@@ -100,23 +98,32 @@ export const runSeed = async (userId?: string) => {
             }
         }
 
-        // 3. Upsert Questions (15 per course)
-        console.log('Seeding Questions...');
+        // 3. Upsert Quizzes (replacing questions)
+        console.log('Seeding Quizzes...');
         for (const c of COURSES) {
-            const { count } = await supabase.from('questions').select('*', { count: 'exact', head: true }).eq('course_id', c.id);
-            if (!count || count < 15) {
-                await supabase.from('questions').delete().eq('course_id', c.id);
-                const questions = [];
-                for (let i = 1; i <= 15; i++) {
-                    questions.push({
-                        course_id: c.id,
-                        question_text: `Exam Question ${i}: What is a critical aspect of ${c.title}?`,
-                        options: ['Security First', 'Performance First', 'Cost First', 'Ignore It', 'Chaos'], // 5 opts or 4
-                        correct_answer: 0
-                    });
+            // First get the modules for this course to link quizzes to
+            const { data: mods } = await supabase.from('modules').select('id').eq('course_id', c.id);
+            if (mods && mods.length > 0) {
+                for (const m of mods) {
+                    const { count } = await supabase.from('quizzes').select('*', { count: 'exact', head: true }).eq('module_id', m.id);
+                    if (!count || count < 2) {
+                        const quizzes = [
+                            {
+                                module_id: m.id,
+                                question: `Review: What is a critical aspect of this module in ${c.title}?`,
+                                options: ['Security First', 'Performance First', 'Cost First', 'Chaos'],
+                                correct_option: 0
+                            },
+                            {
+                                module_id: m.id,
+                                question: `Protocol Check: Which best describes the core concept here?`,
+                                options: ['Encapsulation', 'Redundancy', 'Monitoring', 'Least Privilege'],
+                                correct_option: 3
+                            }
+                        ];
+                        await supabase.from('quizzes').insert(quizzes);
+                    }
                 }
-                const { error: qErr } = await supabase.from('questions').insert(questions);
-                if (qErr) throw new Error(`Questions failed for ${c.title}: ${qErr.message}`);
             }
         }
 

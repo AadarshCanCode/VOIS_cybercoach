@@ -7,7 +7,7 @@ import { courseService } from '@services/courseService';
 import type { Module, Course } from '@types';
 import { ModuleTest } from './ModuleTest';
 import { ProctoringComponent } from '../Proctoring/ProctoringComponent';
-import { learningPathService } from '@services/learningPathService';
+import { learningPathService } from '../../../../shared/services/learningPathService';
 import { useAuth } from '@context/AuthContext';
 
 mermaid.initialize({
@@ -44,11 +44,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
   const [loading, setLoading] = useState(false);
   const [vuStudentDetails, setVuStudentDetails] = useState<any>(null);
 
-  // AI Tutor State
-  const [showAiChat, setShowAiChat] = useState(false);
-  const [aiQuestion, setAiQuestion] = useState('');
-  const [aiAnswer, setAiAnswer] = useState<{ text: string, error?: boolean } | null>(null);
-  const [aiLoading, setAiLoading] = useState(false);
+
 
   // Proctoring State
   const [isProctoringActive, setIsProctoringActive] = useState(false);
@@ -112,35 +108,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
     }
   }, [showTest, moduleId]);
 
-  const askAiTutor = async () => {
-    if (!aiQuestion.trim()) return;
 
-    setAiLoading(true);
-    setAiAnswer(null);
-
-    try {
-      const API_URL = import.meta.env.VITE_API_URL || '';
-      const response = await fetch(`${API_URL}/api/ai/ask`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          question: aiQuestion,
-          context: module?.title || 'Web Security'
-        })
-      });
-
-      const data = await response.json();
-      if (data.answer) {
-        setAiAnswer({ text: data.answer });
-      } else {
-        setAiAnswer({ text: 'Transmission interrupted. Secure line unstable.', error: true });
-      }
-    } catch (err) {
-      setAiAnswer({ text: 'Connection failed. AI Command unresponsive.', error: true });
-    } finally {
-      setAiLoading(false);
-    }
-  };
 
   useEffect(() => {
     let mounted = true;
@@ -276,9 +244,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
     // mark all modules completed if some are missing (for safety)
     try {
       if (user?.id) {
-        // We can't batch update via courseService easily with the current API for VU courses
-        // So we will loop updates for now, or just trust the backend handles course completion logic if we had one.
-        // For now, let's just loop sequentially to be safe with the new API abstraction.
+
         for (const m of allModules) {
           await courseService.updateProgress(user.id, courseId, m.id, true, m.testScore ?? undefined);
         }
@@ -399,14 +365,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
               {module.completed ? '✓ Completed' : 'Mark Complete'}
             </button>
 
-            {/* AI Tutor */}
-            <button
-              className="px-4 py-2 rounded-lg text-sm font-bold bg-[#00FF88]/10 text-[#00FF88] border border-[#00FF88]/20 hover:bg-[#00FF88] hover:text-black transition-all flex items-center space-x-2 shadow-[0_0_10px_rgba(0,255,136,0.1)] hover:shadow-[0_0_20px_rgba(0,255,136,0.3)]"
-              onClick={() => setShowAiChat(true)}
-            >
-              <Terminal className="h-4 w-4" />
-              <span>Ask AI Tutor</span>
-            </button>
+
 
             {/* Go to next module */}
             <button
@@ -621,60 +580,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
           />
         )}
 
-        {/* AI Tutor Chat Modal */}
-        {showAiChat && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-[#0A0F0A] border border-[#00FF88]/30 rounded-2xl w-full max-w-lg shadow-[0_0_50px_rgba(0,255,136,0.2)] flex flex-col max-h-[80vh]">
-              {/* Header */}
-              <div className="p-4 border-b border-[#00FF88]/20 flex items-center justify-between bg-[#00FF88]/5">
-                <div className="flex items-center space-x-2 text-[#00FF88]">
-                  <Terminal className="h-5 w-5" />
-                  <span className="font-bold tracking-wider">TACTICAL AI ADVISOR</span>
-                </div>
-                <button
-                  onClick={() => setShowAiChat(false)}
-                  className="text-white/50 hover:text-white transition-colors"
-                >
-                  ✕
-                </button>
-              </div>
 
-              {/* Chat Area */}
-              <div className="p-6 overflow-y-auto flex-1 space-y-4">
-                <div className="bg-[#00FF88]/5 border border-[#00FF88]/10 p-4 rounded-lg">
-                  <p className="text-[#00FF88] font-mono text-sm">[SYSTEM]: Secure channel established. Awaiting query regarding {module?.title || 'current objective'}.</p>
-                </div>
-
-                {aiAnswer && (
-                  <div className={`p-4 rounded-lg border content-start ${aiAnswer.error ? 'bg-red-500/10 border-red-500/30 text-red-400' : 'bg-slate-900 border-slate-700 text-gray-300'}`}>
-                    <p className="whitespace-pre-wrap font-mono text-sm leading-relaxed">{aiAnswer.text}</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Input Area */}
-              <div className="p-4 border-t border-[#00FF88]/20 bg-[#00FF88]/5">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={aiQuestion}
-                    onChange={(e) => setAiQuestion(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && askAiTutor()}
-                    placeholder="Enter tactical query..."
-                    className="flex-1 bg-black border border-[#00FF88]/30 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#00FF88] font-mono placeholder-white/30"
-                  />
-                  <button
-                    onClick={askAiTutor}
-                    disabled={aiLoading}
-                    className="bg-[#00FF88] text-black font-bold px-4 py-2 rounded-lg hover:bg-[#00CC66] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                  >
-                    {aiLoading ? '...' : 'SEND'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
       <ProctoringComponent
         isActive={isProctoringActive}
