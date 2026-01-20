@@ -1,7 +1,6 @@
 import React, { useState } from "react"
-import { Mail, ArrowRight } from "lucide-react"
 import { useAuth } from "@context/AuthContext"
-import { useNavigate, Link } from "react-router-dom"
+import { Link } from "react-router-dom"
 import { SEO } from "@components/SEO/SEO"
 import { Button } from "@components/ui/button"
 import {
@@ -14,90 +13,27 @@ import {
 import {
   Field,
   FieldGroup,
-  FieldLabel,
-  FieldDescription,
 } from "@components/ui/field"
-import { Input } from "@components/ui/input"
 
 interface RegisterFormProps {
   onSuccess?: () => void;
 }
 
-export const RegisterForm: React.FC<RegisterFormProps> = ({
-  onSuccess
-}) => {
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
+export const RegisterForm: React.FC<RegisterFormProps> = () => {
   const [isLoading, setIsLoading] = useState(false)
-  const [isEmailSent, setIsEmailSent] = useState(false)
   const [error, setError] = useState('')
-  const { register } = useAuth()
-  const navigate = useNavigate()
+  const { loginWithGoogle } = useAuth()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (password !== confirmPassword) {
-      setError('Passwords do not match')
-      return
-    }
-
-    setError('')
-    setIsLoading(true)
-
+  const handleGoogleSignup = async () => {
     try {
-      await register(email, password, name, 'student')
-      if (onSuccess) {
-        onSuccess()
-      } else {
-        navigate('/dashboard')
-      }
+      setIsLoading(true)
+      setError('')
+      // Google Auth handles both login and signup
+      await loginWithGoogle('student')
     } catch (err: any) {
-      const msg = err instanceof Error ? err.message : 'Registration failed'
-      if (msg.includes('Success!') || msg.includes('check your email')) {
-        setIsEmailSent(true)
-        setError('')
-      } else {
-        setError(msg)
-      }
-    } finally {
+      setError('Google signup failed')
       setIsLoading(false)
     }
-  }
-
-  if (isEmailSent) {
-    return (
-      <div className="dark bg-background flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
-        <div className="flex w-full max-w-md flex-col gap-6 text-center">
-          <Card className="bg-zinc-900 border-zinc-800 shadow-2xl">
-            <CardHeader>
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#00FF88]/10 border border-[#00FF88]/20">
-                <Mail className="h-8 w-8 text-[#00FF88]" />
-              </div>
-              <CardTitle className="text-xl uppercase tracking-tighter text-white">Check Your Email</CardTitle>
-              <CardDescription className="text-zinc-400">
-                We've sent a verification link to <span className="text-white font-bold">{email}</span>.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-zinc-400 leading-relaxed">
-                Please click the link in the email to activate your account.
-              </p>
-              <Link to="/login" className="block">
-                <Button className="w-full bg-white text-black hover:bg-zinc-200">
-                  Return to Login
-                </Button>
-              </Link>
-              <p className="text-zinc-500 text-[10px] uppercase font-mono">
-                Didn't get the email? Check your spam folder.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    )
   }
 
   return (
@@ -121,7 +57,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             <CardHeader className="text-center space-y-1">
               <CardTitle className="text-2xl font-bold text-white">Create an account</CardTitle>
               <CardDescription className="text-zinc-400">
-                Enter your details to register as a student
+                Join the platform with Google
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -130,82 +66,40 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
                   <p className="text-red-500 text-xs font-mono uppercase tracking-widest text-center">{error}</p>
                 </div>
               )}
-              <form onSubmit={handleSubmit}>
-                <FieldGroup className="gap-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Field>
-                      <FieldLabel htmlFor="name" className="text-white">Full Name</FieldLabel>
-                      <Input
-                        id="name"
-                        type="text"
-                        placeholder="John Doe"
-                        required
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        disabled={isLoading}
-                        className="bg-zinc-950 border-zinc-800 text-white focus:ring-0 focus:border-zinc-700"
-                      />
-                    </Field>
-                    <Field>
-                      <FieldLabel htmlFor="email" className="text-white">Email</FieldLabel>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="m@example.com"
-                        required
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        disabled={isLoading}
-                        className="bg-zinc-950 border-zinc-800 text-white focus:ring-0 focus:border-zinc-700"
-                      />
-                    </Field>
+
+              <FieldGroup className="gap-6">
+                <Field>
+                  <Button
+                    variant="outline"
+                    type="button"
+                    className="w-full bg-zinc-950 border-zinc-800 text-white hover:bg-zinc-900 hover:text-white h-12 text-md font-medium"
+                    onClick={handleGoogleSignup}
+                    disabled={isLoading}
+                  >
+                    <svg className="mr-2 size-5" viewBox="0 0 24 24">
+                      <path fill="currentColor" d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
+                    </svg>
+                    Sign up with Google
+                  </Button>
+                </Field>
+
+
+
+                <Field>
+                  <div className="text-center mt-4">
+                    <p className="text-zinc-400 text-sm">
+                      Already have an account? <Link to="/login" className="text-white hover:underline underline-offset-4 font-medium transition-colors">Login</Link>
+                    </p>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Field>
-                      <FieldLabel htmlFor="password" className="text-white">Password</FieldLabel>
-                      <Input
-                        id="password"
-                        type="password"
-                        required
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        disabled={isLoading}
-                        className="bg-zinc-950 border-zinc-800 text-white focus:ring-0 focus:border-zinc-700"
-                      />
-                    </Field>
-                    <Field>
-                      <FieldLabel htmlFor="confirmPassword" className="text-white">Confirm</FieldLabel>
-                      <Input
-                        id="confirmPassword"
-                        type="password"
-                        required
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        disabled={isLoading}
-                        className="bg-zinc-950 border-zinc-800 text-white focus:ring-0 focus:border-zinc-700"
-                      />
-                    </Field>
-                  </div>
-                  <Field>
-                    <Button type="submit" className="w-full bg-white text-black hover:bg-zinc-200" disabled={isLoading}>
-                      {isLoading ? 'Signing up...' : (
-                        <span className="flex items-center justify-center gap-2">
-                          Sign Up <ArrowRight className="h-4 w-4" />
-                        </span>
-                      )}
-                    </Button>
-                    <FieldDescription className="text-center text-zinc-400">
-                      Already have an account? <Link to="/login" className="text-white underline underline-offset-4">Login</Link>
-                    </FieldDescription>
-                  </Field>
-                </FieldGroup>
-              </form>
+                </Field>
+
+              </FieldGroup>
             </CardContent>
           </Card>
-          <FieldDescription className="px-6 text-center text-xs text-zinc-500">
+          <p className="px-6 text-center text-xs text-zinc-500">
             By clicking continue, you agree to our <Link to="/terms" className="underline underline-offset-4">Terms of Service</Link>{" "}
             and <Link to="/privacy" className="underline underline-offset-4">Privacy Policy</Link>.
-          </FieldDescription>
+          </p>
         </div>
       </div>
     </>

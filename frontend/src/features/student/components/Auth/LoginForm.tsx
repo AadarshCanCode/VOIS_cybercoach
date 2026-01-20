@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react"
-import { ArrowRight } from "lucide-react"
 import { useAuth } from "@context/AuthContext"
-import { useNavigate, Link } from "react-router-dom"
+import { Link } from "react-router-dom"
 import { SEO } from "@components/SEO/SEO"
 import { Button } from "@components/ui/button"
 import {
@@ -14,26 +13,17 @@ import {
 import {
   Field,
   FieldGroup,
-  FieldLabel,
-  FieldSeparator,
-  FieldDescription,
 } from "@components/ui/field"
-import { Input } from "@components/ui/input"
 
 interface LoginFormProps {
   onSuccess?: () => void;
 }
 
-export const LoginForm: React.FC<LoginFormProps> = ({
-  onSuccess
-}) => {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+export const LoginForm: React.FC<LoginFormProps> = () => {
   const role = 'student' as const;
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  const { login, loginWithGoogle } = useAuth()
-  const navigate = useNavigate()
+  const { loginWithGoogle } = useAuth()
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -44,25 +34,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       window.history.replaceState({}, document.title, window.location.pathname)
     }
   }, [])
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    setIsLoading(true)
-
-    try {
-      await (login as (email: string, password: string, role: 'student') => Promise<boolean>)(email, password, role)
-      if (onSuccess) {
-        onSuccess()
-      } else {
-        navigate('/dashboard')
-      }
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Login failed')
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   const handleGoogleLogin = async () => {
     try {
@@ -96,7 +67,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             <CardHeader className="text-center space-y-1">
               <CardTitle className="text-2xl font-bold text-white">Welcome back</CardTitle>
               <CardDescription className="text-zinc-400">
-                Login with your Google account
+                Access your terminal with Google
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -105,82 +76,31 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                   <p className="text-red-500 text-xs font-mono uppercase tracking-widest text-center">{error}</p>
                 </div>
               )}
-              <form onSubmit={handleSubmit}>
-                <FieldGroup className="gap-6">
-                  <>
-                    <Field>
-                      <Button
-                        variant="outline"
-                        type="button"
-                        className="w-full bg-zinc-900 border-zinc-800 text-white hover:bg-zinc-800 hover:text-white"
-                        onClick={handleGoogleLogin}
-                        disabled={isLoading}
-                      >
-                        <svg className="mr-2 size-4" viewBox="0 0 24 24">
-                          <path fill="currentColor" d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
-                        </svg>
-                        Login with Google
-                      </Button>
-                    </Field>
-                    <FieldSeparator className="text-zinc-500">
-                      Or continue with
-                    </FieldSeparator>
-                  </>
-                  <div className="space-y-4">
-                    <Field>
-                      <FieldLabel htmlFor="email" className="text-white">Email</FieldLabel>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="m@example.com"
-                        required
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        disabled={isLoading}
-                        className="bg-zinc-950 border-zinc-800 text-white focus:ring-0 focus:border-zinc-700"
-                      />
-                    </Field>
-                    <Field>
-                      <div className="flex items-center">
-                        <FieldLabel htmlFor="password" className="text-white">Password</FieldLabel>
-                        <Link
-                          to="/forgot-password"
-                          className="ml-auto text-sm text-white hover:underline underline-offset-4"
-                        >
-                          Forgot your password?
-                        </Link>
-                      </div>
-                      <Input
-                        id="password"
-                        type="password"
-                        required
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        disabled={isLoading}
-                        className="bg-zinc-950 border-zinc-800 text-white focus:ring-0 focus:border-zinc-700"
-                      />
-                    </Field>
-                  </div>
-                  <Field>
-                    <Button type="submit" className="w-full bg-white text-black hover:bg-zinc-200" disabled={isLoading}>
-                      {isLoading ? 'Logging in...' : (
-                        <span className="flex items-center justify-center gap-2">
-                          Login <ArrowRight className="h-4 w-4" />
-                        </span>
-                      )}
-                    </Button>
-                    <FieldDescription className="text-center text-zinc-400">
-                      Don&apos;t have an account? <Link to="/signup" className="text-white underline underline-offset-4">Sign up</Link>
-                    </FieldDescription>
-                  </Field>
-                </FieldGroup>
-              </form>
+
+              <FieldGroup className="gap-6">
+                <Field>
+                  <Button
+                    variant="outline"
+                    type="button"
+                    className="w-full bg-zinc-950 border-zinc-800 text-white hover:bg-zinc-900 hover:text-white h-12 text-md font-medium"
+                    onClick={handleGoogleLogin}
+                    disabled={isLoading}
+                  >
+                    <svg className="mr-2 size-5" viewBox="0 0 24 24">
+                      <path fill="currentColor" d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
+                    </svg>
+                    Continue with Google
+                  </Button>
+                </Field>
+
+
+              </FieldGroup>
             </CardContent>
           </Card>
-          <FieldDescription className="px-6 text-center text-xs text-zinc-500">
+          <p className="px-6 text-center text-xs text-zinc-500">
             By clicking continue, you agree to our <Link to="/terms" className="underline underline-offset-4">Terms of Service</Link>{" "}
             and <Link to="/privacy" className="underline underline-offset-4">Privacy Policy</Link>.
-          </FieldDescription>
+          </p>
         </div>
       </div>
     </>

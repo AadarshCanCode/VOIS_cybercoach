@@ -6,14 +6,8 @@ import { supabase } from '@lib/supabase';
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string, role?: 'student') => Promise<boolean>;
   loginWithGoogle: (role?: 'student') => Promise<void>;
-  register: (
-    email: string,
-    password: string,
-    name: string,
-    role: 'student'
-  ) => Promise<boolean>;
+
   logout: () => Promise<void>;
   updateUser: (updates: Partial<User>) => void;
   isStudent: () => boolean;
@@ -91,18 +85,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  const login = async (email: string, password: string, role: 'student' = 'student') => {
-    try {
-      const credentials = { email, password, role };
-      const loggedInUser = await authService.login(credentials);
-      setUser(loggedInUser);
 
-      return true;
-    } catch (error) {
-      console.error('Login failed:', error);
-      throw error;
-    }
-  };
 
   const loginWithGoogle = async (role: 'student' = 'student') => {
     try {
@@ -113,22 +96,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }
 
-  const register = async (
-    email: string,
-    password: string,
-    name: string,
-    role: 'student' = 'student'
-  ) => {
-    try {
-      const userData = { email, password, name, role };
-      const registeredUser = await authService.register(userData);
-      setUser(registeredUser);
-      return true;
-    } catch (error) {
-      console.error('Registration failed:', error);
-      throw error;
-    }
-  };
+
 
   const logout = async () => {
     setUser(null);
@@ -153,7 +121,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, loginWithGoogle, register, logout, updateUser, isStudent }}>
+    <AuthContext.Provider value={{ user, loading, loginWithGoogle, logout, updateUser, isStudent }}>
       {children}
     </AuthContext.Provider>
   );
