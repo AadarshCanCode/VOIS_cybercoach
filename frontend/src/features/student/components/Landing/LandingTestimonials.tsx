@@ -36,25 +36,25 @@ const testimonials = [
         text: "Security training has never been this engaging. The hands-on labs are exactly what students need.",
         image: "/testimonials/rehan.jpeg",
         name: "Rehan Shaikh",
-        role: "Cybersecurity Instructor",
+        role: "Cohesity Team Lead",
     },
     {
         text: "The platform's analytics give us deep insights into student progress. It's an invaluable tool for education.",
         image: "/testimonials/sarthak.jpeg",
         name: "Sarhtak Jadhav",
-        role: "EdTech Coordinator",
+        role: "NLP Learner",
     },
     {
         text: "Finally, a platform that bridges the gap between theory and practice. Our students are job-ready faster.",
         image: "/testimonials/tanuj.jpeg",
         name: "Tanuj",
-        role: "IT Department Head",
+        role: "Frontend Developer",
     },
     {
         text: "The UI is slick and the gamification keeps students motivated. Best training platform we've used.",
         image: "/testimonials/lavanya.jpeg",
         name: "Lavanya Salian",
-        role: "Security Analyst",
+        role: "Cybersecurity Learner",
     },
 ];
 
