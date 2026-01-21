@@ -75,7 +75,7 @@ Transform passive learning into hands-on, job-ready cybersecurity skills with ad
 
 ### Prerequisites
 
-- [Bun](https://bun.sh/) (Recommended) or Node.js 20+
+- [Bun](https://bun.sh/) (Recommended), [pnpm](https://pnpm.io/), or Node.js 20+ (npm)
 - Git
 - Supabase Account
 - Google Gemini API Key
@@ -89,8 +89,22 @@ cd VOIS_cybercoach
 ```
 
 2️⃣ **Install dependencies**
+
+Choose your preferred package manager:
+
+**Bun (Fastest)**
 ```bash
 bun install
+```
+
+**npm**
+```bash
+npm install
+```
+
+**pnpm**
+```bash
+pnpm install
 ```
 
 3️⃣ **Set up environment variables**

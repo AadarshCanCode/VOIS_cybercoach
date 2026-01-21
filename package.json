@@ -9,9 +9,9 @@
     "start": "next start",
     "lint": "next lint",
     "fetch-faceapi": "node ./scripts/fetch-faceapi.js",
-    "server": "bun src/server/server.ts",
-    "dev:full": "concurrently \"bun server\" \"bun run dev\"",
-    "server:watch": "bun --watch src/server/server.ts"
+    "server": "tsx src/server/server.ts",
+    "dev:full": "concurrently \"npm run server\" \"npm run dev\"",
+    "server:watch": "tsx watch src/server/server.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
@@ -49,7 +49,7 @@
     "html2canvas": "^1.4.1",
     "imagekitio-react": "^4.3.0",
     "jspdf": "^3.0.4",
-    "lucide-react": "^0.344.0",
+    "lucide-react": "^0.460.0",
     "mermaid": "^11.12.2",
     "mongoose": "^9.1.3",
     "motion": "^12.27.5",
