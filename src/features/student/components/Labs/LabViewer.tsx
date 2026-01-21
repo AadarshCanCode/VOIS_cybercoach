@@ -3,6 +3,7 @@ import { Terminal, ExternalLink, ArrowLeft, CheckCircle } from 'lucide-react';
 import { labs } from '@data/labs';
 import { isLabCompleted, markLabAsCompleted } from '@utils/labCompletion';
 import { labApiService } from '@services/labApiService';
+import { useAuth } from '@context/AuthContext';
 
 interface LabViewerProps {
   labId: string;
@@ -10,12 +11,68 @@ interface LabViewerProps {
 }
 
 export const LabViewer: React.FC<LabViewerProps> = ({ labId, onBack }) => {
+  const { user } = useAuth();
   const [isCompleted, setIsCompleted] = useState(false);
   const [showCompletionMessage, setShowCompletionMessage] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
+  // Check for external completion sync from URL
   useEffect(() => {
-    setIsCompleted(isLabCompleted(labId));
+    const params = new URLSearchParams(window.location.search);
+    const completedLabId = params.get('labCompleted');
+    
+    if (completedLabId === labId) {
+      handleExternalCompletion();
+      // Clean URL
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+    }
   }, [labId]);
+
+  // Load initial completion status
+  useEffect(() => {
+    loadCompletionStatus();
+  }, [labId]);
+
+  const loadCompletionStatus = async () => {
+    try {
+      setIsLoading(true);
+      const status = await labApiService.getLabStatus(labId);
+      setIsCompleted(status.completed);
+      
+      // Also sync with localStorage
+      if (status.completed) {
+        markLabAsCompleted(labId);
+      }
+    } catch (error) {
+      console.error('Error loading lab status:', error);
+      // Fallback to localStorage
+      setIsCompleted(isLabCompleted(labId));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleExternalCompletion = async () => {
+    try {
+      setIsLoading(true);
+      // Mark as completed via API (webhook may have already done this, but ensure sync)
+      await labApiService.markLabAsCompleted(labId);
+      markLabAsCompleted(labId); // Also update localStorage
+      setIsCompleted(true);
+      setShowCompletionMessage(true);
+      setTimeout(() => setShowCompletionMessage(false), 5000);
+    } catch (error) {
+      console.error('Error syncing external completion:', error);
+      // Still show as completed locally
+      markLabAsCompleted(labId);
+      setIsCompleted(true);
+      setShowCompletionMessage(true);
+      setTimeout(() => setShowCompletionMessage(false), 5000);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleMarkAsCompleted = async () => {
     try {
@@ -109,12 +166,18 @@ export const LabViewer: React.FC<LabViewerProps> = ({ labId, onBack }) => {
 
               {/* Launch Lab Button */}
               <a
-                href={lab.liveUrl}
+                href={lab.liveUrl ? `${lab.liveUrl}?studentId=${user?.id}&returnUrl=${encodeURIComponent(window.location.origin + '/labs/' + labId)}` : '#'}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={(e) => {
+                  if (!lab.liveUrl) {
+                    e.preventDefault();
+                    alert('Lab URL not configured');
+                  }
+                }}
                 className="flex items-center space-x-2 px-6 py-3 bg-[#00FF88] text-black font-bold rounded-lg hover:bg-[#00CC66] hover:shadow-[0_0_20px_rgba(0,255,136,0.3)] transition-all ml-6 whitespace-nowrap"
               >
-                <span>Launch Lab</span>
+                <span>{isCompleted ? 'Reopen Lab' : 'Launch Lab'}</span>
                 <ExternalLink className="h-5 w-5" />
               </a>
             </div>
@@ -150,6 +213,29 @@ export const LabViewer: React.FC<LabViewerProps> = ({ labId, onBack }) => {
           </div>
         </div>
 
+        {/* Completion Status Banner */}
+        {showCompletionMessage && (
+          <div className="fixed top-4 right-4 z-50 bg-[#00FF88] text-black px-6 py-4 rounded-lg shadow-lg border-2 border-[#00FF88] animate-slide-in">
+            <div className="flex items-center space-x-3">
+              <CheckCircle className="h-6 w-6" />
+              <div>
+                <p className="font-bold">Lab Completed!</p>
+                <p className="text-sm">Completion status synced successfully.</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Loading Indicator */}
+        {isLoading && (
+          <div className="fixed top-4 right-4 z-50 bg-[#0A0F0A] border border-[#00FF88]/20 text-[#00FF88] px-6 py-4 rounded-lg shadow-lg">
+            <div className="flex items-center space-x-3">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#00FF88]"></div>
+              <span className="font-medium">Syncing lab status...</span>
+            </div>
+          </div>
+        )}
+
         {/* Additional Resources */}
         <div className="bg-[#0A0F0A] rounded-xl border border-[#00FF88]/10 p-6 mt-8">
           <h3 className="text-lg font-bold text-white mb-4 flex items-center space-x-2">
@@ -161,12 +247,18 @@ export const LabViewer: React.FC<LabViewerProps> = ({ labId, onBack }) => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 items-start">
             <a
-              href={lab.liveUrl}
+              href={lab.liveUrl ? `${lab.liveUrl}?studentId=${user?.id}&returnUrl=${encodeURIComponent(window.location.origin + '/labs/' + labId)}` : '#'}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={(e) => {
+                if (!lab.liveUrl) {
+                  e.preventDefault();
+                  alert('Lab URL not configured');
+                }
+              }}
               className="inline-flex items-center space-x-2 px-6 py-3 bg-[#00FF88] text-black font-bold rounded-lg hover:bg-[#00CC66] hover:shadow-[0_0_20px_rgba(0,255,136,0.3)] transition-all"
             >
-              <span>Launch Lab Environment</span>
+              <span>{isCompleted ? 'Reopen Lab Environment' : 'Launch Lab Environment'}</span>
               <ExternalLink className="h-5 w-5" />
             </a>
             
@@ -188,13 +280,6 @@ export const LabViewer: React.FC<LabViewerProps> = ({ labId, onBack }) => {
               </button>
             )}
           </div>
-
-          {showCompletionMessage && (
-            <div className="mt-4 p-4 bg-green-600/20 border border-green-600/40 rounded-lg flex items-center space-x-3">
-              <CheckCircle className="h-5 w-5 text-green-500" />
-              <span className="text-green-400">✓ Lab marked as completed!</span>
-            </div>
-          )}
         </div>
       </div>
     </div>

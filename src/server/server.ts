@@ -5,6 +5,7 @@ import 'dotenv/config';
 import studentRoutes from './features/student/routes/index.js';
 import imagekitRoutes from './routes/imagekit.routes.js';
 import connectDB from './shared/lib/mongodb.js';
+import { logger } from './shared/lib/logger.js';
 
 // Connect to MongoDB
 connectDB();
@@ -51,7 +52,7 @@ import { fileURLToPath } from 'url';
 // Only listen if run directly (not imported)
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   app.listen(PORT, () => {
-    console.log(`Backend server running on http://localhost:${PORT}`);
+    logger.info(`Backend server running on http://localhost:${PORT}`);
   });
 }
 

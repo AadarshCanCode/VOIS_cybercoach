@@ -55,7 +55,7 @@ export const LoginForm: React.FC<LoginFormProps> = () => {
         title="Login"
         description="Access your Cybercoach terminal. Sign in to continue your cybersecurity training and operations."
       />
-      <div className="dark bg-background flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
+      <div className="dark bg-zinc-950 flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
         <div className="flex w-full max-w-sm flex-col gap-6">
           <Link href="/" className="flex items-center gap-2 self-center font-medium group transition-all hover:scale-105 mb-2">
             <div className="bg-primary text-primary-foreground flex size-10 items-center justify-center rounded-md group-hover:scale-110 transition-transform">
@@ -66,11 +66,11 @@ export const LoginForm: React.FC<LoginFormProps> = () => {
             </div>
           </Link>
 
-          <Card className="bg-zinc-900 border-zinc-800 shadow-2xl">
+          <Card className="bg-zinc-900/50 border-zinc-800/50 shadow-2xl backdrop-blur-xl">
             <CardHeader className="text-center space-y-1">
               <CardTitle className="text-2xl font-bold text-white">Welcome back</CardTitle>
               <CardDescription className="text-zinc-400">
-                Access your terminal with Google
+                Login with your Google account
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -85,14 +85,23 @@ export const LoginForm: React.FC<LoginFormProps> = () => {
                   <Button
                     variant="outline"
                     type="button"
-                    className="w-full bg-zinc-950 border-zinc-800 text-white hover:bg-zinc-900 hover:text-white h-12 text-md font-medium"
+                    className="w-full bg-zinc-950 border-zinc-800 text-white hover:bg-[#00FF88] hover:text-black hover:border-[#00FF88] h-12 text-md font-bold transition-all duration-300"
                     onClick={handleGoogleLogin}
                     disabled={isLoading}
                   >
-                    <svg className="mr-2 size-5" viewBox="0 0 24 24">
-                      <path fill="currentColor" d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
-                    </svg>
-                    Continue with Google
+                    {isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="size-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                        <span>Initializing...</span>
+                      </div>
+                    ) : (
+                      <>
+                        <svg className="mr-2 size-5" viewBox="0 0 24 24">
+                          <path fill="currentColor" d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
+                        </svg>
+                        <span>Continue with Google</span>
+                      </>
+                    )}
                   </Button>
                 </Field>
 

@@ -1,5 +1,6 @@
 import express from 'express';
 import axios from 'axios';
+import { logger } from '../shared/lib/logger.js';
 
 const router = express.Router();
 
@@ -9,7 +10,7 @@ router.get('/videos', async (req, res) => {
         const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
 
         if (!privateKey) {
-            console.error('ImageKit private key missing');
+            logger.error('ImageKit private key missing');
             return res.status(500).json({ error: 'ImageKit private key not configured' });
         }
 
@@ -27,7 +28,11 @@ router.get('/videos', async (req, res) => {
 
         res.status(200).json(response.data);
     } catch (error: any) {
-        console.error('ImageKit API error:', error.response?.data || error.message);
+        const err = error instanceof Error ? error : new Error(String(error));
+        logger.error('ImageKit API error', err, { 
+            responseData: error.response?.data,
+            status: error.response?.status 
+        });
         res.status(error.response?.status || 500).json({
             error: error.response?.data?.message || error.message || 'Failed to fetch videos'
         });

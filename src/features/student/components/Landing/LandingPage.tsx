@@ -37,6 +37,13 @@ export const LandingPage: React.FC = () => {
     router.push(`/login${tab ? `?tab=${tab}` : ''}`);
   };
 
+  // Auto-redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      router.push('/dashboard');
+    }
+  }, [user, router]);
+
   // navbar mobile state
   const [mobileOpen, setMobileOpen] = useState(false);
 

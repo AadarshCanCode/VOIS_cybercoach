@@ -19,6 +19,7 @@ import {
     DropdownMenuTrigger,
 } from "@shared/components/ui/dropdown-menu"
 import { User, LogOut, CreditCard } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 interface DashboardHeaderProps {
     activeTab: string
@@ -27,6 +28,7 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({ activeTab, onTabChange }: DashboardHeaderProps) {
     const { user, logout } = useAuth()
+    const router = useRouter()
 
     const getBreadcrumbTitle = (tab: string) => {
         switch (tab) {
@@ -50,10 +52,10 @@ export function DashboardHeader({ activeTab, onTabChange }: DashboardHeaderProps
                     <BreadcrumbList>
                         <BreadcrumbItem className="hidden md:block">
                             <BreadcrumbLink
-                                href="#"
+                                href="/dashboard"
                                 onClick={(e) => {
                                     e.preventDefault();
-                                    onTabChange('dashboard');
+                                    router.push('/dashboard');
                                 }}
                             >
                                 <div className="flex items-center gap-2">
@@ -91,7 +93,7 @@ export function DashboardHeader({ activeTab, onTabChange }: DashboardHeaderProps
                     <DropdownMenuContent align="end" className="w-56 mt-2">
                         <DropdownMenuLabel>My Account</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => onTabChange('profile')}>
+                        <DropdownMenuItem onClick={() => router.push('/profile')}>
                             <User className="mr-2 h-4 w-4" />
                             <span>Profile</span>
                         </DropdownMenuItem>
@@ -102,7 +104,10 @@ export function DashboardHeader({ activeTab, onTabChange }: DashboardHeaderProps
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                             onClick={async () => {
-                                try { await logout(); } catch (e) { console.error(e); }
+                                try { 
+                                    await logout(); 
+                                    router.push('/');
+                                } catch (e) { console.error(e); }
                             }}
                             className="text-destructive focus:text-destructive focus:bg-destructive/10"
                         >

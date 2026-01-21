@@ -8,6 +8,7 @@ import {
     LogOut,
     ChevronRight,
 } from "lucide-react"
+import { useRouter, usePathname } from "next/navigation"
 
 import { useAuth } from "@context/AuthContext"
 import {
@@ -31,6 +32,11 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 
 export function AppSidebar({ activeTab, onTabChange, ...props }: AppSidebarProps) {
     const { logout } = useAuth()
+    const router = useRouter()
+
+    const handleNavigation = (tab: string) => {
+        onTabChange(tab);
+    }
 
     const navMain = [
         {
@@ -107,7 +113,7 @@ export function AppSidebar({ activeTab, onTabChange, ...props }: AppSidebarProps
                                         <SidebarMenuButton
                                             tooltip={item.title}
                                             isActive={activeTab === item.id}
-                                            onClick={() => onTabChange(item.id)}
+                                            onClick={() => handleNavigation(item.id)}
                                             className={activeTab === item.id ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}
                                         >
                                             <item.icon className="size-4 shrink-0 transition-all duration-200 group-data-[state=collapsed]:mx-auto" />
@@ -137,6 +143,7 @@ export function AppSidebar({ activeTab, onTabChange, ...props }: AppSidebarProps
                                     onClick={async () => {
                                         try {
                                             await logout()
+                                            router.push("/")
                                         } catch (error) {
                                             console.error("Logout failed:", error)
                                         }

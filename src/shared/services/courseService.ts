@@ -372,19 +372,34 @@ class CourseService {
   // Enrollment Management
   async enrollInCourse(userId: string, courseId: string) {
     try {
-      // Handle static VU courses
+      // Handle static VU courses - store in Supabase instead of localStorage
       if (courseId === 'vu-web-security') {
-        const key = `vu_enrollments_${userId}`;
-        let enrollments = [];
-        try {
-          enrollments = JSON.parse(localStorage.getItem(key) || '[]');
-        } catch (e) { enrollments = []; }
+        // Check if already enrolled in Supabase
+        const { data: existing } = await supabase
+          .from('enrollments')
+          .select('*')
+          .eq('student_id', userId)
+          .eq('course_id', courseId)
+          .maybeSingle();
 
-        if (!enrollments.includes(courseId)) {
-          enrollments.push(courseId);
-          localStorage.setItem(key, JSON.stringify(enrollments));
+        if (existing) {
+          return existing;
         }
-        return { user_id: userId, course_id: courseId, enrolled_at: new Date().toISOString() };
+
+        // Create enrollment in Supabase
+        const { data: enrollment, error } = await supabase
+          .from('enrollments')
+          .insert([{ student_id: userId, course_id: courseId }])
+          .select()
+          .single();
+
+        if (error) {
+          console.error('Error enrolling in VU course:', error);
+          // Fallback: return mock enrollment
+          return { user_id: userId, course_id: courseId, enrolled_at: new Date().toISOString() };
+        }
+
+        return enrollment;
       }
 
       // Avoid double-enrollments
@@ -431,35 +446,8 @@ class CourseService {
 
       if (error) throw new Error(`Failed to fetch enrollments: ${error.message}`);
 
-      // Merge with local VU enrollments
-      const key = `vu_enrollments_${userId}`;
-      let localEnrollments = [];
-      try {
-        localEnrollments = JSON.parse(localStorage.getItem(key) || '[]');
-      } catch (e) { localEnrollments = []; }
-
-      if (localEnrollments.includes('vu-web-security')) {
-        // We need to import the static course data to return it here, but importing it might be circular or messy.
-        // Instead, we can try to fetch it via getCourseById if needed, or just append a partial object.
-        // For now, let's just append a mock object if we can, or rely on the UI to fetch details.
-        // The UI usually iterates enrollments and displays them.
-
-        // Actually, getUserEnrollments returns the join. 
-        // We will just append the static course data.
-        const { vuWebSecurityCourse } = await import('@data/vu-courses/web-application-security');
-
-        // Check if already in data (unlikely if DB failed)
-        if (!data?.find((e: any) => e.course_id === 'vu-web-security')) {
-          const vuEnrollment = {
-            id: 'local-vu-enrollment',
-            user_id: userId,
-            course_id: vuWebSecurityCourse.id,
-            enrolled_at: new Date().toISOString(),
-            course: vuWebSecurityCourse
-          };
-          return [vuEnrollment, ...data!];
-        }
-      }
+      // VU courses are now stored in Supabase, so they'll be included in the data above
+      // No need to check localStorage anymore
 
       return data;
     } catch (error) {

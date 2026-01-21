@@ -1,16 +1,19 @@
 import { Router, Request, Response } from 'express';
 import { getStudentDashboardSummary } from '../services/studentService.js';
-// Imports removed
 import { markLabAsCompleted, getLabStats, isLabCompleted } from '../services/labService.js';
 import trackingRoutes from './trackingRoutes.js';
-
+import labSyncRoutes from './labSyncRoutes.js';
+import { authenticateUser, AuthenticatedRequest } from '../../../shared/middleware/auth.js';
+import { validateObjectId } from '../../../shared/middleware/validation.js';
 import { Course } from '../../../shared/models/Course.js';
+import { logger } from '../../../shared/lib/logger.js';
 
 const router = Router();
 
 router.use('/track', trackingRoutes);
+router.use('/labs', labSyncRoutes);
 
-router.get('/overview', (_req: Request, res: Response): void => {
+router.get('/overview', authenticateUser, (_req: Request, res: Response): void => {
   const summary = getStudentDashboardSummary();
   res.json(summary);
 });
@@ -18,77 +21,104 @@ router.get('/overview', (_req: Request, res: Response): void => {
 // -- Courses --
 router.get('/courses', async (_req: Request, res: Response) => {
   try {
-    const courses = await Course.find({ published: true }).select('-teacherEmail'); // Exclude teacher email if private
+    const courses = await Course.find({ published: true }).select('-teacherEmail');
     res.json(courses);
   } catch (error) {
-    console.error('Error fetching courses:', error);
+    logger.error('Error fetching courses', error instanceof Error ? error : new Error(String(error)));
     res.status(500).json({ error: 'Failed to fetch courses' });
   }
 });
 
-router.get('/courses/:id', async (req: Request, res: Response) => {
+router.get('/courses/:id', validateObjectId('id'), async (req: Request, res: Response) => {
+  const { id } = req.params;
   try {
-    const { id } = req.params;
     const course = await Course.findById(id);
 
     if (!course) {
       return res.status(404).json({ error: 'Course not found' });
     }
 
-    // Determine if we should send modules (maybe only if enrolled? or public?)
-    // For now, sending full course details as per previous behavior
     res.json(course);
   } catch (error) {
-    console.error('Error fetching course:', error);
+    logger.error('Error fetching course', error instanceof Error ? error : new Error(String(error)), { courseId: id });
     res.status(500).json({ error: 'Failed to fetch course' });
   }
 });
 
-// Routes removed
-
-// Lab endpoints
-router.post('/labs/:labId/complete', (req: Request, res: Response) => {
+// Lab endpoints - require authentication
+router.post('/labs/:labId/complete', authenticateUser, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { labId } = req.params;
-    // In production, get studentId from authenticated user
-    const studentId = req.body.studentId || 'demo-student';
+    const studentId = req.user?.id;
+    const authClient = req.supabase;
 
-    const completion = markLabAsCompleted(studentId, labId);
+    if (!studentId || !authClient) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    if (!labId || typeof labId !== 'string' || labId.trim().length === 0) {
+      return res.status(400).json({ error: 'Invalid labId' });
+    }
+
+    const completion = await markLabAsCompleted(authClient, studentId, labId.trim());
     res.json({
       success: true,
       message: `Lab ${labId} marked as completed`,
       completion,
     });
   } catch (error) {
+    logger.error('Error marking lab as completed', error instanceof Error ? error : new Error(String(error)), {
+      labId: req.params.labId,
+      studentId: req.user?.id
+    });
     res.status(500).json({ error: 'Failed to mark lab as completed' });
   }
 });
 
-router.get('/labs/stats', (req: Request, res: Response) => {
+router.get('/labs/stats', authenticateUser, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    // In production, get studentId from authenticated user
-    const studentId = req.query.studentId as string || 'demo-student';
+    const studentId = req.user?.id;
+    const authClient = req.supabase;
 
-    const stats = getLabStats(studentId);
+    if (!studentId || !authClient) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const stats = await getLabStats(authClient, studentId);
     res.json(stats);
   } catch (error) {
+    logger.error('Error fetching lab stats', error instanceof Error ? error : new Error(String(error)), {
+      studentId: req.user?.id
+    });
     res.status(500).json({ error: 'Failed to fetch lab stats' });
   }
 });
 
-router.get('/labs/:labId/status', (req: Request, res: Response) => {
+router.get('/labs/:labId/status', authenticateUser, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { labId } = req.params;
-    // In production, get studentId from authenticated user
-    const studentId = req.query.studentId as string || 'demo-student';
+    const studentId = req.user?.id;
+    const authClient = req.supabase;
 
-    const completed = isLabCompleted(studentId, labId);
+    if (!studentId || !authClient) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    if (!labId || typeof labId !== 'string' || labId.trim().length === 0) {
+      return res.status(400).json({ error: 'Invalid labId' });
+    }
+
+    const completed = await isLabCompleted(authClient, studentId, labId.trim());
     res.json({
       labId,
       completed,
       studentId,
     });
   } catch (error) {
+    logger.error('Error fetching lab status', error instanceof Error ? error : new Error(String(error)), {
+      labId: req.params.labId,
+      studentId: req.user?.id
+    });
     res.status(500).json({ error: 'Failed to fetch lab status' });
   }
 });

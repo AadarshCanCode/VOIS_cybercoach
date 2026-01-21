@@ -1,5 +1,6 @@
 import express from 'express';
 import VUStudent from '../shared/models/VUStudent.js';
+import { logger } from '../shared/lib/logger.js';
 
 const router = express.Router();
 
@@ -25,7 +26,8 @@ router.post('/register', async (req, res) => {
 
         res.status(201).json(student);
     } catch (error: any) {
-        console.error('Registration error:', error);
+        const err = error instanceof Error ? error : new Error(String(error));
+        logger.error('Registration error', err);
         res.status(500).json({ message: error.message });
     }
 });
@@ -77,7 +79,8 @@ router.post('/progress', async (req, res) => {
         await student.save();
         res.json(student);
     } catch (error: any) {
-        console.error('Progress update error:', error);
+        const err = error instanceof Error ? error : new Error(String(error));
+        logger.error('Progress update error', err, { vu_email: req.body.vu_email });
         res.status(500).json({ message: error.message });
     }
 });

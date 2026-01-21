@@ -29,6 +29,20 @@ function withTimeout<T>(
 
 
 
+function resolveName(metadata: any, email?: string): string {
+  // Priority order for finding a name in OAuth metadata
+  const name =
+    metadata.full_name ||
+    metadata.name ||
+    metadata.display_name ||
+    metadata.given_name ||
+    (metadata.first_name ? `${metadata.first_name} ${metadata.last_name || ''}`.trim() : null) ||
+    email?.split('@')[0] ||
+    'User';
+
+  return name;
+}
+
 function sanitizeUser(dbUser: DBUser, email?: string): User {
   return {
     id: dbUser.id,
@@ -161,6 +175,25 @@ class AuthService {
         throw new Error(`Access Denied: You already have a ${profile.role} account.`);
       }
 
+      // If existing profile has the default "User" name, try to improve it with metadata
+      const metadata = user.user_metadata || {};
+      const actualName = resolveName(metadata, user.email);
+
+      if (profile.full_name === 'User' || !profile.full_name || profile.full_name === user.email?.split('@')[0]) {
+        if (actualName && actualName !== 'User' && actualName !== profile.full_name) {
+          console.log(`Improving profile name: ${profile.full_name} -> ${actualName}`);
+          try {
+            await supabase
+              .from('profiles')
+              .update({ full_name: actualName })
+              .eq('id', user.id);
+            profile.full_name = actualName; // Update local reference
+          } catch (e) {
+            console.warn('Failed to auto-update profile name:', e);
+          }
+        }
+      }
+
       const userCopy = sanitizeUser(profile as DBUser, user.email);
       localStorage.setItem('cyberSecUser', JSON.stringify(userCopy));
       return userCopy;
@@ -185,12 +218,13 @@ class AuthService {
       // Priority: Pending Role (Login/Signup) > Metadata Role > Cached Role > 'student'
       const role = pendingRole || metadata.role || cachedRole || 'student';
 
-      console.warn(`Profile not found during sync. Constructing placeholder with role: ${role}`);
+      const resolvedName = resolveName(metadata, user.email);
+      console.log(`Profile sync: Constructing placeholder for ${user.email} (name: ${resolvedName}, role: ${role})`);
 
       const placeholderUser: any = {
         id: user.id,
         email: user.email,
-        name: metadata.full_name || user.email?.split('@')[0] || 'User',
+        name: resolvedName,
         role: role,
         level: 'beginner',
         avatar_url: metadata.avatar_url || metadata.picture,
