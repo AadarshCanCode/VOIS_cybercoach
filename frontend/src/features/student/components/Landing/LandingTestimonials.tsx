@@ -34,26 +34,26 @@ const testimonials = [
     },
     {
         text: "Security training has never been this engaging. The hands-on labs are exactly what students need.",
-        image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cHJvZmVzc2lvbmFsJTIwd29tYW58ZW58MHx8MHx8fDA%3D",
-        name: "Sarah Jenkins",
+        image: "/testimonials/rehan.jpeg",
+        name: "Rehan Shaikh",
         role: "Cybersecurity Instructor",
     },
     {
         text: "The platform's analytics give us deep insights into student progress. It's an invaluable tool for education.",
-        image: "https://plus.unsplash.com/premium_photo-1671656349322-41de944d259b?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8ZmFjZXxlbnwwfHwwfHx8MA%3D%3D",
-        name: "David Chen",
+        image: "/testimonials/sarthak.jpeg",
+        name: "Sarhtak Jadhav",
         role: "EdTech Coordinator",
     },
     {
         text: "Finally, a platform that bridges the gap between theory and practice. Our students are job-ready faster.",
-        image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fGZhY2V8ZW58MHx8MHx8fDA%3D",
-        name: "Emily Rodriguez",
+        image: "/testimonials/tanuj.jpeg",
+        name: "Tanuj",
         role: "IT Department Head",
     },
     {
         text: "The UI is slick and the gamification keeps students motivated. Best training platform we've used.",
         image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bWVuJTIwZmFjZXxlbnwwfHwwfHx8MA%3D%3D",
-        name: "Michael Chang",
+        name: "Lakshya",
         role: "Security Analyst",
     },
 ];

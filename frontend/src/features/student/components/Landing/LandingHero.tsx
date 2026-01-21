@@ -22,7 +22,7 @@ export const LandingHero: React.FC = () => {
 
                 <div className="space-y-6">
                     <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-white leading-[1.1]">
-                        Master Cybersecurity <br />
+                        Master Computer Science <br />
                         <span className="text-[#00FF88]">
                             With Hands-on Labs
                         </span>
