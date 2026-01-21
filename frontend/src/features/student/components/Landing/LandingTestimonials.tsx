@@ -52,8 +52,8 @@ const testimonials = [
     },
     {
         text: "The UI is slick and the gamification keeps students motivated. Best training platform we've used.",
-        image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bWVuJTIwZmFjZXxlbnwwfHwwfHx8MA%3D%3D",
-        name: "Lakshya",
+        image: "/testimonials/lavanya.jpeg",
+        name: "Lavanya Salian",
         role: "Security Analyst",
     },
 ];
