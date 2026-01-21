@@ -2,10 +2,14 @@ import type { Metadata } from "next";
 import { AuthProvider } from "@context/AuthContext";
 import "./globals.css";
 
+export const viewport = {
+    themeColor: "#00FF88",
+};
+
 export const metadata: Metadata = {
+    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
     title: "Cybercoach - Learn Cybersecurity by Doing",
     description: "AI-powered cybersecurity education platform with hands-on labs, proctored assessments, and career tools.",
-    themeColor: "#00FF88",
     keywords: ["cybersecurity", "education", "training", "labs", "assessment", "career", "AI tutor"],
     authors: [{ name: "Cybercoach Team" }],
     icons: {
