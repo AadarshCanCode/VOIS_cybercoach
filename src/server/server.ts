@@ -4,6 +4,10 @@ import 'dotenv/config';
 
 import studentRoutes from './features/student/routes/index.js';
 import imagekitRoutes from './routes/imagekit.routes.js';
+import connectDB from './shared/lib/mongodb.js';
+
+// Connect to MongoDB
+connectDB();
 
 const app = express();
 const parsedPort = Number.parseInt(process.env.PORT ?? '', 10);

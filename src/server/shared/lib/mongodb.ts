@@ -2,9 +2,9 @@ import mongoose from 'mongoose';
 
 const connectDB = async () => {
     try {
-        const uri = process.env.mongo_api || process.env.MONGODB_URI;
+        const uri = process.env.MONGODB_URL || process.env.mongo_api;
         if (!uri) {
-            console.error('Error: MongoDB URI not found in .env (mongo_api or MONGODB_URI)');
+            console.error('Error: MongoDB URI not found in .env (MONGODB_URL or mongo_api)');
             // Don't exit process in dev, just component won't work
             return;
         }

@@ -9,6 +9,8 @@ import { ModuleTest } from './ModuleTest';
 import { ProctoringComponent } from '../Proctoring/ProctoringComponent';
 import { learningPathService } from '../../../../shared/services/learningPathService';
 import { useAuth } from '@context/AuthContext';
+import { useExperienceTracker } from '../../../../shared/hooks/useExperienceTracker';
+import { useProctoring } from '../../../../shared/hooks/useProctoring';
 
 mermaid.initialize({
   startOnLoad: false,
@@ -43,14 +45,29 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(false);
 
-
-
   // Proctoring State
   const [isProctoringActive, setIsProctoringActive] = useState(false);
   const [violationCount, setViolationCount] = useState(0);
 
+  // Experience Tracking (logs reading habits)
+  useExperienceTracker({
+    studentId: user?.id || 'anonymous',
+    courseId,
+    moduleId,
+    enabled: !!user?.id
+  });
+
+  // Backend Proctoring Logging (logs tab switches, blur, etc.)
+  const { logEvent } = useProctoring({
+    studentId: user?.id || 'anonymous',
+    courseId,
+    attemptId: `${moduleId}-${Date.now()}`,
+    enabled: isProctoringActive
+  });
+
   const handleProctoringViolation = async (status: 'ok' | 'violation') => {
     if (status === 'violation' && isProctoringActive) {
+      logEvent('face-violation', { count: violationCount + 1 });
       // Determine max warnings based on module type
       const isFinalExam = moduleId === 'vu-final-exam';
       const maxWarnings = isFinalExam ? 1 : 0;

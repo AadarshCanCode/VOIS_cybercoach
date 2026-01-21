@@ -2,10 +2,13 @@ import { Router, Request, Response } from 'express';
 import { getStudentDashboardSummary } from '../services/studentService.js';
 // Imports removed
 import { markLabAsCompleted, getLabStats, isLabCompleted } from '../services/labService.js';
+import trackingRoutes from './trackingRoutes.js';
 
 import { Course } from '../../../shared/models/Course.js';
 
 const router = Router();
+
+router.use('/track', trackingRoutes);
 
 router.get('/overview', (_req: Request, res: Response): void => {
   const summary = getStudentDashboardSummary();
