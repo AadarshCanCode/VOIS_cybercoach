@@ -62,41 +62,81 @@ router.post('/experience/sync',
                 return res.status(401).json({ error: 'Unauthorized' });
             }
 
-            let experience = await StudentExperience.findOne({ studentId, courseId });
+            const now = new Date();
+            let sanitizedInteraction = null;
 
-            if (!experience) {
-                experience = new StudentExperience({ studentId, courseId, moduleStats: [] });
+            if (aiInteraction && typeof aiInteraction === 'object' && !Array.isArray(aiInteraction)) {
+                sanitizedInteraction = {
+                    query: String(aiInteraction.query || '').substring(0, 1000),
+                    responseSnippet: String(aiInteraction.responseSnippet || '').substring(0, 1000),
+                    timestamp: now
+                };
             }
 
             if (moduleStats) {
-                const existingModule = experience.moduleStats.find(m => m.moduleId === moduleStats.moduleId);
-                if (existingModule) {
-                    // Use atomic operations to prevent race conditions
-                    existingModule.timeSpent = (existingModule.timeSpent || 0) + (moduleStats.timeSpent || 0);
-                    existingModule.scrollDepth = Math.max(existingModule.scrollDepth || 0, moduleStats.scrollDepth || 0);
-                    existingModule.lastAccessed = new Date();
-                } else {
-                    experience.moduleStats.push({
-                        moduleId: String(moduleStats.moduleId).trim(),
-                        timeSpent: Math.max(0, moduleStats.timeSpent || 0),
-                        scrollDepth: Math.max(0, Math.min(100, moduleStats.scrollDepth || 0)),
-                        interactions: moduleStats.interactions || 0,
-                        lastAccessed: new Date()
-                    });
+                const moduleId = String(moduleStats.moduleId).trim();
+                const interactions = moduleStats.interactions || 0;
+                const timeSpent = Math.max(0, moduleStats.timeSpent || 0);
+                const scrollDepth = Math.max(0, Math.min(100, moduleStats.scrollDepth || 0));
+
+                // 1. Try to update an existing module entry using atomic operators
+                // This prevents race conditions where parallel requests overwrite each other's data
+                const updated = await StudentExperience.findOneAndUpdate(
+                    {
+                        studentId,
+                        courseId,
+                        "moduleStats.moduleId": moduleId
+                    },
+                    {
+                        $inc: {
+                            "moduleStats.$.timeSpent": timeSpent,
+                            "moduleStats.$.interactions": interactions
+                        },
+                        $max: { "moduleStats.$.scrollDepth": scrollDepth },
+                        $set: {
+                            "moduleStats.$.lastAccessed": now,
+                            updatedAt: now
+                        },
+                        // If we have an AI interaction, we can push it in the same atomic op
+                        ...(sanitizedInteraction ? { $push: { aiInteractions: sanitizedInteraction } } : {})
+                    }
+                );
+
+                // 2. If no document was found or the module wasn't in the array, perform an upsert/push
+                if (!updated) {
+                    const newModuleStat = {
+                        moduleId,
+                        timeSpent,
+                        scrollDepth,
+                        interactions,
+                        lastAccessed: now
+                    };
+
+                    await StudentExperience.findOneAndUpdate(
+                        { studentId, courseId },
+                        {
+                            $push: {
+                                moduleStats: newModuleStat,
+                                ...(sanitizedInteraction ? { aiInteractions: sanitizedInteraction } : {})
+                            },
+                            $set: { updatedAt: now },
+                            $setOnInsert: { totalTimeSpent: 0 } // Only set on creation
+                        },
+                        { upsert: true }
+                    );
                 }
+            } else if (sanitizedInteraction) {
+                // Case: Only AI interaction, no module stats update
+                await StudentExperience.findOneAndUpdate(
+                    { studentId, courseId },
+                    {
+                        $push: { aiInteractions: sanitizedInteraction },
+                        $set: { updatedAt: now },
+                        $setOnInsert: { moduleStats: [], totalTimeSpent: 0 }
+                    },
+                    { upsert: true }
+                );
             }
-
-            if (aiInteraction && typeof aiInteraction === 'object' && !Array.isArray(aiInteraction)) {
-                const sanitizedInteraction = {
-                    query: String(aiInteraction.query || '').substring(0, 1000),
-                    responseSnippet: String(aiInteraction.responseSnippet || '').substring(0, 1000),
-                    timestamp: new Date()
-                };
-                experience.aiInteractions.push(sanitizedInteraction);
-            }
-
-            experience.updatedAt = new Date();
-            await experience.save();
 
             res.json({ success: true });
         } catch (error) {

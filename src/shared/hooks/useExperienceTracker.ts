@@ -17,6 +17,7 @@ export const useExperienceTracker = ({ studentId, courseId, moduleId, enabled }:
     const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
     const startTimeRef = useRef<number>(Date.now());
     const maxScrollRef = useRef<number>(0);
+    const scrollRequestRef = useRef<number | null>(null);
 
     useEffect(() => {
         if (!enabled) return;
@@ -25,10 +26,17 @@ export const useExperienceTracker = ({ studentId, courseId, moduleId, enabled }:
         maxScrollRef.current = 0;
 
         const handleScroll = () => {
-            const scrollTop = window.scrollY;
-            const docHeight = document.body.scrollHeight - window.innerHeight;
-            const scrollPercent = Math.min(100, Math.max(0, (scrollTop / docHeight) * 100));
-            maxScrollRef.current = Math.max(maxScrollRef.current, scrollPercent);
+            if (scrollRequestRef.current) return;
+
+            scrollRequestRef.current = requestAnimationFrame(() => {
+                const scrollTop = window.scrollY;
+                const docHeight = document.body.scrollHeight - window.innerHeight;
+                if (docHeight > 0) {
+                    const scrollPercent = Math.min(100, Math.max(0, (scrollTop / docHeight) * 100));
+                    maxScrollRef.current = Math.max(maxScrollRef.current, scrollPercent);
+                }
+                scrollRequestRef.current = null;
+            });
         };
 
         window.addEventListener('scroll', handleScroll);
@@ -65,6 +73,9 @@ export const useExperienceTracker = ({ studentId, courseId, moduleId, enabled }:
 
         return () => {
             window.removeEventListener('scroll', handleScroll);
+            if (scrollRequestRef.current) {
+                cancelAnimationFrame(scrollRequestRef.current);
+            }
             clearInterval(intervalId);
             syncData(); // Final sync on unmount/module change
         };
