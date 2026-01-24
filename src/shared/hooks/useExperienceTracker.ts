@@ -55,7 +55,8 @@ export const useExperienceTracker = ({ studentId, courseId, moduleId, enabled }:
             });
 
             if (navigator.sendBeacon) {
-                navigator.sendBeacon(`${backendUrl}/api/student/track/experience/sync`, payload);
+                const blob = new Blob([payload], { type: 'application/json' });
+                navigator.sendBeacon(`${backendUrl}/api/student/track/experience/sync`, blob);
             } else {
                 fetch(`${backendUrl}/api/student/track/experience/sync`, {
                     method: 'POST',

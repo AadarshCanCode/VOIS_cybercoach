@@ -4,13 +4,14 @@ import { logger } from './logger.js';
 let isConnected = false;
 
 const connectDB = async (): Promise<void> => {
-    if (isConnected) {
+    // 0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting
+    if (mongoose.connection.readyState >= 1) {
         return;
     }
 
     try {
         const uri = process.env.MONGODB_URI || process.env.MONGODB_URL || process.env.mongo_api;
-        
+
         if (!uri || typeof uri !== 'string' || uri.trim().length === 0) {
             const error = new Error('MongoDB URI not found in environment variables. Set MONGODB_URI, MONGODB_URL, or mongo_api');
             logger.error('MongoDB Connection Error', error);
@@ -20,7 +21,7 @@ const connectDB = async (): Promise<void> => {
         const conn = await mongoose.connect(uri.trim());
         isConnected = true;
         logger.info(`MongoDB Connected: ${conn.connection.host}`);
-        
+
         mongoose.connection.on('error', (err) => {
             logger.error('MongoDB connection error', err);
             isConnected = false;

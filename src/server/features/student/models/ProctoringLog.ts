@@ -13,4 +13,7 @@ const proctoringLogSchema = new mongoose.Schema({
     timestamp: { type: Date, default: Date.now }
 });
 
+// Compound index for common query pattern: looking up a student's logs for a specific course
+proctoringLogSchema.index({ studentId: 1, courseId: 1 });
+
 export const ProctoringLog = mongoose.model('ProctoringLog', proctoringLogSchema);
