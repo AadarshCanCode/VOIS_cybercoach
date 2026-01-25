@@ -65,3 +65,9 @@ coverage/
 
 # Public large docs
 public/docs/*.pdf
+
+# Agent local config (skills, workflows)
+.agent/
+.cursor/
+.gemini/
+.agents/

@@ -1,7 +1,13 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Clock, Award, Lock, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Clock, Award, Lock, CheckCircle, BookOpen, GraduationCap, ChevronRight } from 'lucide-react';
 import { courseService } from '@services/courseService';
 import type { Course } from '@types';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@components/ui/card';
+import { Button } from '@components/ui/button';
+import { Skeleton } from '@components/ui/skeleton';
+import { cn } from '@lib/utils';
 
 export interface CourseData {
   id: string;
@@ -38,7 +44,7 @@ const DYNAMIC_CATEGORY: CourseCategory = {
   title: 'Cyber Operations',
   description: 'AI-generated specialized training missions',
   icon: '⚡',
-  color: 'from-green-500/20 to-emerald-500/20'
+  color: 'from-emerald-500/20 to-teal-500/20'
 };
 
 interface CourseListProps {
@@ -46,7 +52,6 @@ interface CourseListProps {
 }
 
 export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
-  // const { user } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedCourse, setSelectedCourse] = useState<CourseData | null>(null);
   const [dynamicCourses, setDynamicCourses] = useState<Course[]>([]);
@@ -69,7 +74,16 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
 
   const canAccessCourses = true;
 
-  // Course Disclaimer Modal
+  const getDifficultyVariant = (difficulty: string) => {
+    switch (difficulty) {
+      case 'Beginner': return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
+      case 'Intermediate': return 'bg-amber-500/10 text-amber-500 border-amber-500/20';
+      case 'Advanced': return 'bg-rose-500/10 text-rose-500 border-rose-500/20';
+      default: return 'bg-muted text-muted-foreground border-border';
+    }
+  };
+
+  // Course Detail View
   if (selectedCourse) {
     if (!canAccessCourses) {
       setSelectedCourse(null);
@@ -77,96 +91,97 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
     }
 
     return (
-      <div className="p-6 min-h-screen animate-fade-in text-[#EAEAEA]">
-        <div className="max-w-4xl mx-auto space-y-6">
-          <button
-            onClick={() => setSelectedCourse(null)}
-            className="flex items-center space-x-2 text-[#00B37A] hover:text-[#00FF88] transition-colors group"
-          >
-            <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
-            <span className="font-medium">Back to Courses</span>
-          </button>
+      <div className="flex flex-col gap-6 p-4 md:p-8 animate-in fade-in duration-500">
+        <Button
+          variant="ghost"
+          onClick={() => setSelectedCourse(null)}
+          className="w-fit -ml-2 text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Courses
+        </Button>
 
-          <div className="bg-[#0A0F0A] rounded-xl border border-[#00FF88]/10 overflow-hidden">
-            <div className="p-8">
-              <div className="flex items-start justify-between mb-6">
-                <div>
-                  <h1 className="text-3xl font-black tracking-tighter text-white mb-2">
-                    {selectedCourse.title}
-                  </h1>
-                  <div className="flex items-center space-x-3 text-sm">
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${selectedCourse.difficulty === 'Beginner' ? 'bg-green-500/10 text-green-500 border border-green-500/20' :
-                      selectedCourse.difficulty === 'Intermediate' ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20' :
-                        'bg-red-500/10 text-red-500 border border-red-500/20'
-                      }`}>
-                      {selectedCourse.difficulty}
-                    </span>
-                    <div className="flex items-center space-x-1 text-[#00B37A]">
-                      <Clock className="h-4 w-4" />
-                      <span>{selectedCourse.duration}</span>
-                    </div>
+        <Card className="border-border/50">
+          <CardHeader>
+            <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+              <div className="space-y-2">
+                <CardTitle className="text-2xl md:text-3xl">{selectedCourse.title}</CardTitle>
+                <div className="flex items-center gap-3">
+                  <span className={cn(
+                    "text-xs font-semibold uppercase px-2.5 py-1 rounded-full border",
+                    getDifficultyVariant(selectedCourse.difficulty)
+                  )}>
+                    {selectedCourse.difficulty}
+                  </span>
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                    <Clock className="h-4 w-4" />
+                    <span>{selectedCourse.duration}</span>
                   </div>
                 </div>
               </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <CardDescription className="text-base">
+              {selectedCourse.description}
+            </CardDescription>
 
-              <p className="text-[#00B37A] text-lg mb-6">
-                {selectedCourse.description}
-              </p>
-
-              <div className="mb-6">
-                <h3 className="text-sm font-bold text-[#00FF88] uppercase tracking-wider mb-3">What You'll Learn</h3>
-                <div className="flex flex-wrap gap-2">
-                  {selectedCourse.skills.map((skill, idx) => (
-                    <span key={idx} className="px-3 py-1 bg-[#00FF88]/10 border border-[#00FF88]/20 text-[#00FF88] text-sm rounded-full">
-                      {skill}
-                    </span>
-                  ))}
-                </div>
+            <div>
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-primary mb-3">What You'll Learn</h3>
+              <div className="flex flex-wrap gap-2">
+                {selectedCourse.skills.map((skill, idx) => (
+                  <span
+                    key={idx}
+                    className="px-3 py-1 text-sm bg-primary/10 text-primary border border-primary/20 rounded-full"
+                  >
+                    {skill}
+                  </span>
+                ))}
               </div>
+            </div>
 
-              <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 mb-6">
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 mt-0.5">
-                    <svg className="h-5 w-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+            <Card className="border-amber-500/20 bg-amber-500/5">
+              <CardContent className="pt-6">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                    <svg className="h-5 w-5 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                     </svg>
                   </div>
                   <div>
-                    <h4 className="font-bold text-yellow-500 mb-1">Important Notice</h4>
-                    <p className="text-yellow-500/80 text-sm">
+                    <h4 className="font-semibold text-amber-500 mb-1">Important Notice</h4>
+                    <p className="text-sm text-amber-500/80">
                       {selectedCourse.disclaimer}
                     </p>
                   </div>
                 </div>
-              </div>
+              </CardContent>
+            </Card>
 
-              <button
-                onClick={() => {
-                  if (selectedCourse.url && selectedCourse.url !== '#') {
-                    window.open(selectedCourse.url, '_blank');
-                  } else {
-                    onCourseSelect(selectedCourse.id);
-                  }
-                }}
-                className="w-full bg-[#00FF88] text-black px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#00CC66] hover:shadow-[0_0_20px_rgba(0,255,136,0.3)] transition-all flex items-center justify-center space-x-2"
-              >
-                <span>{selectedCourse.id === 'vu-web-security' ? 'Enter Course' : 'Start Course'}</span>
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
+            <Button
+              size="lg"
+              className="w-full"
+              onClick={() => {
+                if (selectedCourse.url && selectedCourse.url !== '#') {
+                  window.open(selectedCourse.url, '_blank');
+                } else {
+                  onCourseSelect(selectedCourse.id);
+                }
+              }}
+            >
+              {selectedCourse.id === 'vu-web-security' ? 'Enter Course' : 'Start Course'}
+              <ChevronRight className="ml-2 h-5 w-5" />
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
-  // Show courses for selected category
+  // Courses List for Selected Category
   if (selectedCategory) {
-    const category = courseCategories.find(c => c.id === selectedCategory);
+    const category = courseCategories.find(c => c.id === selectedCategory) || (selectedCategory === 'cyber-ops' ? DYNAMIC_CATEGORY : null);
 
-    // Define courses dynamically based on category
     let courses: CourseData[] = [];
 
     if (selectedCategory === 'vishwakarma-university') {
@@ -187,216 +202,222 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
       courses = dynamicCourses.map(c => ({
         id: c.id,
         title: c.title,
-        category: 'vishwakarma-university' as any, // Mock for now
+        category: 'vishwakarma-university' as const,
         url: '#',
         description: c.description || 'No description available.',
         disclaimer: 'This mission is dynamically generated. Exercise caution during practical sessions.',
-        difficulty: (c.difficulty ? (c.difficulty.charAt(0).toUpperCase() + c.difficulty.slice(1)) : 'Beginner') as any,
+        difficulty: (c.difficulty ? (c.difficulty.charAt(0).toUpperCase() + c.difficulty.slice(1)) : 'Beginner') as CourseData['difficulty'],
         duration: c.estimated_hours ? `${c.estimated_hours} hours` : 'Self-paced',
         skills: c.category ? [c.category] : ['Cybersecurity']
       }));
     }
 
     return (
-      <div className="p-6 min-h-screen animate-fade-in text-[#EAEAEA]">
-        <div className="max-w-6xl mx-auto space-y-8">
-          <button
-            onClick={() => setSelectedCategory(null)}
-            className="flex items-center space-x-2 text-[#00B37A] hover:text-[#00FF88] transition-colors group"
-          >
-            <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
-            <span className="font-medium">Back to Categories</span>
-          </button>
+      <div className="flex flex-col gap-6 p-4 md:p-8 animate-in fade-in duration-500">
+        <Button
+          variant="ghost"
+          onClick={() => setSelectedCategory(null)}
+          className="w-fit -ml-2 text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Categories
+        </Button>
 
-          <div className="border-b border-[#00FF88]/10 pb-6">
-            <h1 className="text-3xl font-black tracking-tighter text-white uppercase mb-2">
-              <span className="mr-3">{category?.icon}</span>
-              {category?.title}
-            </h1>
-            <p className="text-[#00B37A] font-mono text-sm">{category?.description.toUpperCase()}</p>
-          </div>
+        <div className="space-y-1">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-3">
+            <span>{category?.icon}</span>
+            {category?.title}
+          </h1>
+          <p className="text-muted-foreground">{category?.description}</p>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {courses.length > 0 ? courses.map((course) => (
-              <div
+        {courses.length > 0 ? (
+          <div className="grid gap-4 md:grid-cols-2">
+            {courses.map((course) => (
+              <Card
                 key={course.id}
                 onClick={() => canAccessCourses && setSelectedCourse(course)}
-                className={`bg-[#0A0F0A] rounded-xl border border-[#00FF88]/10 overflow-hidden group transition-all duration-300 relative ${canAccessCourses ? 'cursor-pointer hover:border-[#00FF88]/30' : 'opacity-40 cursor-not-allowed'
-                  }`}
+                className={cn(
+                  "group transition-all duration-200",
+                  canAccessCourses
+                    ? "cursor-pointer border-border/50 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5"
+                    : "opacity-50 cursor-not-allowed"
+                )}
               >
                 {!canAccessCourses && (
-                  <div className="absolute inset-0 bg-black/70 backdrop-blur-sm z-10 flex items-center justify-center">
+                  <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg">
                     <div className="text-center">
-                      <Lock className="h-12 w-12 text-white/40 mx-auto mb-2" />
-                      <p className="text-white/60 font-bold text-xs">ASSESSMENT REQUIRED</p>
+                      <Lock className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
+                      <p className="text-sm font-medium text-muted-foreground">Assessment Required</p>
                     </div>
                   </div>
                 )}
-                <div className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <h2 className="text-xl font-bold text-white mb-2 group-hover:text-[#00FF88] transition-colors">
-                        {course.title}
-                      </h2>
-                      <p className="text-[#00B37A] text-sm mb-4 line-clamp-2">
-                        {course.description}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3 text-xs text-[#EAEAEA]/60">
-                      <span className={`px-2 py-1 rounded ${course.difficulty === 'Beginner' ? 'bg-green-500/10 text-green-500' :
-                        course.difficulty === 'Intermediate' ? 'bg-yellow-500/10 text-yellow-500' :
-                          'bg-red-500/10 text-red-500'
-                        }`}>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                    {course.title}
+                  </CardTitle>
+                  <CardDescription className="line-clamp-2">
+                    {course.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <span className={cn(
+                        "text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full border",
+                        getDifficultyVariant(course.difficulty)
+                      )}>
                         {course.difficulty}
                       </span>
-                      <div className="flex items-center space-x-1">
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Clock className="h-3 w-3" />
                         <span>{course.duration}</span>
                       </div>
                     </div>
                     {canAccessCourses && (
-                      <div className="text-[#00FF88] text-sm font-bold group-hover:translate-x-1 transition-transform">
-                        View Details →
-                      </div>
+                      <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
                     )}
                   </div>
 
-                  <div className="mt-4 pt-4 border-t border-[#00FF88]/10">
-                    <div className="flex flex-wrap gap-1.5">
-                      {course.skills.slice(0, 3).map((skill, idx) => (
-                        <span key={idx} className="px-2 py-0.5 bg-[#00FF88]/5 text-[#00FF88] text-xs rounded">
-                          {skill}
-                        </span>
-                      ))}
-                      {course.skills.length > 3 && (
-                        <span className="px-2 py-0.5 text-[#00B37A] text-xs">
-                          +{course.skills.length - 3} more
-                        </span>
-                      )}
-                    </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {course.skills.slice(0, 3).map((skill, idx) => (
+                      <span key={idx} className="px-2 py-0.5 text-[10px] font-medium bg-primary/10 text-primary rounded-md">
+                        {skill}
+                      </span>
+                    ))}
+                    {course.skills.length > 3 && (
+                      <span className="px-2 py-0.5 text-[10px] text-muted-foreground">
+                        +{course.skills.length - 3} more
+                      </span>
+                    )}
                   </div>
-                </div>
-              </div>
-            )) : (
-              <div className="col-span-full py-12 text-center text-muted-foreground">
-                <p>No courses available in this category yet.</p>
-              </div>
-            )}
+                </CardContent>
+              </Card>
+            ))}
           </div>
-        </div>
+        ) : (
+          <Card className="border-border/50">
+            <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+              <BookOpen className="h-12 w-12 text-muted-foreground/50 mb-4" />
+              <h2 className="text-xl font-semibold mb-2">No Courses Available</h2>
+              <p className="text-muted-foreground">
+                Courses in this category are being prepared. Check back soon!
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </div>
     );
   }
 
   // Category Selection View
-  return (
-    <div className="p-6 min-h-screen animate-fade-in text-[#EAEAEA]">
-      <div className="max-w-6xl mx-auto space-y-8">
-        <div className="flex items-center justify-between border-b border-[#00FF88]/10 pb-6">
-          <div>
-            <h1 className="text-3xl font-black tracking-tighter text-white uppercase">
-              Training <span className="text-[#00FF88]">Paths</span>
-            </h1>
-            <p className="text-[#00B37A] font-mono text-sm mt-1">CHOOSE YOUR SPECIALIZATION</p>
-          </div>
-          <div className="h-10 w-10 rounded bg-[#00FF88]/10 border border-[#00FF88]/20 flex items-center justify-center">
-            {loading ? (
-              <div className="animate-spin h-5 w-5 border-2 border-[#00FF88] border-t-transparent rounded-full" />
-            ) : (
-              <Award className="h-5 w-5 text-[#00FF88]" />
-            )}
-          </div>
-        </div>
+  const allCategories = [...courseCategories, ...(dynamicCourses.length > 0 ? [DYNAMIC_CATEGORY] : [])];
 
-        {!canAccessCourses && (
-          <div className="bg-[#0A0F0A] border border-yellow-500/20 rounded-xl p-6 relative overflow-hidden group">
-            <div className="absolute inset-0 bg-yellow-500/5 group-hover:bg-yellow-500/10 transition-colors" />
-            <div className="relative flex items-center space-x-4">
-              <div className="h-12 w-12 rounded-full bg-yellow-500/10 flex items-center justify-center border border-yellow-500/20">
-                <svg className="h-6 w-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
+  return (
+    <div className="flex flex-col gap-6 p-4 md:p-8 animate-in fade-in duration-500">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Training Courses</h1>
+          <p className="text-muted-foreground">Choose your specialization and start learning</p>
+        </div>
+        <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-card border border-border/50">
+          {loading ? (
+            <div className="animate-spin h-5 w-5 border-2 border-primary border-t-transparent rounded-full" />
+          ) : (
+            <GraduationCap className="h-5 w-5 text-primary" />
+          )}
+          <span className="text-sm font-medium">{allCategories.length} Categories</span>
+        </div>
+      </div>
+
+      {!canAccessCourses && (
+        <Card className="border-amber-500/20 bg-amber-500/5">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-full bg-amber-500/10 border border-amber-500/20">
+                <Lock className="h-6 w-6 text-amber-500" />
               </div>
               <div>
-                <h3 className="font-bold text-yellow-500 uppercase tracking-wider">Access Restricted</h3>
-                <p className="text-yellow-500/80 text-sm mt-1">
+                <h3 className="font-semibold text-amber-500">Access Restricted</h3>
+                <p className="text-sm text-amber-500/80">
                   Complete the initial assessment to unlock training modules.
                 </p>
               </div>
             </div>
-          </div>
-        )}
+          </CardContent>
+        </Card>
+      )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {[...courseCategories, ...(dynamicCourses.length > 0 ? [DYNAMIC_CATEGORY] : [])].map((category) => {
-            const coursesCount = category.id === 'cyber-ops'
-              ? dynamicCourses.length
-              : (category.id === 'vishwakarma-university' ? 1 : 0);
+      {/* Categories Grid */}
+      <div className="grid gap-4 md:grid-cols-2">
+        {allCategories.map((category) => {
+          const coursesCount = category.id === 'cyber-ops'
+            ? dynamicCourses.length
+            : (category.id === 'vishwakarma-university' ? 1 : 0);
 
-            return (
-              <div
-                key={category.id}
-                onClick={() => canAccessCourses && setSelectedCategory(category.id)}
-                className={`bg-gradient-to-br ${category.color} rounded-xl border border-[#00FF88]/10 overflow-hidden group transition-all duration-300 relative ${canAccessCourses ? 'cursor-pointer hover:border-[#00FF88]/30' : 'opacity-40 cursor-not-allowed'
-                  }`}
-              >
-                {!canAccessCourses && (
-                  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-10 flex items-center justify-center">
-                    <div className="text-center">
-                      <Lock className="h-16 w-16 text-white/40 mx-auto mb-3" />
-                      <p className="text-white/60 font-bold text-sm">LOCKED</p>
-                      <p className="text-white/40 text-xs mt-1">Complete Assessment</p>
-                    </div>
+          return (
+            <Card
+              key={category.id}
+              onClick={() => canAccessCourses && setSelectedCategory(category.id)}
+              className={cn(
+                "group transition-all duration-200 overflow-hidden",
+                canAccessCourses
+                  ? "cursor-pointer border-border/50 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5"
+                  : "opacity-50 cursor-not-allowed"
+              )}
+            >
+              {!canAccessCourses && (
+                <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
+                  <div className="text-center">
+                    <Lock className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-sm font-medium text-muted-foreground">Locked</p>
                   </div>
-                )}
-                <div className="bg-[#0A0F0A]/80 backdrop-blur-sm p-8 h-full">
-                  <div className="flex items-start justify-between mb-6">
-                    <div className="flex items-center space-x-4">
-                      <div className="text-5xl">{category.icon}</div>
-                      <div>
-                        <h2 className="text-2xl font-bold text-white tracking-tight group-hover:text-[#00FF88] transition-colors">
-                          {category.title}
-                        </h2>
-                        <p className="text-[#00B37A] text-sm mt-1">
-                          {category.description}
-                        </p>
-                      </div>
-                    </div>
+                </div>
+              )}
+              <CardHeader>
+                <div className="flex items-center gap-4">
+                  <div className="text-4xl">{category.icon}</div>
+                  <div className="flex-1">
+                    <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                      {category.title}
+                    </CardTitle>
+                    <CardDescription className="mt-1">
+                      {category.description}
+                    </CardDescription>
                   </div>
-
-                  <div className="space-y-3 mb-6">
-                    {coursesCount > 0 && (
-                      <div className="flex items-center space-x-2 text-sm text-[#EAEAEA]/60">
-                        <CheckCircle className="h-4 w-4 text-[#00FF88]" />
-                        <span>{coursesCount} Comprehensive Courses</span>
-                      </div>
-                    )}
-                    <div className="flex items-center space-x-2 text-sm text-[#EAEAEA]/60">
-                      <Clock className="h-4 w-4 text-[#00FF88]" />
-                      <span>Self-paced Learning</span>
-                    </div>
-                    <div className="flex items-center space-x-2 text-sm text-[#EAEAEA]/60">
-                      <Award className="h-4 w-4 text-[#00FF88]" />
-                      <span>Industry Recognition</span>
-                    </div>
-                  </div>
-
-                  {canAccessCourses && coursesCount > 0 && (
-                    <div className="flex items-center justify-between pt-4 border-t border-[#00FF88]/10">
-                      <span className="text-[#00B37A] text-sm font-mono">EXPLORE {coursesCount} COURSES</span>
-                      <svg className="h-6 w-6 text-[#00FF88] group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                      </svg>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="flex flex-col gap-2 text-sm text-muted-foreground mb-4">
+                  {coursesCount > 0 && (
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-primary" />
+                      <span>{coursesCount} Comprehensive Course{coursesCount !== 1 ? 's' : ''}</span>
                     </div>
                   )}
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-primary" />
+                    <span>Self-paced Learning</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Award className="h-4 w-4 text-primary" />
+                    <span>Industry Recognition</span>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+
+                {canAccessCourses && coursesCount > 0 && (
+                  <div className="flex items-center justify-between pt-4 border-t border-border/50">
+                    <span className="text-sm font-medium text-primary">
+                      Explore {coursesCount} Course{coursesCount !== 1 ? 's' : ''}
+                    </span>
+                    <ChevronRight className="h-5 w-5 text-primary group-hover:translate-x-1 transition-transform" />
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
     </div>
   );
