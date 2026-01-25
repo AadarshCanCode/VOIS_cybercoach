@@ -306,6 +306,10 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
                         <div className="h-8 w-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
                           <CheckCircle className="h-5 w-5 text-primary" />
                         </div>
+                      ) : (module.type === 'initial_assessment' || module.type === 'final_assessment') ? (
+                        <div className="h-8 w-8 rounded-full bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center">
+                          <Shield className="h-4 w-4 text-yellow-500" />
+                        </div>
                       ) : isModuleUnlocked ? (
                         <div className="h-8 w-8 rounded-full border border-border flex items-center justify-center group-hover:border-primary/50 transition-colors">
                           <span className="text-sm font-bold text-muted-foreground group-hover:text-primary transition-colors">

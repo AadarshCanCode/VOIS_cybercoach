@@ -10,6 +10,7 @@ const questionSchema = new mongoose.Schema({
 const moduleSchema = new mongoose.Schema({
     title: { type: String, required: true },
     content: { type: String, required: true },
+    type: { type: String, enum: ['lecture', 'quiz', 'initial_assessment', 'final_assessment'], default: 'lecture' },
     quiz: [questionSchema], // Array of questions
 });
 

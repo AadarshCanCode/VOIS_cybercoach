@@ -44,6 +44,7 @@ export interface Module {
   /* Compatibility fields used elsewhere */
   module_order?: number;
   questions?: Question[];
+  type?: 'lecture' | 'quiz' | 'initial_assessment' | 'final_assessment';
 }
 
 export interface Certificate {

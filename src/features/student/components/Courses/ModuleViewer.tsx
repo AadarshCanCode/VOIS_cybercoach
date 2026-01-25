@@ -69,11 +69,13 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
     enabled: isProctoringActive
   });
 
+  const module: Module | undefined = (course?.course_modules ?? course?.modules ?? []).find((m: Module) => m.id === moduleId);
+
   const handleProctoringViolation = async (status: 'ok' | 'violation') => {
     if (status === 'violation' && isProctoringActive) {
       logEvent('face-violation', { count: violationCount + 1 });
-      const isFinalExam = moduleId === 'vu-final-exam';
-      const maxWarnings = isFinalExam ? 1 : 0;
+      const isFinalExam = moduleId === 'vu-final-exam' || module?.type === 'final_assessment' || module?.type === 'initial_assessment';
+      const maxWarnings = 3;
 
       if (violationCount < maxWarnings) {
         setViolationCount(prev => prev + 1);
@@ -86,7 +88,9 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
 
         try {
           const lockedUntil = new Date();
-          lockedUntil.setHours(lockedUntil.getHours() + 1);
+          // Lockout duration: 3 hours for Final Assessment / Exams, 1 hour for others
+          const isFinalExam = moduleId === 'vu-final-exam' || module?.type === 'final_assessment';
+          lockedUntil.setHours(lockedUntil.getHours() + (isFinalExam ? 3 : 1));
 
           const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.VITE_API_URL || '';
           const email = localStorage.getItem('vu_student_email');
@@ -102,7 +106,8 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
                 locked_until: lockedUntil.toISOString()
               })
             });
-            alert('PROCTORING VIOLATION: Test has been locked for 1 hour due to suspicious activity.');
+            const durationText = (moduleId === 'vu-final-exam' || module?.type === 'final_assessment') ? '3 hours' : '1 hour';
+            alert(`PROCTORING VIOLATION: Test has been locked for ${durationText} due to suspicious activity.`);
             onBack();
           }
         } catch (e) {
@@ -113,80 +118,12 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
   };
 
   useEffect(() => {
-    if (showTest) {
-      setViolationCount(0);
-      setIsProctoringActive(true);
-    } else {
-      setIsProctoringActive(false);
+    if (module?.type === 'final_assessment' || module?.type === 'initial_assessment') {
+      setActiveTab('test');
+      setShowTest(true);
     }
-  }, [showTest, moduleId]);
+  }, [module?.id]);
 
-  useEffect(() => {
-    let mounted = true;
-    const load = async () => {
-      setLoading(true);
-      try {
-        const data = await courseService.getCourseById(courseId);
-        if (mounted && data) {
-          if (user?.id) {
-            try {
-              const progress = await courseService.getUserProgress(user.id) as any[] | null;
-              const moduleProgress = (progress || []).reduce((acc: any, p: any) => {
-                if (p.module_id) acc[p.module_id] = p;
-                return acc;
-              }, {});
-
-              const modules = (data.course_modules ?? data.modules ?? []) as Module[];
-
-              const finalExamModule = modules.find(m => m.id === 'vu-final-exam');
-              if (finalExamModule) {
-                const allQuestions = modules
-                  .filter(m => m.id !== 'vu-final-exam')
-                  .flatMap(m => m.questions || []);
-
-                const shuffled = [...allQuestions].sort(() => 0.5 - Math.random());
-                finalExamModule.questions = shuffled.slice(0, 20);
-              }
-
-              const normalized = modules.map((m) => ({
-                ...m,
-                completed: !!moduleProgress[m.id]?.completed,
-                testScore: (moduleProgress[m.id]?.quiz_score ?? m.testScore) ?? undefined
-              }));
-
-              setCourse({ ...data, course_modules: normalized, modules: normalized });
-            } catch (e) {
-              console.error('Failed to load progress', e);
-              setCourse(data);
-            }
-          } else {
-            setCourse(data);
-          }
-        }
-      } catch (e) {
-        console.error('Failed to load course for module viewer:', e);
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    };
-    load();
-    return () => { mounted = false; };
-  }, [courseId, user?.id]);
-
-  useEffect(() => {
-    if (activeTab === 'content' && course && !loading) {
-      const timer = setTimeout(() => {
-        try {
-          mermaid.contentLoaded();
-        } catch (e) {
-          console.error('Mermaid rendering failed:', e);
-        }
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [activeTab, course, loading]);
-
-  const module: Module | undefined = (course?.course_modules ?? course?.modules ?? []).find((m: Module) => m.id === moduleId);
 
   const isAllModulesCompleted = (course: Course) => {
     const modules = course.course_modules ?? course.modules ?? [];
