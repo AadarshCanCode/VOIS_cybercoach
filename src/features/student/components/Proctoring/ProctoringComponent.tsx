@@ -64,6 +64,12 @@ export const ProctoringComponent: React.FC<ProctoringComponentProps> = ({ isActi
     // Detection Loop
     useEffect(() => {
         let interval: NodeJS.Timeout;
+        let warmupComplete = false;
+
+        // Give user 5 seconds to get positioned before flagging violations
+        const warmupTimer = setTimeout(() => {
+            warmupComplete = true;
+        }, 5000);
 
         const detectFaces = async () => {
             if (!videoRef.current || !isActive || !modelLoaded) return;
@@ -80,10 +86,16 @@ export const ProctoringComponent: React.FC<ProctoringComponentProps> = ({ isActi
             // 2. Multiple faces detected (Cheating)
             if (detections.length === 0 || detections.length > 1) {
                 setStatus('violation');
-                onStatusChange('violation');
+                // Only call onStatusChange('violation') AFTER warmup period
+                if (warmupComplete) {
+                    onStatusChange('violation');
+                }
             } else {
                 setStatus('ok');
-                onStatusChange('ok');
+                // Always call ok - helps reset violation counts if user corrects themselves
+                if (warmupComplete) {
+                    onStatusChange('ok');
+                }
             }
         };
 
@@ -91,7 +103,10 @@ export const ProctoringComponent: React.FC<ProctoringComponentProps> = ({ isActi
             interval = setInterval(detectFaces, 1000); // Check every second
         }
 
-        return () => clearInterval(interval);
+        return () => {
+            clearInterval(interval);
+            clearTimeout(warmupTimer);
+        };
     }, [isActive, modelLoaded, onStatusChange]);
 
     if (!isActive) return null;

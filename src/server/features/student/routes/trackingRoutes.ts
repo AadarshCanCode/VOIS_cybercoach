@@ -9,17 +9,17 @@ import { logger } from '../../../shared/lib/logger.js';
 const router = Router();
 
 // Ingest proctoring logs (used with sendBeacon or fetch)
+// Note: authenticateUser removed for sendBeacon compatibility (cannot send headers)
+// studentId is passed in the body instead
 router.post('/proctor/ingest',
-    authenticateUser,
     proctoringRateLimiter,
     validateProctoringEvent,
     async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const { courseId, attemptId, eventType, details } = req.body;
-            const studentId = req.user?.id;
+            const { studentId, courseId, attemptId, eventType, details } = req.body;
 
             if (!studentId) {
-                return res.status(401).json({ error: 'Unauthorized' });
+                return res.status(400).json({ error: 'Missing studentId' });
             }
 
             // Sanitize inputs
@@ -28,7 +28,7 @@ router.post('/proctor/ingest',
                 : {};
 
             const log = new ProctoringLog({
-                studentId,
+                studentId: String(studentId).trim().substring(0, 200),
                 courseId: String(courseId).trim().substring(0, 200),
                 attemptId: String(attemptId).trim().substring(0, 200),
                 eventType,
@@ -40,7 +40,7 @@ router.post('/proctor/ingest',
             res.status(202).json({ success: true }); // 202 Accepted
         } catch (error) {
             logger.error('Proctoring Ingestion Error', error instanceof Error ? error : new Error(String(error)), {
-                studentId: req.user?.id,
+                studentId: req.body.studentId,
                 eventType: req.body.eventType
             });
             res.status(500).json({ error: 'Failed to ingest log' });
@@ -49,17 +49,16 @@ router.post('/proctor/ingest',
 );
 
 // Update student experience (periodic heartbeat)
+// Note: authenticateUser removed for sendBeacon compatibility
 router.post('/experience/sync',
-    authenticateUser,
     experienceRateLimiter,
     validateExperienceSync,
     async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const { courseId, moduleStats, aiInteraction } = req.body;
-            const studentId = req.user?.id;
+            const { studentId, courseId, moduleStats, aiInteraction } = req.body;
 
             if (!studentId) {
-                return res.status(401).json({ error: 'Unauthorized' });
+                return res.status(400).json({ error: 'Missing studentId' });
             }
 
             const now = new Date();

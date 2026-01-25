@@ -22,16 +22,17 @@ export const useProctoring = ({ studentId, courseId, attemptId, enabled }: Proct
             timestamp: new Date().toISOString()
         });
 
-        // Use sendBeacon for reliable logging even when page is closed
+        // Use sendBeacon for reliable, low-overhead logging
         if (navigator.sendBeacon) {
-            navigator.sendBeacon(`${backendUrl}/api/student/track/proctor/ingest`, payload);
+            const blob = new Blob([payload], { type: 'application/json' });
+            navigator.sendBeacon(`${backendUrl}/api/student/track/proctor/ingest`, blob);
         } else {
             fetch(`${backendUrl}/api/student/track/proctor/ingest`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: payload,
                 keepalive: true
-            }).catch(err => console.error('Proctoring Log Error:', err));
+            }).catch(() => { /* Silently fail */ });
         }
     }, [studentId, courseId, attemptId, enabled, backendUrl]);
 

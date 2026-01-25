@@ -54,6 +54,7 @@ export const useExperienceTracker = ({ studentId, courseId, moduleId, enabled }:
                 }
             });
 
+            // Use sendBeacon for reliable, low-overhead logging
             if (navigator.sendBeacon) {
                 const blob = new Blob([payload], { type: 'application/json' });
                 navigator.sendBeacon(`${backendUrl}/api/student/track/experience/sync`, blob);
@@ -63,10 +64,10 @@ export const useExperienceTracker = ({ studentId, courseId, moduleId, enabled }:
                     headers: { 'Content-Type': 'application/json' },
                     body: payload,
                     keepalive: true
-                }).catch(err => console.error('Experience Sync Error:', err));
+                }).catch(() => { /* Silently fail */ });
             }
 
-            // Reset timer for next interval if kept alive, but usually we just sync on unmount/interval
+            // Reset timer for next interval
             startTimeRef.current = Date.now();
         };
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import mermaid from 'mermaid';
 import { labs } from '@data/labs';
-import { ArrowLeft, FileText, CheckCircle, Award, Terminal, Play, Shield, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, FileText, CheckCircle, Award, Terminal, Play, Shield, ChevronRight } from 'lucide-react';
 import { CertificateModal } from '../Certificates/CertificateModal';
 import { courseService } from '@services/courseService';
 import type { Module, Course } from '@types';
@@ -171,8 +171,13 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
   const allModules = course.course_modules ?? course.modules ?? [];
   const currentIndex = allModules.findIndex((m: Module) => m.id === moduleId);
 
-  const goToNextModule = () => {
+  const goToNextModule = async () => {
     if (currentIndex >= 0 && currentIndex < allModules.length - 1) {
+      // Ensure current module is marked complete before moving on
+      if (!module.completed) {
+        await markModuleCompleted();
+      }
+
       const next = allModules[currentIndex + 1];
       if (onNavigateToModule) {
         onNavigateToModule(next.id);
@@ -278,6 +283,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
           onComplete={handleTestCompletion}
           onBack={() => setShowTest(false)}
           questions={module.quiz || []}
+          isInitialAssessment={module.type === 'initial_assessment'}
         />
         <ProctoringComponent
           isActive={isProctoringActive}
@@ -514,10 +520,18 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
                   <p className="text-muted-foreground text-sm">You've successfully completed this training module.</p>
                 </div>
               </div>
-              <Button variant="outline" onClick={() => setShowTest(true)}>
-                <CheckCircle className="mr-2 h-4 w-4" />
-                Retake Test
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" onClick={() => setShowTest(true)}>
+                  <CheckCircle className="mr-2 h-4 w-4" />
+                  Retake Test
+                </Button>
+                {currentIndex < allModules.length - 1 && (
+                  <Button onClick={goToNextModule}>
+                    Next Module
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -568,10 +582,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
         />
       )}
 
-      <ProctoringComponent
-        isActive={isProctoringActive}
-        onStatusChange={handleProctoringViolation}
-      />
+      {/* ProctoringComponent is rendered inside the showTest block above */}
     </div>
   );
 };

@@ -11,10 +11,11 @@ interface ModuleTestProps {
   moduleTitle: string;
   onComplete: (score: number, answers: number[]) => void;
   onBack: () => void;
-  questions?: { question: string; options: string[]; correctAnswer: number; explanation?: string }[];
+  questions?: { question: string; options: string[]; correctAnswer: number | string; explanation?: string }[];
+  isInitialAssessment?: boolean;
 }
 
-export const ModuleTest: React.FC<ModuleTestProps> = ({ moduleId, moduleTitle, onComplete, onBack, questions = [] }) => {
+export const ModuleTest: React.FC<ModuleTestProps> = ({ moduleId, moduleTitle, onComplete, onBack, questions = [], isInitialAssessment = false }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -46,21 +47,20 @@ export const ModuleTest: React.FC<ModuleTestProps> = ({ moduleId, moduleTitle, o
         setCurrentQuestionIndex(currentQuestionIndex + 1);
         setSelectedAnswer(newAnswers[currentQuestionIndex + 1] ?? null);
       } else {
-        // Answers already set in state; submit without args
         handleSubmitTest();
       }
     }
   };
 
   const handleSubmitTest = () => {
-    // Calculate score is done when rendering results; just mark show results
     setShowResults(true);
   };
 
   const calculateScore = (userAnswers: number[]) => {
     let correct = 0;
     questions.forEach((question, index) => {
-      if (userAnswers[index] === question.correctAnswer) {
+      // Robust comparison for string/number types
+      if (Number(userAnswers[index]) === Number(question.correctAnswer)) {
         correct++;
       }
     });
@@ -73,33 +73,25 @@ export const ModuleTest: React.FC<ModuleTestProps> = ({ moduleId, moduleTitle, o
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  if (questions.length === 0) {
-    return (
-      <div className="flex flex-col gap-6 p-4 md:p-8 animate-in fade-in duration-500 max-w-4xl mx-auto w-full">
-        <Card className="border-border/50">
-          <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-            <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
-            <h2 className="text-xl font-semibold mb-2">No Test Available</h2>
-            <p className="text-muted-foreground mb-6">This module currently has no assessment questions. Please check back later.</p>
-            <Button onClick={onBack} variant="secondary">Back to Module</Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+
 
   if (showResults) {
     const score = calculateScore(answers);
     const passed = score >= 70;
+    const canProceed = passed || isInitialAssessment;
 
     return (
       <div className="flex flex-col gap-6 p-4 md:p-8 animate-in fade-in duration-500 max-w-4xl mx-auto w-full">
-        <Card className={cn("border-border/50", passed ? "bg-green-500/5 border-green-500/20" : "bg-destructive/5 border-destructive/20")}>
+        <Card className={cn("border-border/50", canProceed ? "bg-green-500/5 border-green-500/20" : "bg-destructive/5 border-destructive/20")}>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
             <div className="mb-6">
               {passed ? (
                 <div className="h-20 w-20 rounded-full bg-green-500/10 flex items-center justify-center">
                   <CheckCircle className="h-10 w-10 text-green-500" />
+                </div>
+              ) : isInitialAssessment ? (
+                <div className="h-20 w-20 rounded-full bg-yellow-500/10 flex items-center justify-center">
+                  <AlertCircle className="h-10 w-10 text-yellow-500" />
                 </div>
               ) : (
                 <div className="h-20 w-20 rounded-full bg-destructive/10 flex items-center justify-center">
@@ -109,20 +101,20 @@ export const ModuleTest: React.FC<ModuleTestProps> = ({ moduleId, moduleTitle, o
             </div>
 
             <h2 className="text-2xl font-bold tracking-tight mb-2">Test Complete!</h2>
-            <div className={cn("text-5xl font-black mb-2", passed ? "text-green-500" : "text-destructive")}>
+            <div className={cn("text-5xl font-black mb-2", passed ? "text-green-500" : isInitialAssessment ? "text-yellow-500" : "text-destructive")}>
               {score}%
             </div>
             <p className="text-lg text-muted-foreground mb-8">
-              {passed ? 'Congratulations! You passed the test.' : 'You need 70% to pass. Try again!'}
+              {passed ? 'Congratulations! You passed the test.' : isInitialAssessment ? 'Assessment complete. You may proceed to the next module.' : 'You need 70% to pass. Try again!'}
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-md mb-8">
               <div className="bg-background/50 border border-border p-4 rounded-lg flex flex-col items-center">
-                <div className="text-2xl font-bold text-green-500">{answers.filter((answer, index) => answer === questions[index]?.correctAnswer).length}</div>
+                <div className="text-2xl font-bold text-green-500">{answers.filter((answer, index) => Number(answer) === Number(questions[index]?.correctAnswer)).length}</div>
                 <div className="text-sm text-muted-foreground">Correct</div>
               </div>
               <div className="bg-background/50 border border-border p-4 rounded-lg flex flex-col items-center">
-                <div className="text-2xl font-bold text-destructive">{questions.length - answers.filter((answer, index) => answer === questions[index]?.correctAnswer).length}</div>
+                <div className="text-2xl font-bold text-destructive">{questions.length - answers.filter((answer, index) => Number(answer) === Number(questions[index]?.correctAnswer)).length}</div>
                 <div className="text-sm text-muted-foreground">Incorrect</div>
               </div>
             </div>
@@ -130,11 +122,11 @@ export const ModuleTest: React.FC<ModuleTestProps> = ({ moduleId, moduleTitle, o
             <div className="flex gap-4">
               <Button
                 onClick={() => onComplete(score, answers)}
-                disabled={!passed}
-                variant={passed ? "default" : "secondary"}
-                className={cn(passed && "bg-green-600 hover:bg-green-700")}
+                disabled={!canProceed}
+                variant={canProceed ? "default" : "secondary"}
+                className={cn(passed && "bg-green-600 hover:bg-green-700", !passed && isInitialAssessment && "bg-yellow-600 hover:bg-yellow-700")}
               >
-                {passed ? 'Complete Module' : 'Retake Required'}
+                {canProceed ? 'Complete Module' : 'Retake Required'}
               </Button>
               <Button onClick={onBack} variant="outline">
                 Back to Module
@@ -151,7 +143,7 @@ export const ModuleTest: React.FC<ModuleTestProps> = ({ moduleId, moduleTitle, o
           <CardContent className="space-y-4">
             {questions.map((question, index) => {
               const userAnswer = answers[index];
-              const isCorrect = userAnswer === question.correctAnswer;
+              const isCorrect = Number(userAnswer) === Number(question.correctAnswer);
 
               return (
                 <div key={index} className={cn(
@@ -170,14 +162,14 @@ export const ModuleTest: React.FC<ModuleTestProps> = ({ moduleId, moduleTitle, o
                         <p className="flex gap-2">
                           <span className="font-medium text-muted-foreground w-24">Your answer:</span>
                           <span className={isCorrect ? "text-green-500" : "text-destructive"}>
-                            {question.options[userAnswer]}
+                            {userAnswer !== undefined ? question.options[Number(userAnswer)] : 'Not answered'}
                           </span>
                         </p>
                         {!isCorrect && (
                           <p className="flex gap-2">
                             <span className="font-medium text-muted-foreground w-24">Correct:</span>
                             <span className="text-green-500">
-                              {question.options[question.correctAnswer]}
+                              {question.options[Number(question.correctAnswer)]}
                             </span>
                           </p>
                         )}
