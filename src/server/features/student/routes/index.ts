@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import mongoose from 'mongoose';
 import { getStudentDashboardSummary } from '../services/studentService.js';
 import { markLabAsCompleted, getLabStats, isLabCompleted } from '../services/labService.js';
 import trackingRoutes from './trackingRoutes.js';
@@ -33,10 +34,15 @@ router.get('/courses', async (_req: Request, res: Response) => {
   }
 });
 
-router.get('/courses/:id', validateObjectId('id'), async (req: Request, res: Response) => {
+router.get('/courses/:id', async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
-    const course = await Course.findById(id);
+    let course;
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      course = await Course.findById(id);
+    } else {
+      course = await Course.findOne({ code: id });
+    }
 
     if (!course) {
       return res.status(404).json({ error: 'Course not found' });

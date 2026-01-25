@@ -191,26 +191,24 @@ class CourseService {
     }
 
     try {
-      // 1. Fetch from Supabase
-      const { data: course, error: courseError } = await supabase
-        .from('courses')
-        .select('*')
-        .eq('id', id)
-        .single();
+      // 1. Fetch from Backend API (MongoDB)
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
 
-      if (courseError) {
-        console.error('Supabase error fetching course:', courseError);
+      const response = await fetch(`/api/student/courses/${id}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+
+      if (!response.ok) {
+        // Fallback or just return null
+        if (response.status === 404) return null;
+        console.error('Backend API error:', response.statusText);
+        // Fallback to Supabase if API fails? No, data mismatch risk.
         return null;
       }
-      if (!course) return null;
 
-      // 2. Fetch Modules
-      const modules = await this.getModulesByCourse(id);
+      const courseData = await response.json();
+      return courseData as Course;
 
-      return {
-        ...course,
-        modules: modules
-      } as Course;
     } catch (error) {
       console.error('Get course by id error:', error);
       return null;

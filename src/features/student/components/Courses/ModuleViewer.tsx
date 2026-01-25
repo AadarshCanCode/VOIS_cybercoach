@@ -124,6 +124,18 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
     }
   }, [module?.id]);
 
+  useEffect(() => {
+    if (activeTab === 'content') {
+      // Use setTimeout to ensure the DOM has updated with the new HTML
+      const timer = setTimeout(() => {
+        mermaid.run({
+          querySelector: '.mermaid'
+        }).catch(err => console.error('Mermaid rendering failed:', err));
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [activeTab, module?.content, moduleId]);
+
 
   const isAllModulesCompleted = (course: Course) => {
     const modules = course.course_modules ?? course.modules ?? [];
