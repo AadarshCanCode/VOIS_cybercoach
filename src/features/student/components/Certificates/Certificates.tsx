@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
-import { Award, Download, Calendar, Shield, Globe } from 'lucide-react';
+import { Award, Download, Calendar, Shield, ExternalLink, GraduationCap } from 'lucide-react';
 import { useAuth } from '@context/AuthContext';
 import { CertificateModal } from './CertificateModal';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@shared/components/ui/card';
+import { Button } from '@shared/components/ui/button';
+import { cn } from '@lib/utils';
 
 export const Certificates: React.FC = () => {
   const { user } = useAuth();
@@ -14,116 +17,125 @@ export const Certificates: React.FC = () => {
   } | null>(null);
 
   return (
-    <div className="p-6 min-h-screen animate-fade-in text-[#EAEAEA]">
-      <div className="max-w-6xl mx-auto space-y-8">
+    <div className="flex flex-col gap-8 p-4 md:p-8 animate-in fade-in duration-500 min-h-screen">
+      {/* Header Section */}
+      <div className="space-y-1">
+        <h1 className="text-3xl font-bold tracking-tight text-white flex items-center gap-3">
+          <Award className="h-8 w-8 text-primary" />
+          Official <span className="text-primary">Credentials</span>
+        </h1>
+        <p className="text-muted-foreground">
+          Verifiable certifications earned through your training operations.
+        </p>
+      </div>
 
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#00FF88]/10 pb-6">
-          <div>
-            <h1 className="text-3xl font-black tracking-tighter text-white uppercase">
-              Official <span className="text-[#00FF88]">Credentials</span>
-            </h1>
-            <p className="text-[#00B37A] font-mono text-sm mt-1">VERIFIED CREDENTIALS</p>
-          </div>
-          <div className="h-10 w-10 rounded bg-[#00FF88]/10 border border-[#00FF88]/20 flex items-center justify-center">
-            <Award className="h-5 w-5 text-[#00FF88]" />
-          </div>
+      {/* Certificates Grid */}
+      <div className="grid gap-6">
+        <div className="flex items-center gap-4">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground/70">
+            Acquired Certifications
+          </h2>
+          <div className="flex-1 h-px bg-border/50" />
         </div>
 
-        {/* Awareness Testing Section */}
-        <div className="bg-[#0A0F0A] border border-[#00FF88]/20 rounded-2xl p-8 flex flex-col items-center text-center space-y-6 relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-b from-[#00FF88]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          <div className="space-y-4 relative z-10">
-            <h2 className="text-2xl font-black text-white uppercase tracking-tighter italic leading-tight">
-              Get certified by testing your awareness about cybersecurity
-            </h2>
-            <p className="text-[#00B37A] max-w-xl mx-auto font-medium">
-              Validate your tactical awareness in real-time high-fidelity combat scenarios.
-            </p>
-          </div>
-
-          <a
-            className="flex items-center gap-4 px-10 py-5 text-white bg-white/5 border border-white/10 hover:border-[#00FF88]/40 rounded-[2rem] font-black text-lg transition-all hover:bg-[#00FF88]/5 backdrop-blur-md group/btn shadow-[0_0_30px_rgba(0,255,136,0.1)] hover:shadow-[0_0_50px_rgba(0,255,136,0.2)] relative z-10"
-            href="https://cybergame.sparkstudio.co.in/"
-            target="_blank"
-            rel="noreferrer"
-          >
-            <Globe className="h-7 w-7 text-[#00FF88] group-hover/btn:rotate-12 transition-transform" />
-            LIVE OPS: ASSESSMENT RANGE
-          </a>
-        </div>
-
-        {/* Earned Certificates */}
         {earnedCertificates.length > 0 ? (
-          <div className="mb-8">
-            <h2 className="text-xs font-bold text-[#00B37A] uppercase tracking-widest mb-4">Acquired Credentials</h2>
-            <div className="grid gap-6">
-              {earnedCertificates.map((certificateEntry: string, idx: number) => {
-                const isUrl = typeof certificateEntry === 'string' && (certificateEntry.startsWith('http://') || certificateEntry.startsWith('https://'));
+          <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
+            {earnedCertificates.map((certificateEntry: string, idx: number) => {
+              const isUrl = typeof certificateEntry === 'string' && (certificateEntry.startsWith('http://') || certificateEntry.startsWith('https://'));
 
-                if (isUrl) {
-                  const filename = certificateEntry.split('/').pop() || "";
-                  const parts = filename.split('_');
-                  let displayTitle = "Classified Operation";
-                  if (parts.length >= 2) {
-                    displayTitle = parts[1].replace(/%20/g, ' ');
-                  }
-                  const timestamp = parseInt(parts[2]?.split('.')[0] || '0');
-                  const completionDate = timestamp ? new Date(timestamp) : new Date();
+              if (isUrl) {
+                const filename = certificateEntry.split('/').pop() || "";
+                const parts = filename.split('_');
+                let displayTitle = "Classified Operation";
+                if (parts.length >= 2) {
+                  displayTitle = parts[1].replace(/%20/g, ' ');
+                }
+                const timestamp = parseInt(parts[2]?.split('.')[0] || '0');
+                const completionDate = timestamp ? new Date(timestamp) : new Date();
 
-                  return (
-                    <div key={`url-${idx}`} className="bg-[#0A0F0A] border border-[#00FF88]/20 rounded-xl p-6 relative overflow-hidden group">
-                      <div className="absolute inset-0 bg-gradient-to-r from-[#00FF88]/0 via-[#00FF88]/0 to-[#00FF88]/0 group-hover:via-[#00FF88]/5 transition-all duration-500" />
-                      <div className="flex items-center justify-between relative">
-                        <div className="flex items-center space-x-6">
-                          <div className="bg-[#00FF88]/10 p-4 rounded-lg border border-[#00FF88]/20">
-                            <Award className="h-8 w-8 text-[#00FF88]" />
-                          </div>
-                          <div>
-                            <h3 className="text-xl font-bold text-white uppercase tracking-tight">{displayTitle}</h3>
-                            <p className="text-[#00B37A] font-mono text-sm">DIGITAL ID: {Math.random().toString(36).substr(2, 9).toUpperCase()}</p>
-                            <div className="flex items-center space-x-2 mt-2 text-xs text-[#EAEAEA]/60 font-mono">
-                              <Calendar className="h-3 w-3" />
-                              <span>ISSUED: {completionDate.toLocaleDateString()}</span>
-                            </div>
-                          </div>
+                return (
+                  <Card
+                    key={`url-${idx}`}
+                    className="group overflow-hidden border-border/50 hover:border-primary/40 transition-all duration-300 bg-secondary/30 backdrop-blur-sm"
+                  >
+                    <CardHeader className="pb-4">
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-1">
+                          <CardTitle className="text-xl font-bold group-hover:text-primary transition-colors">
+                            {displayTitle}
+                          </CardTitle>
+                          <CardDescription className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-primary/70">
+                            <Shield className="h-3 w-3" />
+                            Digital ID: {Math.random().toString(36).substr(2, 9).toUpperCase()}
+                          </CardDescription>
                         </div>
-                        <div className="flex gap-2">
-                          <a
-                            href={certificateEntry}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="flex items-center space-x-2 bg-black/50 text-[#00FF88] px-4 py-3 rounded-lg border border-[#00FF88]/20 hover:bg-[#00FF88]/10 transition-all font-bold"
+                        <div className="bg-primary/10 p-2.5 rounded-xl border border-primary/20 group-hover:bg-primary group-hover:text-black transition-all duration-300">
+                          <GraduationCap className="h-6 w-6" />
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-2">
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium">
+                          <Calendar className="h-3.5 w-3.5" />
+                          Issued on {completionDate.toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })}
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-9 px-4 text-xs font-semibold"
+                            asChild
                           >
-                            <span>PREVIEW</span>
-                          </a>
-                          <button
+                            <a href={certificateEntry} target="_blank" rel="noreferrer">
+                              <ExternalLink className="mr-2 h-3.5 w-3.5" />
+                              Preview
+                            </a>
+                          </Button>
+                          <Button
+                            size="sm"
+                            className="h-9 px-4 text-xs font-bold"
                             onClick={() => setViewCertificate({
                               isOpen: true,
                               courseName: displayTitle,
                               date: completionDate
                             })}
-                            className="flex items-center space-x-2 bg-[#00FF88] text-black px-6 py-3 rounded-lg hover:bg-[#00CC66] transition-all shadow-[0_0_20px_rgba(0,255,136,0.3)] font-bold"
                           >
-                            <Download className="h-4 w-4" />
-                            <span>DOWNLOAD PDF</span>
-                          </button>
+                            <Download className="mr-2 h-3.5 w-3.5" />
+                            Download
+                          </Button>
                         </div>
                       </div>
-                    </div>
-                  );
-                }
-                return null;
-              })}
-            </div>
+                    </CardContent>
+                  </Card>
+                );
+              }
+              return null;
+            })}
           </div>
         ) : (
-          <div className="py-20 flex flex-col items-center justify-center text-center space-y-4 opacity-50">
-            <Shield className="h-16 w-16 text-[#00B37A]/20" />
-            <p className="text-[#00B37A] font-mono uppercase tracking-[0.2em]">No Credentials Detected In System</p>
-          </div>
+          <Card className="border-dashed border-2 py-20 bg-transparent">
+            <CardContent className="flex flex-col items-center justify-center text-center space-y-6">
+              <div className="bg-muted/50 p-6 rounded-full border border-border/50">
+                <Award className="h-12 w-12 text-muted-foreground/30" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl font-bold text-white">No Credentials Found</h3>
+                <p className="text-muted-foreground max-w-xs mx-auto text-sm">
+                  You haven't earned any certifications yet. Complete your first course to unlock your official credentials.
+                </p>
+              </div>
+              <Button variant="outline" className="mt-4">
+                Browse Available Operations
+              </Button>
+            </CardContent>
+          </Card>
         )}
-
       </div>
 
       {viewCertificate && (

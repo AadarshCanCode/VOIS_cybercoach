@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { Award, Download } from 'lucide-react';
 import { supabase } from '@lib/supabase';
 import { useAuth } from '@context/AuthContext';
+import { Button } from '@shared/components/ui/button';
 
 
 interface CertificateModalProps {
@@ -325,25 +326,26 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
         </div>
 
         {/* Footer Controls */}
-        <div className="bg-gray-50 px-6 py-4 border-t flex justify-end space-x-4">
-          <button
+        <div className="bg-zinc-900 px-6 py-4 border-t border-white/10 flex justify-end items-center gap-4">
+          <Button
+            variant="ghost"
             onClick={onClose}
-            className="px-4 py-2 text-gray-600 hover:text-black transition-colors"
+            className="text-zinc-400 hover:text-white hover:bg-white/5"
           >
             Close
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={downloadCertificate}
             disabled={isDownloading}
-            className={`bg-black text-white px-6 py-2 rounded shadow hover:bg-gray-800 transition-colors flex items-center space-x-2 ${isDownloading ? 'opacity-70 cursor-wait' : ''}`}
+            className="bg-primary text-black font-bold hover:bg-primary/90"
           >
             {isDownloading ? (
-              <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <div className="h-4 w-4 border-2 border-black/30 border-t-black rounded-full animate-spin mr-2" />
             ) : (
-              <Download className="h-4 w-4" />
+              <Download className="h-4 w-4 mr-2" />
             )}
-            <span>{isDownloading ? 'Downloading...' : 'Download Certificate'}</span>
-          </button>
+            <span>{isDownloading ? 'Processing...' : 'Download Official PDF'}</span>
+          </Button>
         </div>
       </div>
     </div>
