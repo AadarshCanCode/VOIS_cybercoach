@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Play, CheckCircle, Clock, FileText, FlaskRound as Flask, Award, Terminal, Lock, BookOpen } from 'lucide-react';
+import { ArrowLeft, Play, CheckCircle, Clock, FileText, FlaskRound as Flask, Award, Terminal, Lock, BookOpen, Shield } from 'lucide-react';
 import { ModuleViewer } from './ModuleViewer';
 import { courseService } from '@services/courseService';
 import type { Course, Module } from '@types';
