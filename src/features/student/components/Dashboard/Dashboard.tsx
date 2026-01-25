@@ -86,7 +86,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
   return (
     <div className="flex flex-col gap-6 p-4 md:p-8 animate-in fade-in duration-500">
       <SEO
-        title="Student Dashboard"
+        title="Learner Dashboard"
         description="Monitor your cybersecurity training progress, labs, and achievements."
       />
 
@@ -147,9 +147,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
                   </span>
-                  Active Operation
+                  Current Goal
                 </CardTitle>
-                <CardDescription>Your current mission and learning objective</CardDescription>
+                <CardDescription>Your current learning objective</CardDescription>
               </div>
               <Zap className="h-5 w-5 text-primary" />
             </div>
@@ -176,7 +176,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
                 </div>
                 <div className="flex gap-4">
                   <Button className="flex-1" onClick={() => onTabChange?.('courses')}>
-                    <Play className="mr-2 h-4 w-4" /> Resume Mission
+                    <Play className="mr-2 h-4 w-4" /> Resume Learning
                   </Button>
                   <Button variant="outline" size="icon" onClick={() => onTabChange?.('labs')}>
                     <Terminal className="h-4 w-4" />
@@ -185,7 +185,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
               </>
             ) : (
               <div className="flex flex-col items-center justify-center py-10 text-center">
-                <p className="text-muted-foreground mb-4">No active operations detected.</p>
+                <p className="text-muted-foreground mb-4">No active courses detected.</p>
                 <Button onClick={() => onTabChange?.('courses')}>Browse Courses</Button>
               </div>
             )}
@@ -194,7 +194,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
 
         <Card className="col-span-full lg:col-span-3 shadow-sm hover:shadow-md transition-all duration-200 border-border/50 hover:border-border">
           <CardHeader>
-            <CardTitle>Recent Intel</CardTitle>
+            <CardTitle>Recent Activity</CardTitle>
             <CardDescription>Your latest training activities</CardDescription>
           </CardHeader>
           <CardContent>
@@ -240,7 +240,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
       <div className="grid gap-4 md:grid-cols-2">
         <Card className="shadow-sm hover:shadow-md transition-all duration-200 border-border/50 hover:border-border">
           <CardHeader>
-            <CardTitle>Mission Quick Links</CardTitle>
+            <CardTitle>Quick Links</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-2">
 

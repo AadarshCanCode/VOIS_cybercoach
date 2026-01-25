@@ -22,10 +22,10 @@ export const Certificates: React.FC = () => {
       <div className="space-y-1">
         <h1 className="text-3xl font-bold tracking-tight text-white flex items-center gap-3">
           <Award className="h-8 w-8 text-primary" />
-          Official <span className="text-primary">Credentials</span>
+          Your <span className="text-primary">Certificates</span>
         </h1>
         <p className="text-muted-foreground">
-          Verifiable certifications earned through your training operations.
+          Verifiable certifications earned through your training courses.
         </p>
       </div>
 
@@ -33,7 +33,7 @@ export const Certificates: React.FC = () => {
       <div className="grid gap-6">
         <div className="flex items-center gap-4">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground/70">
-            Acquired Certifications
+            My Certificates
           </h2>
           <div className="flex-1 h-px bg-border/50" />
         </div>
@@ -46,7 +46,7 @@ export const Certificates: React.FC = () => {
               if (isUrl) {
                 const filename = certificateEntry.split('/').pop() || "";
                 const parts = filename.split('_');
-                let displayTitle = "Classified Operation";
+                let displayTitle = "Course";
                 if (parts.length >= 2) {
                   displayTitle = parts[1].replace(/%20/g, ' ');
                 }
@@ -66,7 +66,7 @@ export const Certificates: React.FC = () => {
                           </CardTitle>
                           <CardDescription className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-primary/70">
                             <Shield className="h-3 w-3" />
-                            Digital ID: {Math.random().toString(36).substr(2, 9).toUpperCase()}
+                            Certificate ID: {Math.random().toString(36).substr(2, 9).toUpperCase()}
                           </CardDescription>
                         </div>
                         <div className="bg-primary/10 p-2.5 rounded-xl border border-primary/20 group-hover:bg-primary group-hover:text-black transition-all duration-300">
@@ -125,13 +125,13 @@ export const Certificates: React.FC = () => {
                 <Award className="h-12 w-12 text-muted-foreground/30" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl font-bold text-white">No Credentials Found</h3>
+                <h3 className="text-xl font-bold text-white">No Certificates Found</h3>
                 <p className="text-muted-foreground max-w-xs mx-auto text-sm">
                   You haven't earned any certifications yet. Complete your first course to unlock your official credentials.
                 </p>
               </div>
               <Button variant="outline" className="mt-4">
-                Browse Available Operations
+                Browse Courses
               </Button>
             </CardContent>
           </Card>
