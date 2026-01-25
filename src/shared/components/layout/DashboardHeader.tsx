@@ -77,10 +77,7 @@ export function DashboardHeader({ activeTab, onTabChange }: DashboardHeaderProps
                     <DropdownMenuTrigger asChild>
                         <button className="flex items-center gap-2 outline-none">
                             <div className="hidden text-right md:block">
-                                <p className="text-xs font-bold text-foreground">{user?.name}</p>
-                                <p className="text-[10px] text-muted-foreground uppercase tracking-widest leading-none">
-                                    Operator
-                                </p>
+                                <p className="text-sm font-medium text-foreground">{user?.name}</p>
                             </div>
                             <Avatar className="h-8 w-8 border border-border">
                                 <AvatarImage src={user?.avatar_url || ""} />
@@ -104,8 +101,8 @@ export function DashboardHeader({ activeTab, onTabChange }: DashboardHeaderProps
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                             onClick={async () => {
-                                try { 
-                                    await logout(); 
+                                try {
+                                    await logout();
                                     router.push('/');
                                 } catch (e) { console.error(e); }
                             }}

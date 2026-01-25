@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Play, CheckCircle, Clock, FileText, FlaskRound as Flask, Award, Terminal, Lock } from 'lucide-react';
+import { ArrowLeft, Play, CheckCircle, Clock, FileText, FlaskRound as Flask, Award, Terminal, Lock, BookOpen } from 'lucide-react';
 import { ModuleViewer } from './ModuleViewer';
 import { courseService } from '@services/courseService';
 import type { Course, Module } from '@types';
 import { useAuth } from '@context/AuthContext';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@components/ui/card';
+import { Button } from '@components/ui/button';
+import { Progress } from '@shared/components/ui/progress';
+import { Skeleton } from '@components/ui/skeleton';
+import { cn } from '@lib/utils';
 
 interface CourseDetailProps {
   courseId: string;
@@ -37,7 +42,6 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
       setLoading(true);
       try {
         const data = await courseService.getCourseById(courseId);
-        // merge user progress if available
         if (mounted && data) {
           if (user?.id) {
             try {
@@ -47,8 +51,6 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
                 return acc;
               }, {});
 
-              console.log('Course data loaded:', data);
-              // normalize modules into course.modules for rendering
               const rawModules = data.course_modules ?? data.modules ?? [];
               if (!Array.isArray(rawModules)) {
                 console.error('Modules is not an array:', rawModules);
@@ -68,14 +70,12 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
               setCourse({ ...data, modules: normalized });
             } catch (e) {
               console.error('Failed to load user progress for course detail:', e);
-              // Fallback to data without progress integration if that fails
               const rawModules = data.course_modules ?? data.modules ?? [];
               const modules = Array.isArray(rawModules) ? rawModules : [];
               setCourse({ ...data, modules });
             }
           } else {
             const rawModules = data.course_modules ?? data.modules ?? [];
-            // Ensure modules is an array
             if (!Array.isArray(rawModules)) {
               console.warn('Course has no valid modules array, defaulting to empty');
               setCourse({ ...data, modules: [] });
@@ -91,21 +91,18 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
       }
     };
     load();
-    // Listen for fallback navigation events from ModuleViewer
+
     const onNavigate = (e: Event) => {
       try {
         const detail = (e as CustomEvent).detail;
         if (detail?.moduleId) setSelectedModuleId(detail.moduleId);
       } catch (err) {
-        // ignore malformed events but log for debugging
-
         console.warn('navigateModule event parsing failed', err);
       }
     };
 
     window.addEventListener('navigateModule', onNavigate as EventListener);
 
-    // If URL contains ?module=ID set it
     const params = new URLSearchParams(window.location.search);
     const qModule = params.get('module');
     if (qModule) setSelectedModuleId(qModule);
@@ -113,7 +110,6 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
     return () => { mounted = false; window.removeEventListener('navigateModule', onNavigate as EventListener); };
   }, [courseId, user]);
 
-  // helper to refresh course data (used by ModuleViewer after progress changes)
   const refreshCourse = async () => {
     try {
       const data = await courseService.getCourseById(courseId);
@@ -142,32 +138,64 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
     }
   };
 
-  if (loading) return (
-    <div className="p-6 min-h-screen bg-black flex items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00FF88] mx-auto mb-4"></div>
-        <p className="text-[#00B37A] font-mono">LOADING MISSION DATA...</p>
-      </div>
-    </div>
-  );
-  if (!course) {
+  // Loading State
+  if (loading) {
     return (
-      <div className="p-6 min-h-screen bg-black">
-        <div className="max-w-4xl mx-auto text-center py-20">
-          <Terminal className="h-16 w-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-2">Course Not Found</h2>
-          <p className="text-[#00B37A] mb-6">The requested training module does not exist.</p>
-          <button
-            onClick={onBack}
-            className="px-6 py-3 bg-[#00FF88] text-black font-bold rounded-lg hover:bg-[#00CC66] transition-colors"
-          >
-            Return to Courses
-          </button>
-        </div>
+      <div className="flex flex-col gap-6 p-4 md:p-8 animate-in fade-in duration-500">
+        <Skeleton className="h-8 w-40" />
+        <Card className="border-border/50">
+          <CardContent className="p-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-4">
+                <Skeleton className="h-10 w-3/4" />
+                <Skeleton className="h-20 w-full" />
+                <div className="flex gap-4">
+                  <Skeleton className="h-6 w-24" />
+                  <Skeleton className="h-6 w-24" />
+                  <Skeleton className="h-6 w-24" />
+                </div>
+              </div>
+              <div>
+                <Skeleton className="h-40 w-full rounded-lg" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-border/50">
+          <CardHeader>
+            <Skeleton className="h-6 w-40" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {[1, 2, 3].map(i => (
+              <Skeleton key={i} className="h-24 w-full" />
+            ))}
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
+  // Course Not Found State
+  if (!course) {
+    return (
+      <div className="flex flex-col gap-6 p-4 md:p-8 animate-in fade-in duration-500">
+        <Button variant="ghost" onClick={onBack} className="w-fit -ml-2">
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Courses
+        </Button>
+        <Card className="border-destructive/20 bg-destructive/5">
+          <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+            <Terminal className="h-12 w-12 text-destructive mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Course Not Found</h2>
+            <p className="text-muted-foreground mb-6">The requested course does not exist.</p>
+            <Button onClick={onBack}>Return to Courses</Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Module Viewer
   if (selectedModuleId) {
     return (
       <ModuleViewer
@@ -182,185 +210,194 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
 
   const completedModules = (course.modules ?? course.course_modules ?? []).filter((m: Module) => m.completed).length;
   const totalModules = (course.modules ?? course.course_modules ?? []).length;
-  const progressPercentage = (completedModules / totalModules) * 100;
-
-
+  const progressPercentage = totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0;
 
   return (
-    <div className="p-6 min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-[#EAEAEA]">
-      <div className="max-w-6xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={onBack}
-            className="flex items-center space-x-2 text-[#00B37A] hover:text-[#00FF88] transition-colors group"
-          >
-            <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
-            <span className="font-medium">Back to Courses</span>
-          </button>
-        </div>
+    <div className="flex flex-col gap-6 p-4 md:p-8 animate-in fade-in duration-500">
+      {/* Back Button */}
+      <Button variant="ghost" onClick={onBack} className="w-fit -ml-2 text-muted-foreground hover:text-foreground">
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back to Courses
+      </Button>
 
-        {/* Course Info */}
-        <div className="bg-[#0A0F0A] rounded-xl border border-[#00FF88]/10 overflow-hidden">
-          <div className="p-8">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2">
-                <div className="flex items-center space-x-3 mb-3">
-                  <div className="p-2 rounded-lg bg-[#00FF88]/10 border border-[#00FF88]/20">
-                    <Terminal className="h-6 w-6 text-[#00FF88]" />
-                  </div>
-                  <h1 className="text-3xl font-bold text-white">{course.title}</h1>
+      {/* Course Header Card */}
+      <Card className="border-border/50 overflow-hidden">
+        <CardContent className="p-6 md:p-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Course Info */}
+            <div className="lg:col-span-2 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
+                  <BookOpen className="h-6 w-6 text-primary" />
                 </div>
-                <p className="text-[#00B37A] text-lg mb-6">{course.description}</p>
-
-                <div className="flex items-center flex-wrap gap-4 text-sm font-mono mb-6">
-                  <div className="flex items-center space-x-2 text-[#EAEAEA]/60">
-                    <FileText className="h-4 w-4 text-[#00FF88]" />
-                    <span>{totalModules} MODULES</span>
-                  </div>
-                  <div className="flex items-center space-x-2 text-[#EAEAEA]/60">
-                    <Clock className="h-4 w-4 text-[#00FF88]" />
-                    <span>~{totalModules * 2} HOURS</span>
-                  </div>
-                  <div className="flex items-center space-x-2 text-[#EAEAEA]/60">
-                    <Flask className="h-4 w-4 text-[#00FF88]" />
-                    <span>HANDS-ON LABS</span>
-                  </div>
-                  <div className="flex items-center space-x-2 text-[#EAEAEA]/60">
-                    <Award className="h-4 w-4 text-[#00FF88]" />
-                    <span>CERTIFICATE</span>
-                  </div>
-                </div>
-
-                {/* Intentional blank: mission objectives removed to avoid static content */}
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{course.title}</h1>
               </div>
 
-              <div className="space-y-6">
-                {/* Progress Card */}
-                <div className="bg-black/40 rounded-xl p-6 border border-[#00FF88]/10">
-                  <h3 className="font-bold text-[#00B37A] mb-4 text-xs uppercase tracking-widest">Mission Progress</h3>
-                  <div className="text-center mb-4">
-                    <div className="text-4xl font-bold text-[#00FF88] font-mono">{Math.round(progressPercentage)}%</div>
-                    <div className="text-[#00B37A] text-sm">Complete</div>
-                  </div>
-                  <div className="w-full bg-black rounded-full h-2 mb-4 border border-[#00FF88]/10">
-                    <div
-                      className="bg-[#00FF88] h-full rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(0,255,136,0.5)]"
-                      style={{ width: `${progressPercentage}%` }}
-                    ></div>
-                  </div>
-                  <div className="text-sm text-[#00B37A] text-center font-mono">
-                    {completedModules} / {totalModules} MODULES COMPLETED
-                  </div>
-                </div>
+              <CardDescription className="text-base">
+                {course.description}
+              </CardDescription>
 
-                {/* Intentional blank: quick stats with hardcoded values removed */}
+              <div className="flex items-center flex-wrap gap-4 text-sm">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <FileText className="h-4 w-4 text-primary" />
+                  <span>{totalModules} Modules</span>
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Clock className="h-4 w-4 text-primary" />
+                  <span>~{totalModules * 2} Hours</span>
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Flask className="h-4 w-4 text-primary" />
+                  <span>Hands-on Labs</span>
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Award className="h-4 w-4 text-primary" />
+                  <span>Certificate</span>
+                </div>
               </div>
             </div>
+
+            {/* Progress Card */}
+            <Card className="border-primary/20 bg-primary/5">
+              <CardContent className="p-6">
+                <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-4">
+                  Course Progress
+                </h3>
+                <div className="text-center mb-4">
+                  <div className="text-4xl font-bold text-primary">{progressPercentage}%</div>
+                  <div className="text-sm text-muted-foreground">Complete</div>
+                </div>
+                <Progress value={progressPercentage} className="h-2 mb-4" />
+                <div className="text-sm text-muted-foreground text-center">
+                  {completedModules} / {totalModules} modules completed
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        </div>
+        </CardContent>
+      </Card>
 
-        {/* Modules List */}
-        <div className="bg-[#0A0F0A] rounded-xl border border-[#00FF88]/10 overflow-hidden">
-          <div className="border-b border-[#00FF88]/10 p-6">
-            <h2 className="text-xl font-bold text-white flex items-center space-x-2">
-              <Terminal className="h-5 w-5 text-[#00FF88]" />
-              <span>Training Modules</span>
-            </h2>
-          </div>
+      {/* Modules List */}
+      <Card className="border-border/50">
+        <CardHeader className="border-b border-border/50">
+          <CardTitle className="flex items-center gap-2">
+            <Terminal className="h-5 w-5 text-primary" />
+            Training Modules
+          </CardTitle>
+        </CardHeader>
+        <div className="divide-y divide-border/50">
+          {(course.modules ?? course.course_modules ?? []).map((module: Module, index: number, array: Module[]) => {
+            const isModuleUnlocked = user?.role === 'admin' || index === 0 || array[index - 1]?.completed;
 
-          <div className="divide-y divide-[#00FF88]/10">
-            {(course.modules ?? course.course_modules ?? []).map((module: Module, index: number, array: any[]) => {
-              // Sequential Locking: Admin always access, First module always access, Others need previous completed
-              const isModuleUnlocked = user?.role === 'admin' || index === 0 || array[index - 1]?.completed;
-
-              return (
-                <div key={module.id} className="p-6 hover:bg-[#00FF88]/5 transition-colors group">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-start space-x-4 flex-1">
-                      <div className="flex-shrink-0 mt-1">
-                        {module.completed ? (
-                          <div className="h-8 w-8 rounded-full bg-[#00FF88]/10 border border-[#00FF88]/20 flex items-center justify-center">
-                            <CheckCircle className="h-5 w-5 text-[#00FF88]" />
-                          </div>
-                        ) : isModuleUnlocked ? (
-                          <div className="h-8 w-8 rounded-full border border-[#00FF88]/30 flex items-center justify-center group-hover:border-[#00FF88] transition-colors">
-                            <span className="text-sm font-bold text-[#00B37A] font-mono">{String(index + 1).padStart(2, '0')}</span>
-                          </div>
-                        ) : (
-                          <div className="h-8 w-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
-                            <Lock className="h-4 w-4 text-white/30" />
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="flex-1">
-                        <h3 className={`text-lg font-medium mb-1 ${isModuleUnlocked ? 'text-white group-hover:text-[#00FF88]' : 'text-white/30'} transition-colors`}>
-                          {module.title}
-                        </h3>
-                        <p className={`mb-3 ${isModuleUnlocked ? 'text-[#00B37A]' : 'text-white/20'}`}>{module.description}</p>
-
-                        <div className={`flex items-center space-x-4 text-sm ${isModuleUnlocked ? 'text-[#EAEAEA]/60' : 'text-white/20'}`}>
-                          <div className="flex items-center space-x-1">
-                            <FileText className="h-4 w-4" />
-                            <span>Reading</span>
-                          </div>
-                          {module.videoUrl && (
-                            <div className="flex items-center space-x-1">
-                              <Play className="h-4 w-4" />
-                              <span>Video</span>
-                            </div>
-                          )}
-                          {module.labUrl && (
-                            <div className="flex items-center space-x-1">
-                              <Flask className="h-4 w-4" />
-                              <span>Lab</span>
-                            </div>
-                          )}
-                          <div className="flex items-center space-x-1">
-                            <Clock className="h-4 w-4" />
-                            <span>~2 hours</span>
-                          </div>
+            return (
+              <div
+                key={module.id}
+                className={cn(
+                  "p-6 transition-colors",
+                  isModuleUnlocked && "hover:bg-muted/50 cursor-pointer group"
+                )}
+                onClick={() => isModuleUnlocked && setSelectedModuleId(module.id)}
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-start gap-4 flex-1">
+                    {/* Module Number/Status */}
+                    <div className="flex-shrink-0 mt-1">
+                      {module.completed ? (
+                        <div className="h-8 w-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
+                          <CheckCircle className="h-5 w-5 text-primary" />
                         </div>
-
-                        {module.testScore && (
-                          <div className="mt-2">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#00FF88]/10 text-[#00FF88] border border-[#00FF88]/20">
-                              Test Score: {module.testScore}%
-                            </span>
-                          </div>
-                        )}
-                      </div>
+                      ) : isModuleUnlocked ? (
+                        <div className="h-8 w-8 rounded-full border border-border flex items-center justify-center group-hover:border-primary/50 transition-colors">
+                          <span className="text-sm font-bold text-muted-foreground group-hover:text-primary transition-colors">
+                            {String(index + 1).padStart(2, '0')}
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="h-8 w-8 rounded-full bg-muted border border-border flex items-center justify-center">
+                          <Lock className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                      )}
                     </div>
 
-                    <button
-                      onClick={() => setSelectedModuleId(module.id)}
-                      disabled={!isModuleUnlocked}
-                      className={`flex items-center space-x-2 px-5 py-2.5 rounded-lg font-bold transition-all ${isModuleUnlocked
-                        ? 'bg-[#00FF88] text-black hover:bg-[#00CC66] hover:shadow-[0_0_20px_rgba(0,255,136,0.3)]'
-                        : 'bg-white/5 border border-white/10 text-white/30 cursor-not-allowed'
-                        }`}
-                    >
-                      {isModuleUnlocked ? (
-                        <>
-                          <Play className="h-4 w-4" />
-                          <span>{module.completed ? 'Review' : 'Start'}</span>
-                        </>
-                      ) : (
-                        <>
-                          <Lock className="h-4 w-4" />
-                          <span>Locked</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
+                    {/* Module Content */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className={cn(
+                        "text-lg font-medium mb-1 transition-colors",
+                        isModuleUnlocked ? "group-hover:text-primary" : "text-muted-foreground"
+                      )}>
+                        {module.title}
+                      </h3>
+                      <p className={cn(
+                        "text-sm mb-3",
+                        isModuleUnlocked ? "text-muted-foreground" : "text-muted-foreground/50"
+                      )}>
+                        {module.description}
+                      </p>
 
+                      <div className={cn(
+                        "flex items-center gap-4 text-xs",
+                        isModuleUnlocked ? "text-muted-foreground" : "text-muted-foreground/50"
+                      )}>
+                        <div className="flex items-center gap-1">
+                          <FileText className="h-3.5 w-3.5" />
+                          <span>Reading</span>
+                        </div>
+                        {module.videoUrl && (
+                          <div className="flex items-center gap-1">
+                            <Play className="h-3.5 w-3.5" />
+                            <span>Video</span>
+                          </div>
+                        )}
+                        {module.labUrl && (
+                          <div className="flex items-center gap-1">
+                            <Flask className="h-3.5 w-3.5" />
+                            <span>Lab</span>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-3.5 w-3.5" />
+                          <span>~2 hours</span>
+                        </div>
+                      </div>
+
+                      {module.testScore && (
+                        <div className="mt-2">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
+                            Test Score: {module.testScore}%
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Action Button */}
+                  <Button
+                    variant={module.completed ? "outline" : "default"}
+                    disabled={!isModuleUnlocked}
+                    className={cn(!isModuleUnlocked && "opacity-50")}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (isModuleUnlocked) setSelectedModuleId(module.id);
+                    }}
+                  >
+                    {isModuleUnlocked ? (
+                      <>
+                        <Play className="mr-2 h-4 w-4" />
+                        {module.completed ? 'Review' : 'Start'}
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="mr-2 h-4 w-4" />
+                        Locked
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </Card>
     </div>
   );
 };

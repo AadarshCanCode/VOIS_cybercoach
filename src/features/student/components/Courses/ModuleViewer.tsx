@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import mermaid from 'mermaid';
 import { labs } from '@data/labs';
-import { ArrowLeft, FileText, CheckCircle, Award, Terminal, Play, Shield } from 'lucide-react';
+import { ArrowLeft, FileText, CheckCircle, Award, Terminal, Play, Shield, ChevronRight } from 'lucide-react';
 import { CertificateModal } from '../Certificates/CertificateModal';
 import { courseService } from '@services/courseService';
 import type { Module, Course } from '@types';
@@ -11,6 +11,10 @@ import { learningPathService } from '../../../../shared/services/learningPathSer
 import { useAuth } from '@context/AuthContext';
 import { useExperienceTracker } from '../../../../shared/hooks/useExperienceTracker';
 import { useProctoring } from '../../../../shared/hooks/useProctoring';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@components/ui/card';
+import { Button } from '@components/ui/button';
+import { Skeleton } from '@components/ui/skeleton';
+import { cn } from '@lib/utils';
 
 mermaid.initialize({
   startOnLoad: false,
@@ -19,12 +23,12 @@ mermaid.initialize({
   themeVariables: {
     darkMode: true,
     fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-    primaryColor: '#00FF88',
+    primaryColor: 'hsl(152 100% 50%)',
     primaryTextColor: '#000000',
-    primaryBorderColor: '#00FF88',
-    lineColor: '#00FF88',
-    secondaryColor: '#0a0f0a',
-    tertiaryColor: '#00331b'
+    primaryBorderColor: 'hsl(152 100% 50%)',
+    lineColor: 'hsl(152 100% 50%)',
+    secondaryColor: 'hsl(120 20% 4%)',
+    tertiaryColor: 'hsl(150 100% 10%)'
   }
 });
 
@@ -49,7 +53,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
   const [isProctoringActive, setIsProctoringActive] = useState(false);
   const [violationCount, setViolationCount] = useState(0);
 
-  // Experience Tracking (logs reading habits)
+  // Experience Tracking
   useExperienceTracker({
     studentId: user?.id || 'anonymous',
     courseId,
@@ -57,7 +61,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
     enabled: !!user?.id
   });
 
-  // Backend Proctoring Logging (logs tab switches, blur, etc.)
+  // Backend Proctoring Logging
   const { logEvent } = useProctoring({
     studentId: user?.id || 'anonymous',
     courseId,
@@ -68,23 +72,19 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
   const handleProctoringViolation = async (status: 'ok' | 'violation') => {
     if (status === 'violation' && isProctoringActive) {
       logEvent('face-violation', { count: violationCount + 1 });
-      // Determine max warnings based on module type
       const isFinalExam = moduleId === 'vu-final-exam';
       const maxWarnings = isFinalExam ? 1 : 0;
 
       if (violationCount < maxWarnings) {
-        // Warning
         setViolationCount(prev => prev + 1);
         alert(`PROCTORING WARNING: Suspicious activity detected! You have ${maxWarnings - violationCount} warnings remaining.`);
       } else {
-        // Lockout
         console.warn('Proctoring Violation - Locking out!');
         setIsProctoringActive(false);
         setShowTest(false);
-        setViolationCount(0); // Reset for next valid attempt after lockout
+        setViolationCount(0);
 
         try {
-          // Calculate lockout time (1 hour from now)
           const lockedUntil = new Date();
           lockedUntil.setHours(lockedUntil.getHours() + 1);
 
@@ -114,17 +114,12 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
 
   useEffect(() => {
     if (showTest) {
-      if (moduleId === 'vu-final-exam') {
-        // Special start logic for Final Exam could go here
-      }
-      setViolationCount(0); // Reset count on start
+      setViolationCount(0);
       setIsProctoringActive(true);
     } else {
       setIsProctoringActive(false);
     }
   }, [showTest, moduleId]);
-
-
 
   useEffect(() => {
     let mounted = true;
@@ -133,7 +128,6 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
       try {
         const data = await courseService.getCourseById(courseId);
         if (mounted && data) {
-
           if (user?.id) {
             try {
               const progress = await courseService.getUserProgress(user.id) as any[] | null;
@@ -144,19 +138,14 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
 
               const modules = (data.course_modules ?? data.modules ?? []) as Module[];
 
-              // Handle Final Exam Dynamic Questions
               const finalExamModule = modules.find(m => m.id === 'vu-final-exam');
               if (finalExamModule) {
-                // Collect all questions from other modules
                 const allQuestions = modules
                   .filter(m => m.id !== 'vu-final-exam')
                   .flatMap(m => m.questions || []);
 
-                // Shuffle and pick 20
                 const shuffled = [...allQuestions].sort(() => 0.5 - Math.random());
                 finalExamModule.questions = shuffled.slice(0, 20);
-                // Also assign testScore from progress if exists
-                // finalExamModule.testScore = moduleProgress['vu-final-exam']?.quiz_score;
               }
 
               const normalized = modules.map((m) => ({
@@ -184,7 +173,6 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
     return () => { mounted = false; };
   }, [courseId, user?.id]);
 
-  // Handle Mermaid Rendering
   useEffect(() => {
     if (activeTab === 'content' && course && !loading) {
       const timer = setTimeout(() => {
@@ -205,24 +193,38 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
     return modules.every((m: Module) => m.completed);
   };
 
+  // Loading State
   if (loading) {
     return (
-      <div className="p-6 min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#00FF88] mx-auto mb-4"></div>
-          <p className="text-[#00FF88] font-mono">LOADING MODULE DATA...</p>
-        </div>
+      <div className="flex flex-col gap-6 p-4 md:p-8 animate-in fade-in duration-500">
+        <Skeleton className="h-8 w-40" />
+        <Card className="border-border/50">
+          <CardContent className="p-8 space-y-4">
+            <Skeleton className="h-8 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+            <Skeleton className="h-64 w-full" />
+          </CardContent>
+        </Card>
       </div>
     );
   }
+
+  // Module Not Found
   if (!course || !module) {
     return (
-      <div className="p-6 min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center">
-          <Terminal className="h-16 w-16 text-red-500 mx-auto mb-4" />
-          <p className="text-red-400 font-mono">ERROR: MODULE NOT FOUND</p>
-          <button onClick={onBack} className="mt-4 text-[#00FF88] hover:underline">Return to Course</button>
-        </div>
+      <div className="flex flex-col gap-6 p-4 md:p-8 animate-in fade-in duration-500">
+        <Button variant="ghost" onClick={onBack} className="w-fit -ml-2">
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Course
+        </Button>
+        <Card className="border-destructive/20 bg-destructive/5">
+          <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+            <Terminal className="h-12 w-12 text-destructive mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Module Not Found</h2>
+            <p className="text-muted-foreground mb-4">The requested module does not exist.</p>
+            <Button onClick={onBack}>Return to Course</Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -233,13 +235,10 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
   const goToNextModule = () => {
     if (currentIndex >= 0 && currentIndex < allModules.length - 1) {
       const next = allModules[currentIndex + 1];
-      // Prefer calling parent navigation callback if provided
       if (onNavigateToModule) {
         onNavigateToModule(next.id);
         return;
       }
-
-      // fallback: update history and dispatch event so parent can pick it up
       window.history.pushState({}, '', `/course/${courseId}?module=${next.id}`);
       const evt = new CustomEvent('navigateModule', { detail: { moduleId: next.id } });
       window.dispatchEvent(evt);
@@ -254,7 +253,6 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
       if (user?.id) {
         await courseService.updateProgress(user.id, moduleId, true, module.testScore ?? undefined);
         await learningPathService.rebalance(user.id, courseId);
-        // inform parent to refresh progress
         if (onModuleStatusChange) onModuleStatusChange();
       }
     } catch (e) {
@@ -263,15 +261,11 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
   };
 
   const completeCourseAndGenerateCertificate = async () => {
-    // mark all modules completed if some are missing (for safety)
     try {
       if (user?.id) {
-
         for (const m of allModules) {
           await courseService.updateProgress(user.id, m.id, true, m.testScore ?? undefined);
         }
-
-        // inform parent to refresh progress, then show certificate
         if (onModuleStatusChange) await onModuleStatusChange();
         setShowCertificate(true);
       } else {
@@ -283,12 +277,10 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
   };
 
   const handleTestCompletion = async (score: number) => {
-    // Update module completion status
     module.completed = true;
     module.testScore = score;
     setShowTest(false);
 
-    // Persist progress and trigger rebalance
     try {
       if (user?.id) {
         await courseService.updateProgress(user.id, moduleId, true, score);
@@ -321,13 +313,12 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
   const processContent = (rawContent: string) => {
     let content = rawContent || '';
 
-    // 0. Pre-process YouTube
+    // YouTube embeds
     content = content.replace(
       /<a\s+(?:[^>]*?\s+)?href=["'](?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)(?:&[\w%=]*)?["'][^>]*>.*?<\/a>/gi,
-      (_match, videoId) => `<div class="aspect-video w-full my-8 bg-black/50 rounded-xl overflow-hidden border border-[#00FF88]/20 shadow-[0_0_20px_rgba(0,255,136,0.1)] group"><iframe src="https://www.youtube.com/embed/${videoId}" class="w-full h-full" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`
+      (_match, videoId) => `<div class="aspect-video w-full my-8 bg-muted rounded-xl overflow-hidden border border-border"><iframe src="https://www.youtube.com/embed/${videoId}" class="w-full h-full" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`
     );
 
-    // 1. Code Blocks (Mermaid & Generic) - Tokenize early to protect them
     const tokens: string[] = [];
     const saveToken = (text: string) => {
       tokens.push(text);
@@ -335,14 +326,13 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
     };
 
     content = content.replace(/```mermaid([\s\S]*?)```/gi, (_match, code) => {
-      return saveToken(`<div class="mermaid my-8 bg-[#0A0F0A] p-6 rounded-xl border border-[#00FF88]/20 flex justify-center overflow-x-auto shadow-[inset_0_0_20px_rgba(0,255,136,0.05)] text-left">${code.trim()}</div>`);
+      return saveToken(`<div class="mermaid my-8 bg-card p-6 rounded-xl border border-border flex justify-center overflow-x-auto text-left">${code.trim()}</div>`);
     });
 
     content = content.replace(/```([\s\S]*?)```/gi, (_match, code) => {
-      return saveToken(`<pre class="bg-black border border-[#00FF88]/20 p-4 rounded-lg my-4 overflow-x-auto"><code class="text-[#00FF88] font-mono">${code.trim().replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`);
+      return saveToken(`<pre class="bg-card border border-border p-4 rounded-lg my-4 overflow-x-auto"><code class="text-primary font-mono">${code.trim().replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`);
     });
 
-    // 2. Bold & Italics
     content = content
       .replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>')
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
@@ -351,31 +341,25 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
       .replace(/__(.*?)__/g, '<strong>$1</strong>')
       .replace(/_(.*?)_/g, '<em>$1</em>');
 
-    // 3. Headers & Lists (Markdown) - Relies on \n
     content = content
-      .replace(/^# (.+)$/gm, '<h1 class="text-3xl font-bold mb-6 mt-8 text-white border-b border-[#00FF88]/20 pb-2">$1</h1>')
-      .replace(/^## (.+)$/gm, '<h2 class="text-2xl font-bold mb-4 mt-8 text-white">$1</h2>')
-      .replace(/^### (.+)$/gm, '<h3 class="text-xl font-bold mb-3 mt-6 text-[#00FF88]">$1</h3>')
-      .replace(/^#### (.+)$/gm, '<h4 class="text-lg font-bold mb-2 mt-4 text-[#00FF88]">$1</h4>')
-      .replace(/^- (.+)$/gm, '<li class="ml-6 mb-2 text-[#EAEAEA] list-disc marker:text-[#00FF88]">$1</li>')
-      .replace(/^\* (.+)$/gm, '<li class="ml-6 mb-2 text-[#EAEAEA] list-disc marker:text-[#00FF88]">$1</li>')
-      .replace(/^(\d+)\. (.+)$/gm, '<li class="ml-6 mb-2 text-[#EAEAEA] list-decimal marker:text-[#00FF88]">$2</li>');
+      .replace(/^# (.+)$/gm, '<h1 class="text-3xl font-bold mb-6 mt-8 border-b border-border pb-2">$1</h1>')
+      .replace(/^## (.+)$/gm, '<h2 class="text-2xl font-bold mb-4 mt-8">$1</h2>')
+      .replace(/^### (.+)$/gm, '<h3 class="text-xl font-bold mb-3 mt-6 text-primary">$1</h3>')
+      .replace(/^#### (.+)$/gm, '<h4 class="text-lg font-bold mb-2 mt-4 text-primary">$1</h4>')
+      .replace(/^- (.+)$/gm, '<li class="ml-6 mb-2 list-disc marker:text-primary">$1</li>')
+      .replace(/^\* (.+)$/gm, '<li class="ml-6 mb-2 list-disc marker:text-primary">$1</li>')
+      .replace(/^(\d+)\. (.+)$/gm, '<li class="ml-6 mb-2 list-decimal marker:text-primary">$2</li>');
 
-    // 4. Inline Code
-    content = content.replace(/`([^`]+)`/g, '<code class="bg-[#00FF88]/10 px-1.5 py-0.5 rounded text-[#00FF88] font-mono border border-[#00FF88]/20">$1</code>');
+    content = content.replace(/`([^`]+)`/g, '<code class="bg-primary/10 px-1.5 py-0.5 rounded text-primary font-mono border border-primary/20">$1</code>');
 
-    // 5. Paragraphs - Split by double newlines and wrap in <p>
-    // First, preserve single newlines for <br/> if needed, or just let paragraphs handle it.
-    // For now, let's just handle double newlines as paragraph breaks.
     const blocks = content.split(/\n\s*\n/);
     content = blocks.map(block => {
       if (block.trim().startsWith('<h') || block.trim().startsWith('<li') || block.trim().startsWith('<pre') || block.trim().startsWith('<div') || block.trim().startsWith('__TOKEN')) {
         return block;
       }
-      return `<p class="mb-4 leading-relaxed text-[#EAEAEA]/80">${block.trim().replace(/\n/g, '<br/>')}</p>`;
+      return `<p class="mb-4 leading-relaxed text-muted-foreground">${block.trim().replace(/\n/g, '<br/>')}</p>`;
     }).join('\n');
 
-    // 6. Restore tokens
     tokens.forEach((token, index) => {
       content = content.replace(`__TOKEN_${index}__`, token);
     });
@@ -384,245 +368,229 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
   };
 
   return (
-    <div className="p-6 min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-[#EAEAEA]">
-      <div className="max-w-4xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <button
-            onClick={onBack}
-            className="flex items-center space-x-2 text-[#00B37A] hover:text-[#00FF88] transition-colors group"
+    <div className="flex flex-col gap-6 p-4 md:p-8 animate-in fade-in duration-500">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <Button variant="ghost" onClick={onBack} className="w-fit -ml-2 text-muted-foreground hover:text-foreground">
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Course
+        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant={module.completed ? "outline" : "default"}
+            onClick={() => markModuleCompleted(true)}
+            disabled={module.completed}
           >
-            <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
-            <span className="font-medium">Back to Course</span>
-          </button>
-          <div className="flex items-center space-x-4">
-            {/* Mark as completed (manual) */}
+            {module.completed ? (
+              <>
+                <CheckCircle className="mr-2 h-4 w-4" />
+                Completed
+              </>
+            ) : (
+              'Mark Complete'
+            )}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={goToNextModule}
+            disabled={currentIndex < 0 || currentIndex >= allModules.length - 1 || (!module.completed && user?.role !== 'admin')}
+          >
+            Next Module
+            <ChevronRight className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Module Info Card */}
+      <Card className="border-border/50">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
+              <Terminal className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="text-2xl">{module.title}</CardTitle>
+              <CardDescription>
+                Module {String(currentIndex + 1).padStart(2, '0')} of {String(allModules.length).padStart(2, '0')}
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground mb-4">{module.description}</p>
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <FileText className="h-4 w-4 text-primary" />
+              <span>Content</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Tabs */}
+      <Card className="border-border/50">
+        <div className="border-b border-border/50">
+          <div className="flex gap-1 p-2">
             <button
-              onClick={() => markModuleCompleted(true)}
-              disabled={module.completed}
-              className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${module.completed ? 'bg-[#00FF88]/10 text-[#00FF88] border border-[#00FF88]/20 cursor-not-allowed' : 'bg-[#00FF88] text-black hover:bg-[#00CC66] hover:shadow-[0_0_20px_rgba(0,255,136,0.3)]'}`}
-              title="Mark this module as completed"
+              onClick={() => setActiveTab('content')}
+              className={cn(
+                "flex items-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-all",
+                activeTab === 'content'
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              )}
             >
-              {module.completed ? '✓ Completed' : 'Mark Complete'}
+              <FileText className="h-4 w-4" />
+              Content
             </button>
-
-
-
-            {/* Go to next module */}
             <button
-              onClick={goToNextModule}
-              disabled={currentIndex < 0 || currentIndex >= allModules.length - 1 || (!module.completed && user?.role !== 'admin')}
-              className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center space-x-2 ${currentIndex < 0 || currentIndex >= allModules.length - 1 || (!module.completed && user?.role !== 'admin') ? 'bg-white/5 border border-white/10 text-white/30 cursor-not-allowed' : 'bg-[#00B37A] text-black hover:bg-[#00FF88] hover:shadow-[0_0_20px_rgba(0,255,136,0.3)]'}`}
-              title="Go to next module"
+              onClick={() => setActiveTab('test')}
+              className={cn(
+                "flex items-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-all",
+                activeTab === 'test'
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              )}
             >
-              <span>Next Module</span>
-              <Play className="h-4 w-4" />
+              <CheckCircle className="h-4 w-4" />
+              Test
             </button>
           </div>
         </div>
 
-        {/* Module Info */}
-        <div className="bg-[#0A0F0A] rounded-xl border border-[#00FF88]/10 overflow-hidden">
-          <div className="p-8">
-            <div className="flex items-center space-x-3 mb-3">
-              <div className="p-2 rounded-lg bg-[#00FF88]/10 border border-[#00FF88]/20">
-                <Terminal className="h-6 w-6 text-[#00FF88]" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-white">{module.title}</h1>
-                <p className="text-[#00B37A] text-sm font-mono">MODULE {String(currentIndex + 1).padStart(2, '0')} OF {String(allModules.length).padStart(2, '0')}</p>
-              </div>
-            </div>
-            <p className="text-[#00B37A] mb-6">{module.description}</p>
-
-            <div className="flex items-center flex-wrap gap-4 text-sm font-mono text-[#EAEAEA]/60">
-              <div className="flex items-center space-x-2">
-                <FileText className="h-4 w-4 text-[#00FF88]" />
-                <span>CONTENT</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="bg-[#0A0F0A] rounded-xl border border-[#00FF88]/10 overflow-hidden">
-          <div className="border-b border-[#00FF88]/10">
-            <nav className="flex space-x-1 p-2">
-              <button
-                onClick={() => setActiveTab('content')}
-                className={`py-3 px-6 rounded-lg font-medium text-sm transition-all ${activeTab === 'content'
-                  ? 'bg-[#00FF88] text-black'
-                  : 'text-[#00B37A] hover:text-[#00FF88] hover:bg-[#00FF88]/10'
-                  }`}
-              >
-                <div className="flex items-center space-x-2">
-                  <FileText className="h-4 w-4" />
-                  <span>Content</span>
-                </div>
-              </button>
-
-              <button
-                onClick={() => setActiveTab('test')}
-                className={`py-3 px-6 rounded-lg font-medium text-sm transition-all ${activeTab === 'test'
-                  ? 'bg-[#00FF88] text-black'
-                  : 'text-[#00B37A] hover:text-[#00FF88] hover:bg-[#00FF88]/10'
-                  }`}
-              >
-                <div className="flex items-center space-x-2">
-                  <CheckCircle className="h-4 w-4" />
-                  <span>Test</span>
-                </div>
-              </button>
-            </nav>
-          </div>
-
-          <div className="p-6">
-            {activeTab === 'content' && (
-              <div
-                className="prose max-w-none text-[#EAEAEA] module-content"
-                onClick={(e) => {
-                  const target = e.target as HTMLElement;
-                  // Handle Lab Launch Buttons
-                  const labBtn = target.closest('[data-lesson-action="launch-lab"]');
-                  if (labBtn) {
-                    const labId = labBtn.getAttribute('data-lab-id');
-                    if (labId) {
-                      const lab = labs.find((l: any) => l.id === labId);
-                      if (lab && lab.liveUrl) {
-                        window.open(lab.liveUrl, '_blank');
-                      } else {
-                        // Fallback to internal navigation if no URL (optional, or just do nothing)
-                        const evt = new CustomEvent('navigateToTab', {
-                          detail: { tab: 'labs', labId: labId }
-                        });
-                        window.dispatchEvent(evt);
-                      }
+        <CardContent className="p-6">
+          {activeTab === 'content' && (
+            <div
+              className="prose max-w-none module-content"
+              onClick={(e) => {
+                const target = e.target as HTMLElement;
+                const labBtn = target.closest('[data-lesson-action="launch-lab"]');
+                if (labBtn) {
+                  const labId = labBtn.getAttribute('data-lab-id');
+                  if (labId) {
+                    const lab = labs.find((l: any) => l.id === labId);
+                    if (lab && lab.liveUrl) {
+                      window.open(lab.liveUrl, '_blank');
+                    } else {
+                      const evt = new CustomEvent('navigateToTab', {
+                        detail: { tab: 'labs', labId: labId }
+                      });
+                      window.dispatchEvent(evt);
                     }
                   }
-                }}
-              >
-                <div dangerouslySetInnerHTML={{ __html: processContent(module.content || '') }} />
-              </div>
-            )}
+                }
+              }}
+            >
+              <div dangerouslySetInnerHTML={{ __html: processContent(module.content || '') }} />
+            </div>
+          )}
 
-            {activeTab === 'test' && (
-              <div className="text-center py-12">
-                <div className="p-4 rounded-full bg-[#00FF88]/10 border border-[#00FF88]/20 w-20 h-20 mx-auto mb-6 flex items-center justify-center">
-                  <Shield className="h-10 w-10 text-[#00FF88]" />
+          {activeTab === 'test' && (
+            <div className="text-center py-12">
+              <div className="p-4 rounded-full bg-primary/10 border border-primary/20 w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                <Shield className="h-10 w-10 text-primary" />
+              </div>
+              <h3 className="text-xl font-bold mb-4">Module Assessment</h3>
+              <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                Test your understanding of this module with a focused quiz to validate your knowledge.
+              </p>
+              {module.testScore && (
+                <div className="mb-6">
+                  <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-primary/10 text-primary border border-primary/20">
+                    Previous Score: {module.testScore}%
+                  </span>
                 </div>
-                <h3 className="text-xl font-bold text-white mb-4">Module Assessment</h3>
-                <p className="text-[#00B37A] mb-6 max-w-md mx-auto">
-                  Test your understanding of this module with a focused quiz to validate your knowledge.
-                </p>
-                {module.testScore && (
-                  <div className="mb-6">
-                    <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-[#00FF88]/10 text-[#00FF88] border border-[#00FF88]/20">
-                      Previous Score: {module.testScore}%
-                    </span>
-                  </div>
-                )}
-                <button
-                  onClick={() => setShowTest(true)}
-                  className="bg-[#00FF88] text-black px-8 py-3 rounded-lg font-bold hover:bg-[#00CC66] hover:shadow-[0_0_20px_rgba(0,255,136,0.3)] transition-all"
-                >
-                  {module.testScore ? 'Retake Test' : 'Start Test'}
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
+              )}
+              <Button onClick={() => setShowTest(true)}>
+                {module.testScore ? 'Retake Test' : 'Start Test'}
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-        {/* Complete Module Button or Certificate */}
-        {!module.completed ? (
-          <div className="bg-[#0A0F0A] rounded-xl border border-[#00FF88]/10 p-6">
+      {/* Complete Module Section */}
+      {!module.completed ? (
+        <Card className="border-border/50">
+          <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-bold text-white">Ready to prove your skills?</h3>
-                <p className="text-[#00B37A]">Take the assessment to complete this module.</p>
+                <h3 className="font-semibold">Ready to prove your skills?</h3>
+                <p className="text-muted-foreground text-sm">Take the assessment to complete this module.</p>
               </div>
-              <button
-                onClick={() => setShowTest(true)}
-                className="bg-[#00FF88] text-black px-6 py-3 rounded-lg font-bold hover:bg-[#00CC66] hover:shadow-[0_0_20px_rgba(0,255,136,0.3)] transition-all"
-              >
+              <Button onClick={() => setShowTest(true)}>
                 Take Module Test
-              </button>
+              </Button>
             </div>
-          </div>
-        ) : (
-          <div className="bg-[#0A0F0A] rounded-xl border border-[#00FF88]/20 p-6">
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="p-6">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 rounded-lg bg-[#00FF88]/10 border border-[#00FF88]/20">
-                  <CheckCircle className="h-6 w-6 text-[#00FF88]" />
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
+                  <CheckCircle className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-[#00FF88]">Module Completed!</h3>
-                  <p className="text-[#00B37A]">You've successfully completed this training module.</p>
+                  <h3 className="font-semibold text-primary">Module Completed!</h3>
+                  <p className="text-muted-foreground text-sm">You've successfully completed this training module.</p>
                 </div>
               </div>
-              <button
-                onClick={() => setShowTest(true)}
-                className="text-[#00B37A] hover:text-[#00FF88] transition-colors flex items-center space-x-2 border border-[#00FF88]/20 px-4 py-2 rounded-lg hover:bg-[#00FF88]/10"
-              >
-                <CheckCircle className="h-5 w-5" />
-                <span>Retake Test</span>
-              </button>
+              <Button variant="outline" onClick={() => setShowTest(true)}>
+                <CheckCircle className="mr-2 h-4 w-4" />
+                Retake Test
+              </Button>
             </div>
-          </div>
-        )}
+          </CardContent>
+        </Card>
+      )}
 
-        {/* Certificate Section */}
-        {course && isAllModulesCompleted(course) && (
-          <div className="bg-gradient-to-r from-[#0A0F0A] to-[#0A1A0A] rounded-xl border-2 border-[#00FF88]/30 p-6">
+      {/* Certificate Section */}
+      {course && isAllModulesCompleted(course) && (
+        <Card className="border-primary/30 bg-gradient-to-r from-primary/5 to-primary/10">
+          <CardContent className="p-6">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="p-3 rounded-full bg-[#00FF88]/10 border border-[#00FF88]/20">
-                  <Award className="h-10 w-10 text-[#00FF88]" />
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-full bg-primary/10 border border-primary/20">
+                  <Award className="h-10 w-10 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-[#00FF88] text-lg">Mission Complete!</h3>
-                  <p className="text-[#00B37A]">Congratulations, operative! You've completed all training modules.</p>
+                  <h3 className="font-bold text-primary text-lg">Course Complete!</h3>
+                  <p className="text-muted-foreground">Congratulations! You've completed all training modules.</p>
                 </div>
               </div>
-              <div className="flex items-center space-x-3">
-                {/* If we're on last module, show Complete Course button */}
+              <div className="flex items-center gap-3">
                 {currentIndex === allModules.length - 1 ? (
-                  <button
-                    onClick={completeCourseAndGenerateCertificate}
-                    className="bg-[#00FF88] text-black px-6 py-3 rounded-lg font-bold hover:bg-[#00CC66] hover:shadow-[0_0_20px_rgba(0,255,136,0.3)] transition-all flex items-center space-x-2"
-                  >
-                    <Award className="h-5 w-5" />
-                    <span>Complete Course</span>
-                  </button>
+                  <Button onClick={completeCourseAndGenerateCertificate}>
+                    <Award className="mr-2 h-5 w-5" />
+                    Complete Course
+                  </Button>
                 ) : (
-                  <button
-                    onClick={() => setShowCertificate(true)}
-                    className="bg-[#00FF88] text-black px-6 py-3 rounded-lg font-bold hover:bg-[#00CC66] hover:shadow-[0_0_20px_rgba(0,255,136,0.3)] transition-all flex items-center space-x-2"
-                  >
-                    <Award className="h-5 w-5" />
-                    <span>View Certificate</span>
-                  </button>
+                  <Button onClick={() => setShowCertificate(true)}>
+                    <Award className="mr-2 h-5 w-5" />
+                    View Certificate
+                  </Button>
                 )}
               </div>
             </div>
-          </div>
-        )}
+          </CardContent>
+        </Card>
+      )}
 
-        {/* Certificate Modal */}
-        {showCertificate && course && user && (
-          <CertificateModal
-            isOpen={showCertificate}
-            onClose={() => setShowCertificate(false)}
-            courseName={course.title}
-            studentName={user.name || 'Student'}
-            completionDate={new Date()}
-            facultyName=""
-            isVU={false}
-          />
-        )}
+      {/* Certificate Modal */}
+      {showCertificate && course && user && (
+        <CertificateModal
+          isOpen={showCertificate}
+          onClose={() => setShowCertificate(false)}
+          courseName={course.title}
+          studentName={user.name || 'Student'}
+          completionDate={new Date()}
+          facultyName=""
+          isVU={false}
+        />
+      )}
 
-
-      </div>
       <ProctoringComponent
         isActive={isProctoringActive}
         onStatusChange={handleProctoringViolation}

@@ -23,7 +23,7 @@ export const Certificates: React.FC = () => {
             <h1 className="text-3xl font-black tracking-tighter text-white uppercase">
               Official <span className="text-[#00FF88]">Credentials</span>
             </h1>
-            <p className="text-[#00B37A] font-mono text-sm mt-1">VERIFIED OPERATOR STATUS</p>
+            <p className="text-[#00B37A] font-mono text-sm mt-1">VERIFIED CREDENTIALS</p>
           </div>
           <div className="h-10 w-10 rounded bg-[#00FF88]/10 border border-[#00FF88]/20 flex items-center justify-center">
             <Award className="h-5 w-5 text-[#00FF88]" />
@@ -131,7 +131,7 @@ export const Certificates: React.FC = () => {
           isOpen={viewCertificate.isOpen}
           onClose={() => setViewCertificate(null)}
           courseName={viewCertificate.courseName}
-          studentName={user?.name || 'Operator'}
+          studentName={user?.name || 'Student'}
           completionDate={viewCertificate.date}
           isVU={true}
           facultyName="Kiran Deshpande"

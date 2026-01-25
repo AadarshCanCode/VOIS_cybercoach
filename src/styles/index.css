@@ -54,10 +54,11 @@
   --color-cyber-900: #0c4a6e;
   --color-cyber-950: #082f49;
 
-  /* Font families - Using System UI for clean, native look */
-  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
-  --font-display: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* Font families - Serif for headings, Sans-serif for body */
+  --font-sans: var(--font-inter), 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-serif: var(--font-serif), 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  --font-mono: 'SF Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+  --font-display: var(--font-serif), 'Source Serif 4', Georgia, serif;
 
   /* Box shadows */
   --shadow-glow: 0 0 20px rgba(14, 165, 233, 0.3);
@@ -241,7 +242,7 @@
 
   /* Terminal styles */
   .terminal {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--font-mono);
     @apply bg-black text-green-400;
   }
 

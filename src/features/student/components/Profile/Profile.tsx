@@ -82,7 +82,7 @@ export const Profile: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-6 p-4 md:p-8 animate-in fade-in duration-500">
-      <SEO title="Operator Profile" description="Your service record and achievements." />
+      <SEO title="Profile" description="Your profile and achievements." />
 
       {/* Hero Section */}
       <Card className="shadow-sm border-border/50 overflow-hidden relative">
@@ -307,7 +307,7 @@ export const Profile: React.FC = () => {
           isOpen={viewCertificate.isOpen}
           onClose={() => setViewCertificate(null)}
           courseName={viewCertificate.courseName}
-          studentName={vuDetails?.name || user?.name || 'Operator'}
+          studentName={vuDetails?.name || user?.name || 'Student'}
           completionDate={viewCertificate.date}
           isVU={true}
           facultyName="Kiran Deshpande"

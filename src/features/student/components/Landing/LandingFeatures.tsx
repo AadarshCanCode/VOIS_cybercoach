@@ -42,27 +42,37 @@ export const LandingFeatures: React.FC = () => {
                             content: (
                                 <div className="w-full overflow-hidden relative h-full rounded-2xl p-10 text-xl md:text-4xl font-bold text-white bg-zinc-900 border border-zinc-800">
                                     <p>Practice with real tools</p>
+                                    <TabImage src="/tabs/labs.png" />
+                                </div>
+                            ),
+                        },
+                        {
+                            title: "Training Courses",
+                            value: "courses",
+                            content: (
+                                <div className="w-full overflow-hidden relative h-full rounded-2xl p-10 text-xl md:text-4xl font-bold text-white bg-zinc-900 border border-zinc-800">
+                                    <p>Learn from experts</p>
                                     <TabImage src="/tabs/course.png" />
                                 </div>
                             ),
                         },
                         {
-                            title: "Resume Builder",
-                            value: "resume",
+                            title: "Video Library",
+                            value: "videos",
                             content: (
                                 <div className="w-full overflow-hidden relative h-full rounded-2xl p-10 text-xl md:text-4xl font-bold text-white bg-zinc-900 border border-zinc-800">
-                                    <p>ATS-Optimized Resumes</p>
-                                    <TabImage src="/tabs/resume.png" />
+                                    <p>Watch and learn</p>
+                                    <TabImage src="/tabs/videos.png" />
                                 </div>
                             ),
                         },
                         {
-                            title: "Job Portal",
-                            value: "career",
+                            title: "Your Profile",
+                            value: "profile",
                             content: (
                                 <div className="w-full overflow-hidden relative h-full rounded-2xl p-10 text-xl md:text-4xl font-bold text-white bg-zinc-900 border border-zinc-800">
-                                    <p>Find your next role</p>
-                                    <TabImage src="/tabs/career.png" />
+                                    <p>Track achievements</p>
+                                    <TabImage src="/tabs/profile.png" />
                                 </div>
                             ),
                         },
