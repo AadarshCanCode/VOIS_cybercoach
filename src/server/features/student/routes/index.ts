@@ -4,6 +4,7 @@ import { markLabAsCompleted, getLabStats, isLabCompleted } from '../services/lab
 import trackingRoutes from './trackingRoutes.js';
 import labSyncRoutes from './labSyncRoutes.js';
 import assessmentRoutes from './assessmentRoutes.js';
+import supportRoutes from './supportRoutes.js';
 import { authenticateUser, AuthenticatedRequest } from '../../../shared/middleware/auth.js';
 import { validateObjectId } from '../../../shared/middleware/validation.js';
 import { Course } from '../../../shared/models/Course.js';
@@ -14,6 +15,7 @@ const router = Router();
 router.use('/track', trackingRoutes);
 router.use('/labs', labSyncRoutes);
 router.use('/assessment', assessmentRoutes);
+router.use('/support', supportRoutes);
 
 router.get('/overview', authenticateUser, (_req: Request, res: Response): void => {
   const summary = getStudentDashboardSummary();

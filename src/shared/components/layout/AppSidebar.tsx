@@ -7,10 +7,12 @@ import {
     User,
     LogOut,
     ChevronRight,
+    Bug,
 } from "lucide-react"
 import { useRouter, usePathname } from "next/navigation"
 
 import { useAuth } from "@context/AuthContext"
+import { BugReportModal } from "@student/components/Support/BugReportModal"
 import {
     Sidebar,
     SidebarContent,
@@ -33,6 +35,7 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 export function AppSidebar({ activeTab, onTabChange, ...props }: AppSidebarProps) {
     const { logout } = useAuth()
     const router = useRouter()
+    const [isBugModalOpen, setIsBugModalOpen] = React.useState(false)
 
     const handleNavigation = (tab: string) => {
         onTabChange(tab);
@@ -136,7 +139,15 @@ export function AppSidebar({ activeTab, onTabChange, ...props }: AppSidebarProps
                     <SidebarGroupContent>
                         <SidebarMenu>
                             <SidebarMenuItem>
-
+                                <SidebarMenuButton
+                                    onClick={() => setIsBugModalOpen(true)}
+                                    className="text-muted-foreground hover:text-primary hover:bg-primary/10"
+                                >
+                                    <Bug className="size-4 shrink-0 transition-all duration-200 group-data-[state=collapsed]:mx-auto" />
+                                    <span className="transition-opacity duration-200 group-data-[state=collapsed]:hidden">
+                                        Report a Bug
+                                    </span>
+                                </SidebarMenuButton>
                             </SidebarMenuItem>
                             <SidebarMenuItem>
                                 <SidebarMenuButton
@@ -161,6 +172,7 @@ export function AppSidebar({ activeTab, onTabChange, ...props }: AppSidebarProps
                 </SidebarGroup>
             </SidebarFooter>
             <SidebarRail />
+            <BugReportModal isOpen={isBugModalOpen} onClose={() => setIsBugModalOpen(false)} />
         </Sidebar>
     )
 }
