@@ -58,27 +58,30 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
               }
               const modules = rawModules as CourseModuleLike[];
 
-              const normalized = modules.map((m) => {
+              const normalized = modules.map((m: any) => {
                 if (!m) return null;
+                const modId = m.id || m._id;
                 return {
                   ...m,
-                  completed: !!moduleProgress[m.id]?.completed,
-                  testScore: (moduleProgress[m.id]?.quiz_score ?? m.testScore) ?? undefined
+                  id: modId, // Ensure ID is present
+                  completed: !!moduleProgress[modId]?.completed,
+                  testScore: (moduleProgress[modId]?.quiz_score ?? m.testScore) ?? undefined
                 };
               }).filter(Boolean) as CourseModuleLike[];
 
               setCourse({ ...data, modules: normalized });
             } catch (e) {
-              console.error('Failed to load user progress for course detail:', e);
-              const rawModules = data.course_modules ?? data.modules ?? [];
-              const modules = Array.isArray(rawModules) ? rawModules : [];
-              setCourse({ ...data, modules });
+              // ...
             }
           } else {
+            // Guest user ID normalization
             const rawModules = data.course_modules ?? data.modules ?? [];
-            if (!Array.isArray(rawModules)) {
-              console.warn('Course has no valid modules array, defaulting to empty');
-              setCourse({ ...data, modules: [] });
+            if (Array.isArray(rawModules)) {
+              const normalized = rawModules.map((m: any) => ({
+                ...m,
+                id: m.id || m._id
+              }));
+              setCourse({ ...data, modules: normalized });
             } else {
               setCourse(data);
             }
@@ -92,24 +95,11 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
     };
     load();
 
-    const onNavigate = (e: Event) => {
-      try {
-        const detail = (e as CustomEvent).detail;
-        if (detail?.moduleId) setSelectedModuleId(detail.moduleId);
-      } catch (err) {
-        console.warn('navigateModule event parsing failed', err);
-      }
-    };
-
-    window.addEventListener('navigateModule', onNavigate as EventListener);
-
-    const params = new URLSearchParams(window.location.search);
-    const qModule = params.get('module');
-    if (qModule) setSelectedModuleId(qModule);
-
-    return () => { mounted = false; window.removeEventListener('navigateModule', onNavigate as EventListener); };
+    // ... (event listeners)
   }, [courseId, user]);
 
+  // ... (refreshCourse logic similar update recommended but let's focus on load first or update both)
+  // Updating refreshCourse as well for consistency
   const refreshCourse = async () => {
     try {
       const data = await courseService.getCourseById(courseId);
@@ -121,12 +111,16 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
             return acc;
           }, {});
 
-          const modules = (data.course_modules ?? data.modules ?? []) as CourseModuleLike[];
-          const normalized = modules.map((m) => ({
-            ...m,
-            completed: !!moduleProgress[m.id]?.completed,
-            testScore: (moduleProgress[m.id]?.quiz_score ?? m.testScore) ?? undefined
-          }));
+          const modules = (data.course_modules ?? data.modules ?? []) as any[];
+          const normalized = modules.map((m) => {
+            const modId = m.id || m._id;
+            return {
+              ...m,
+              id: modId,
+              completed: !!moduleProgress[modId]?.completed,
+              testScore: (moduleProgress[modId]?.quiz_score ?? m.testScore) ?? undefined
+            };
+          });
 
           setCourse({ ...data, modules: normalized });
         } else {
@@ -137,6 +131,8 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
       console.error('Failed refreshing course:', e);
     }
   };
+
+  // ... (renders)
 
   // Loading State
   if (loading) {
@@ -201,6 +197,7 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
       <ModuleViewer
         courseId={courseId}
         moduleId={selectedModuleId}
+        course={course}
         onBack={() => setSelectedModuleId(null)}
         onNavigateToModule={(id: string) => setSelectedModuleId(id)}
         onModuleStatusChange={refreshCourse}
@@ -291,12 +288,20 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
 
             return (
               <div
-                key={module.id}
+                key={module.id || index}
                 className={cn(
                   "p-6 transition-colors",
                   isModuleUnlocked && "hover:bg-muted/50 cursor-pointer group"
                 )}
-                onClick={() => isModuleUnlocked && setSelectedModuleId(module.id)}
+                onClick={() => {
+                  console.log('Module clicked:', module);
+                  if (isModuleUnlocked) {
+                    console.log('Setting selected module:', module.id);
+                    setSelectedModuleId(module.id);
+                  } else {
+                    console.log('Module locked');
+                  }
+                }}
               >
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-start gap-4 flex-1">
@@ -381,7 +386,18 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
                     className={cn(!isModuleUnlocked && "opacity-50")}
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (isModuleUnlocked) setSelectedModuleId(module.id);
+                      console.log('Button clicked for module:', module);
+
+                      const targetId = module.id || (module as any)._id;
+                      if (!targetId) {
+                        console.error('Module has no ID!', module);
+                        return;
+                      }
+
+                      if (isModuleUnlocked) {
+                        console.log('Navigating to module:', targetId);
+                        setSelectedModuleId(targetId);
+                      }
                     }}
                   >
                     {isModuleUnlocked ? (

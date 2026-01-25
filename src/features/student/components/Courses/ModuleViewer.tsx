@@ -35,19 +35,20 @@ mermaid.initialize({
 interface ModuleViewerProps {
   courseId: string;
   moduleId: string;
+  course: Course; // Now required
   onBack: () => void;
   onNavigateToModule?: (moduleId: string) => void;
   onModuleStatusChange?: () => void;
 }
 
-export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, onBack, onNavigateToModule, onModuleStatusChange }) => {
+export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, course, onBack, onNavigateToModule, onModuleStatusChange }) => {
   const [activeTab, setActiveTab] = useState<'content' | 'test'>('content');
   const [showTest, setShowTest] = useState(false);
   const { user } = useAuth();
   const [showCertificate, setShowCertificate] = useState(false);
 
-  const [course, setCourse] = useState<Course | null>(null);
-  const [loading, setLoading] = useState(false);
+  // const [course, setCourse] = useState<Course | null>(null); // REMOVED local state
+  // const [loading, setLoading] = useState(false); // REMOVED local loading logic
 
   // Proctoring State
   const [isProctoringActive, setIsProctoringActive] = useState(false);
@@ -121,8 +122,11 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
     if (module?.type === 'final_assessment' || module?.type === 'initial_assessment') {
       setActiveTab('test');
       setShowTest(true);
+      setIsProctoringActive(true); // Enable proctoring automatically
+    } else {
+      setIsProctoringActive(false);
     }
-  }, [module?.id]);
+  }, [module?.id, module?.type]);
 
   useEffect(() => {
     if (activeTab === 'content') {
@@ -142,21 +146,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
     return modules.every((m: Module) => m.completed);
   };
 
-  // Loading State
-  if (loading) {
-    return (
-      <div className="flex flex-col gap-6 p-4 md:p-8 animate-in fade-in duration-500">
-        <Skeleton className="h-8 w-40" />
-        <Card className="border-border/50">
-          <CardContent className="p-8 space-y-4">
-            <Skeleton className="h-8 w-3/4" />
-            <Skeleton className="h-4 w-1/2" />
-            <Skeleton className="h-64 w-full" />
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  // Loading State - Removed as course is passed via props
 
   // Module Not Found
   if (!course || !module) {
@@ -197,7 +187,8 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
   const markModuleCompleted = async (_skipTest = false) => {
     try {
       module.completed = true;
-      setCourse({ ...course });
+      module.completed = true;
+      // setCourse({ ...course }); // Cannot update prop directly, rely on refresh callback
 
       if (user?.id) {
         await courseService.updateProgress(user.id, moduleId, true, module.testScore ?? undefined);
@@ -286,7 +277,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
           moduleTitle={module.title}
           onComplete={handleTestCompletion}
           onBack={() => setShowTest(false)}
-          questions={module.questions || []}
+          questions={module.quiz || []}
         />
         <ProctoringComponent
           isActive={isProctoringActive}

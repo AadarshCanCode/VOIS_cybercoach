@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
-import { ArrowLeft, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, Clock, AlertCircle } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@shared/components/ui/card';
+import { Button } from '@shared/components/ui/button';
+import { Progress } from '@shared/components/ui/progress';
+import { cn } from '@lib/utils';
+import { Alert, AlertDescription, AlertTitle } from '@shared/components/ui/alert';
 
 interface ModuleTestProps {
   moduleId: string;
@@ -70,19 +75,15 @@ export const ModuleTest: React.FC<ModuleTestProps> = ({ moduleId, moduleTitle, o
 
   if (questions.length === 0) {
     return (
-      <div className="p-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-lg shadow-md p-8 text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">No Test Available</h2>
-            <p className="text-gray-600 mb-6">This module currently has no assessment questions. Please check back later.</p>
-            <button
-              onClick={onBack}
-              className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-            >
-              Back to Module
-            </button>
-          </div>
-        </div>
+      <div className="flex flex-col gap-6 p-4 md:p-8 animate-in fade-in duration-500 max-w-4xl mx-auto w-full">
+        <Card className="border-border/50">
+          <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+            <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
+            <h2 className="text-xl font-semibold mb-2">No Test Available</h2>
+            <p className="text-muted-foreground mb-6">This module currently has no assessment questions. Please check back later.</p>
+            <Button onClick={onBack} variant="secondary">Back to Module</Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -92,184 +93,203 @@ export const ModuleTest: React.FC<ModuleTestProps> = ({ moduleId, moduleTitle, o
     const passed = score >= 70;
 
     return (
-      <div className="p-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-lg shadow-md p-8 text-center">
+      <div className="flex flex-col gap-6 p-4 md:p-8 animate-in fade-in duration-500 max-w-4xl mx-auto w-full">
+        <Card className={cn("border-border/50", passed ? "bg-green-500/5 border-green-500/20" : "bg-destructive/5 border-destructive/20")}>
+          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
             <div className="mb-6">
               {passed ? (
-                <CheckCircle className="h-16 w-16 text-green-500 mx-auto" />
+                <div className="h-20 w-20 rounded-full bg-green-500/10 flex items-center justify-center">
+                  <CheckCircle className="h-10 w-10 text-green-500" />
+                </div>
               ) : (
-                <XCircle className="h-16 w-16 text-red-500 mx-auto" />
+                <div className="h-20 w-20 rounded-full bg-destructive/10 flex items-center justify-center">
+                  <XCircle className="h-10 w-10 text-destructive" />
+                </div>
               )}
             </div>
 
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Test Complete!</h2>
-            <div className="text-4xl font-bold text-cyan-600 mb-2">{score}%</div>
-            <p className="text-lg text-gray-600 mb-6">
+            <h2 className="text-2xl font-bold tracking-tight mb-2">Test Complete!</h2>
+            <div className={cn("text-5xl font-black mb-2", passed ? "text-green-500" : "text-destructive")}>
+              {score}%
+            </div>
+            <p className="text-lg text-muted-foreground mb-8">
               {passed ? 'Congratulations! You passed the test.' : 'You need 70% to pass. Try again!'}
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <div className="text-xl font-bold text-gray-900">{answers.filter((answer, index) => answer === questions[index]?.correctAnswer).length}</div>
-                <div className="text-gray-600">Correct</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-md mb-8">
+              <div className="bg-background/50 border border-border p-4 rounded-lg flex flex-col items-center">
+                <div className="text-2xl font-bold text-green-500">{answers.filter((answer, index) => answer === questions[index]?.correctAnswer).length}</div>
+                <div className="text-sm text-muted-foreground">Correct</div>
               </div>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <div className="text-xl font-bold text-gray-900">{questions.length - answers.filter((answer, index) => answer === questions[index]?.correctAnswer).length}</div>
-                <div className="text-gray-600">Incorrect</div>
+              <div className="bg-background/50 border border-border p-4 rounded-lg flex flex-col items-center">
+                <div className="text-2xl font-bold text-destructive">{questions.length - answers.filter((answer, index) => answer === questions[index]?.correctAnswer).length}</div>
+                <div className="text-sm text-muted-foreground">Incorrect</div>
               </div>
             </div>
 
-            <div className="flex justify-center space-x-4">
-              <button
+            <div className="flex gap-4">
+              <Button
                 onClick={() => onComplete(score, answers)}
                 disabled={!passed}
-                className={`px-6 py-3 rounded-lg font-medium ${passed
-                  ? 'bg-green-600 text-white hover:bg-green-700'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  }`}
+                variant={passed ? "default" : "secondary"}
+                className={cn(passed && "bg-green-600 hover:bg-green-700")}
               >
                 {passed ? 'Complete Module' : 'Retake Required'}
-              </button>
-              <button
-                onClick={onBack}
-                className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-              >
+              </Button>
+              <Button onClick={onBack} variant="outline">
                 Back to Module
-              </button>
+              </Button>
             </div>
-          </div>
+          </CardContent>
+        </Card>
 
-          {/* Detailed Results */}
-          <div className="bg-white rounded-lg shadow-md p-6 mt-6">
-            <h3 className="text-xl font-bold text-gray-900 mb-6">Detailed Results</h3>
-            <div className="space-y-4">
-              {questions.map((question, index) => {
-                const userAnswer = answers[index];
-                const isCorrect = userAnswer === question.correctAnswer;
+        {/* Detailed Results */}
+        <Card className="border-border/50">
+          <CardHeader>
+            <CardTitle>Detailed Results</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {questions.map((question, index) => {
+              const userAnswer = answers[index];
+              const isCorrect = userAnswer === question.correctAnswer;
 
-                return (
-                  <div key={index} className={`border rounded-lg p-4 ${isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
-                    <div className="flex items-start space-x-3">
-                      {isCorrect ? (
-                        <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
-                      ) : (
-                        <XCircle className="h-5 w-5 text-red-500 mt-0.5" />
-                      )}
-                      <div className="flex-1">
-                        <p className="font-medium text-gray-900 mb-2">{question.question}</p>
-                        <p className="text-sm text-gray-600 mb-2">
-                          <span className="font-medium">Your answer:</span> {question.options[userAnswer]}
+              return (
+                <div key={index} className={cn(
+                  "border rounded-lg p-4 transition-colors",
+                  isCorrect ? "bg-green-500/5 border-green-500/20" : "bg-destructive/5 border-destructive/20"
+                )}>
+                  <div className="flex items-start gap-3">
+                    {isCorrect ? (
+                      <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
+                    ) : (
+                      <XCircle className="h-5 w-5 text-destructive mt-0.5" />
+                    )}
+                    <div className="flex-1 space-y-2">
+                      <p className="font-medium">{question.question}</p>
+                      <div className="text-sm space-y-1">
+                        <p className="flex gap-2">
+                          <span className="font-medium text-muted-foreground w-24">Your answer:</span>
+                          <span className={isCorrect ? "text-green-500" : "text-destructive"}>
+                            {question.options[userAnswer]}
+                          </span>
                         </p>
                         {!isCorrect && (
-                          <p className="text-sm text-gray-600 mb-2">
-                            <span className="font-medium">Correct answer:</span> {question.options[question.correctAnswer]}
+                          <p className="flex gap-2">
+                            <span className="font-medium text-muted-foreground w-24">Correct:</span>
+                            <span className="text-green-500">
+                              {question.options[question.correctAnswer]}
+                            </span>
                           </p>
                         )}
-                        <p className="text-sm text-gray-700">{question.explanation}</p>
                       </div>
+                      {question.explanation && (
+                        <div className="mt-2 text-sm text-muted-foreground bg-background/50 p-3 rounded border border-border/50">
+                          <span className="font-semibold block mb-1 text-xs uppercase tracking-wider opacity-70">Explanation</span>
+                          {question.explanation}
+                        </div>
+                      )}
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="p-6">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={onBack}
-              className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              <ArrowLeft className="h-5 w-5" />
-              <span>Back</span>
-            </button>
-            <h1 className="text-xl font-bold text-gray-900">{moduleTitle} - Test</h1>
-          </div>
-          <div className="flex items-center space-x-2 text-lg font-medium">
-            <Clock className="h-5 w-5 text-gray-500" />
-            <span className={timeLeft < 120 ? 'text-red-600' : 'text-gray-900'}>
-              {formatTime(timeLeft)}
-            </span>
-          </div>
+    <div className="flex flex-col gap-6 p-4 md:p-8 animate-in fade-in duration-500 max-w-4xl mx-auto w-full">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" onClick={onBack} size="sm" className="-ml-2">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back
+          </Button>
+          <div className="h-6 w-px bg-border hidden md:block"></div>
+          <h1 className="text-xl font-bold tracking-tight hidden md:block">{moduleTitle}</h1>
         </div>
-
-        {/* Progress */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm text-gray-600">Question {currentQuestionIndex + 1} of {questions.length}</span>
-            <span className="text-sm text-gray-600">{Math.round(((currentQuestionIndex + 1) / questions.length) * 100)}% Complete</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className="bg-cyan-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${((currentQuestionIndex + 1) / questions.length) * 100}%` }}
-            ></div>
-          </div>
-        </div>
-
-        {/* Question */}
-        <div className="bg-white rounded-lg shadow-md p-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">{currentQuestion.question}</h2>
-
-          <div className="space-y-3 mb-8">
-            {currentQuestion.options.map((option: string, index: number) => (
-              <button
-                key={index}
-                onClick={() => handleAnswerSelect(index)}
-                className={`w-full text-left p-4 rounded-lg border-2 transition-all ${selectedAnswer === index
-                  ? 'border-cyan-500 bg-cyan-50 text-cyan-900'
-                  : 'border-gray-200 hover:border-gray-300 bg-white'
-                  }`}
-              >
-                <div className="flex items-center space-x-3">
-                  <div className={`w-4 h-4 rounded-full border-2 ${selectedAnswer === index
-                    ? 'border-cyan-500 bg-cyan-500'
-                    : 'border-gray-300'
-                    }`}>
-                    {selectedAnswer === index && (
-                      <div className="w-full h-full rounded-full bg-white scale-50"></div>
-                    )}
-                  </div>
-                  <span className="text-gray-900">{option}</span>
-                </div>
-              </button>
-            ))}
-          </div>
-
-          {/* Navigation */}
-          <div className="flex justify-between">
-            <button
-              onClick={() => {
-                if (currentQuestionIndex > 0) {
-                  setCurrentQuestionIndex(currentQuestionIndex - 1);
-                  setSelectedAnswer(answers[currentQuestionIndex - 1] ?? null);
-                }
-              }}
-              disabled={currentQuestionIndex === 0}
-              className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              Previous
-            </button>
-
-            <button
-              onClick={handleNextQuestion}
-              disabled={selectedAnswer === null}
-              className="px-6 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {currentQuestionIndex === questions.length - 1 ? 'Submit Test' : 'Next Question'}
-            </button>
-          </div>
+        <div className={cn(
+          "flex items-center gap-2 px-3 py-1.5 rounded-full border bg-background font-mono text-sm font-medium",
+          timeLeft < 120 ? "border-destructive/50 text-destructive bg-destructive/5" : "border-border text-muted-foreground"
+        )}>
+          <Clock className="h-4 w-4" />
+          <span>{formatTime(timeLeft)}</span>
         </div>
       </div>
+
+      <div className="space-y-1">
+        <div className="flex justify-between text-xs text-muted-foreground">
+          <span>Question {currentQuestionIndex + 1} of {questions.length}</span>
+          <span>{Math.round(((currentQuestionIndex + 1) / questions.length) * 100)}%</span>
+        </div>
+        <Progress value={((currentQuestionIndex + 1) / questions.length) * 100} className="h-2" />
+      </div>
+
+      {/* Question Card */}
+      <Card className="border-border/50 min-h-[400px] flex flex-col">
+        <CardHeader>
+          <div className="bg-primary/5 text-primary text-xs font-bold px-2 py-1 rounded w-fit mb-2">
+            QUESTION {currentQuestionIndex + 1}
+          </div>
+          <h2 className="text-xl md:text-2xl font-bold leading-tight">{currentQuestion.question}</h2>
+        </CardHeader>
+
+        <CardContent className="flex-1">
+          <div className="grid gap-3">
+            {currentQuestion.options.map((option: string, index: number) => (
+              <div
+                key={index}
+                onClick={() => handleAnswerSelect(index)}
+                className={cn(
+                  "relative flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all hover:bg-muted/50",
+                  selectedAnswer === index
+                    ? "border-primary bg-primary/5 shadow-sm ring-1 ring-primary/20"
+                    : "border-muted bg-card hover:border-primary/50"
+                )}
+              >
+                <div className={cn(
+                  "h-5 w-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors",
+                  selectedAnswer === index ? "border-primary bg-primary" : "border-muted-foreground/30"
+                )}>
+                  {selectedAnswer === index && <div className="h-2 w-2 rounded-full bg-primary-foreground" />}
+                </div>
+                <span className={cn(
+                  "font-medium",
+                  selectedAnswer === index ? "text-primary" : "text-foreground"
+                )}>
+                  {option}
+                </span>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+
+        <CardFooter className="flex justify-between border-t border-border/50 p-6 bg-muted/5">
+          <Button
+            variant="outline"
+            onClick={() => {
+              if (currentQuestionIndex > 0) {
+                setCurrentQuestionIndex(currentQuestionIndex - 1);
+                setSelectedAnswer(answers[currentQuestionIndex - 1] ?? null);
+              }
+            }}
+            disabled={currentQuestionIndex === 0}
+          >
+            Previous
+          </Button>
+
+          <Button
+            onClick={handleNextQuestion}
+            disabled={selectedAnswer === null}
+            className="min-w-[120px]"
+          >
+            {currentQuestionIndex === questions.length - 1 ? 'Submit Test' : 'Next'}
+          </Button>
+        </CardFooter>
+      </Card>
     </div>
   );
 };

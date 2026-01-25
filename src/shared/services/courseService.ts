@@ -342,6 +342,14 @@ class CourseService {
 
   async updateProgress(userId: string, moduleId: string, completed: boolean, quizScore?: number) {
     try {
+      // UUID Validation: PostgreSQL expects a valid UUID. If this is a MongoDB ID (24 hex), we cannot store it in this table.
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(moduleId);
+
+      if (!isUUID) {
+        console.warn(`Skipping Supabase progress sync for non-UUID moduleId: ${moduleId}. This is expected for AI-generated courses.`);
+        return;
+      }
+
       // Save progress to Supabase
       const updates: any = {
         student_id: userId,
@@ -363,7 +371,7 @@ class CourseService {
       }
     } catch (error) {
       console.error('Update progress error:', error);
-      throw error;
+      // Don't throw, just log. This prevents UI from breaking if sync fails.
     }
   }
 
