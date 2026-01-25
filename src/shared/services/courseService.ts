@@ -482,13 +482,21 @@ class CourseService {
   // Assessment Submission
   async submitAssessment(moduleId: string, answers: Record<string, number>, proctoringSessionId?: string) {
     try {
+      // Get the current session token from Supabase client
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch('/api/student/assessment/submit', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          // Header authorization is handled by the browser cookie or intercepted if using a token approach
-          // Assuming cookie-based session or global interceptor adds token
-        },
+        headers,
         body: JSON.stringify({
           moduleId,
           answers,
