@@ -207,7 +207,7 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
         description: c.description || 'No description available.',
         disclaimer: 'This mission is dynamically generated. Exercise caution during practical sessions.',
         difficulty: (c.difficulty ? (c.difficulty.charAt(0).toUpperCase() + c.difficulty.slice(1)) : 'Beginner') as CourseData['difficulty'],
-        duration: c.estimated_hours ? `${c.estimated_hours} hours` : 'Self-paced',
+        duration: c.duration || (c.estimated_hours ? `${c.estimated_hours} hours` : 'Self-paced'),
         skills: c.category ? [c.category] : ['Cybersecurity']
       }));
     }
