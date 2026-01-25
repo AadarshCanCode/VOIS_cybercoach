@@ -82,7 +82,7 @@ export const VideoLibrary: React.FC = () => {
   const DEFAULT_PLACEHOLDER = '/video-placeholder.png';
 
   const tabs = [
-    { id: 'all', label: 'All Videos', icon: Database },
+    { id: 'all', label: 'All Lessons', icon: Database },
     { id: 'vu', label: 'University', icon: Shield },
     { id: 'external', label: 'External', icon: Globe },
   ];
@@ -94,7 +94,7 @@ export const VideoLibrary: React.FC = () => {
         <Card className="border-border/50">
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
             <Film className="h-12 w-12 text-muted-foreground/50 mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No Videos Found</h3>
+            <h3 className="text-lg font-semibold mb-2">No Lessons Found</h3>
             <p className="text-muted-foreground text-sm">Try adjusting your search or filters</p>
           </CardContent>
         </Card>
@@ -196,7 +196,7 @@ export const VideoLibrary: React.FC = () => {
           className="w-fit -ml-2 text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Video Library
+          Back to Lessons
         </Button>
 
         <Card className="border-border/50 overflow-hidden">
@@ -245,20 +245,20 @@ export const VideoLibrary: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Video Library</h1>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Lesson Library</h1>
           <p className="text-muted-foreground">Training resources and educational content</p>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-card border border-border/50">
             <Film className="h-5 w-5 text-primary" />
-            <span className="text-sm font-medium">{allVideos.length} Videos</span>
+            <span className="text-sm font-medium">{allVideos.length} Lessons</span>
           </div>
           <Button
             variant="outline"
             size="icon"
             onClick={loadVideos}
             className="h-10 w-10"
-            title="Refresh Videos"
+            title="Refresh Lessons"
           >
             <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
           </Button>
@@ -293,7 +293,7 @@ export const VideoLibrary: React.FC = () => {
           <div className="relative flex-1 sm:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search videos..."
+              placeholder="Search lessons..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-9 h-10"
@@ -362,7 +362,7 @@ export const VideoLibrary: React.FC = () => {
           <Card className="border-destructive/20 bg-destructive/5">
             <CardContent className="flex flex-col items-center justify-center py-16 text-center">
               <AlertTriangle className="h-12 w-12 text-destructive mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Failed to Load Videos</h3>
+              <h3 className="text-lg font-semibold mb-2">Failed to Load Lessons</h3>
               <p className="text-muted-foreground mb-4">{error}</p>
               <Button onClick={loadVideos} variant="outline">
                 <RefreshCw className="mr-2 h-4 w-4" />

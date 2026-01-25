@@ -74,10 +74,10 @@ export const Profile: React.FC = () => {
     : 0;
 
   const achievements = [
-    { id: 1, title: 'First Steps', description: 'Enrolled in your first course', icon: Target, earned: stats.coursesEnrolled > 0 },
-    { id: 2, title: 'Knowledge Seeker', description: 'Completed 3 course modules', icon: BookOpen, earned: stats.completedModules >= 3 },
-    { id: 3, title: 'Lab Expert', description: 'Completed 5 hands-on labs', icon: Star, earned: false },
-    { id: 4, title: 'Security Pro', description: 'Earned your first certificate', icon: Award, earned: stats.certificatesEarned > 0 },
+    { id: 1, title: 'Getting Started', description: 'Enrolled in your first course', icon: Target, earned: stats.coursesEnrolled > 0 },
+    { id: 2, title: 'Active Learner', description: 'Completed 3 course modules', icon: BookOpen, earned: stats.completedModules >= 3 },
+    { id: 3, title: 'Lab Master', description: 'Completed 5 hands-on labs', icon: Star, earned: false },
+    { id: 4, title: 'Certified', description: 'Earned your first certificate', icon: Award, earned: stats.certificatesEarned > 0 },
   ];
 
   return (
@@ -106,7 +106,7 @@ export const Profile: React.FC = () => {
               <div className="flex flex-wrap items-center gap-3">
                 <h1 className="text-3xl font-bold tracking-tight">{vuDetails?.name || user.name}</h1>
                 <Badge variant="outline" className="text-primary border-primary/20 bg-primary/5 uppercase tracking-wider text-[10px]">
-                  AUTHORIZED OPERATIVE
+                  ACTIVE STUDENT
                 </Badge>
               </div>
 
@@ -126,7 +126,7 @@ export const Profile: React.FC = () => {
             <div className="flex gap-3 w-full md:w-auto">
               <div className="flex-1 md:flex-none text-right px-4">
                 <div className="text-3xl font-bold text-primary">{missionReadiness}%</div>
-                <div className="text-xs text-muted-foreground uppercase tracking-wider">Readiness</div>
+                <div className="text-xs text-muted-foreground uppercase tracking-wider">Course Progress</div>
               </div>
             </div>
           </div>
@@ -139,28 +139,28 @@ export const Profile: React.FC = () => {
           <CardContent className="p-6 flex flex-col items-center text-center space-y-2">
             <BookOpen className="w-8 h-8 text-primary mb-2" />
             <div className="text-2xl font-bold">{stats.completedModules}</div>
-            <p className="text-xs text-muted-foreground uppercase tracking-wider">Modules Cleared</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wider">Modules Completed</p>
           </CardContent>
         </Card>
         <Card className="shadow-sm hover:border-primary/50 transition-colors">
           <CardContent className="p-6 flex flex-col items-center text-center space-y-2">
             <Target className="w-8 h-8 text-primary mb-2" />
             <div className="text-2xl font-bold">{Math.floor(stats.completedModules / 3)}</div>
-            <p className="text-xs text-muted-foreground uppercase tracking-wider">Simulations</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wider">Labs</p>
           </CardContent>
         </Card>
         <Card className="shadow-sm hover:border-primary/50 transition-colors">
           <CardContent className="p-6 flex flex-col items-center text-center space-y-2">
             <Clock className="w-8 h-8 text-primary mb-2" />
             <div className="text-2xl font-bold">{stats.hoursActive}h</div>
-            <p className="text-xs text-muted-foreground uppercase tracking-wider">Field Time</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wider">Learn Time</p>
           </CardContent>
         </Card>
         <Card className="shadow-sm hover:border-primary/50 transition-colors">
           <CardContent className="p-6 flex flex-col items-center text-center space-y-2">
             <Award className="w-8 h-8 text-primary mb-2" />
             <div className="text-2xl font-bold">{stats.certificatesEarned}</div>
-            <p className="text-xs text-muted-foreground uppercase tracking-wider">Commendations</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wider">Certificates</p>
           </CardContent>
         </Card>
       </div>
@@ -171,9 +171,9 @@ export const Profile: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Activity className="w-5 h-5 text-primary" />
-              Combat Capabilities
+              Skills Overview
             </CardTitle>
-            <CardDescription>Track your operational proficiency</CardDescription>
+            <CardDescription>Track your learning progress</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {loading ? (
@@ -194,7 +194,7 @@ export const Profile: React.FC = () => {
             ) : (
               <div className="flex flex-col items-center justify-center py-10 text-center text-muted-foreground">
                 <Shield className="w-12 h-12 mb-3 opacity-20" />
-                <p>No verified field operations detected.</p>
+                <p>No labs completed yet.</p>
                 <p className="text-xs mt-1">Ensure your VU account is connected.</p>
               </div>
             )}
@@ -208,7 +208,7 @@ export const Profile: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Star className="w-5 h-5 text-primary" />
-                Service Ribbons
+                Service Achievements
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -290,7 +290,7 @@ export const Profile: React.FC = () => {
                   {courseProgress.some(p => p.progress === 100) ? (
                     <div className="animate-pulse flex flex-col items-center">
                       <Award className="w-8 h-8 text-primary mb-2" />
-                      <p>Processing Certification...</p>
+                      <p>Generating Certificate...</p>
                     </div>
                   ) : (
                     <p>No certificates earned yet.</p>

@@ -28,7 +28,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
         { id: 'courses', label: 'Courses', icon: BookOpen },
         { id: 'labs', label: 'Labs', icon: Terminal },
         { id: 'community', label: 'Community', icon: Users },
-        { id: 'videos', label: 'Videos', icon: Video },
+        { id: 'videos', label: 'Lessons', icon: Video },
     ];
 
 

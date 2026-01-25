@@ -56,18 +56,18 @@ export function AppSidebar({ activeTab, onTabChange, ...props }: AppSidebarProps
                     icon: BookOpen,
                 },
                 {
-                    title: "Labs",
+                    title: "Practice Labs",
                     id: "labs",
                     icon: Terminal,
                 },
             ],
         },
         {
-            title: "Community & Help",
+            title: "Community",
             items: [
 
                 {
-                    title: "Videos",
+                    title: "Lessons",
                     id: "videos",
                     icon: Video,
                 },
