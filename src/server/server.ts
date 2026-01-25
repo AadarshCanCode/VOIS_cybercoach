@@ -1,6 +1,7 @@
 import express, { type Request, type Response } from 'express';
 import cors from 'cors';
-import 'dotenv/config';
+import dotenv from 'dotenv';
+dotenv.config({ quiet: true } as any);
 
 import studentRoutes from './features/student/routes/index.js';
 import imagekitRoutes from './routes/imagekit.routes.js';

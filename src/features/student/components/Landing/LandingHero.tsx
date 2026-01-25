@@ -3,6 +3,7 @@ import { ArrowRight } from 'lucide-react';
 import { useAuth } from '@context/AuthContext';
 import { useRouter } from 'next/navigation';
 import FoundersTooltip from './FoundersTooltip';
+import { BackgroundCircles } from '@shared/components/ui/background-circles';
 
 export const LandingHero: React.FC = () => {
     const { user } = useAuth();
@@ -17,7 +18,7 @@ export const LandingHero: React.FC = () => {
     };
 
     return (
-        <section className="relative pt-32 pb-32 px-6 flex items-center overflow-visible">
+        <BackgroundCircles variant="primary" className="pt-32 pb-32 px-6">
             <div className="max-w-5xl mx-auto flex flex-col items-center text-center relative z-10 w-full space-y-10">
 
                 <div className="space-y-6">
@@ -43,12 +44,12 @@ export const LandingHero: React.FC = () => {
 
                     <div className="flex flex-col items-center justify-center gap-4">
                         <FoundersTooltip />
-                        <span className="text-zinc-500 text-sm tracking-wide">
+                        <span className="text-white text-sm tracking-wide">
                             Makers of this beautiful platform
                         </span>
                     </div>
                 </div>
             </div>
-        </section>
+        </BackgroundCircles>
     );
 };
