@@ -1,175 +1,132 @@
--- Enable the UUID extension
-create extension if not exists "uuid-ossp";
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
 
--- Set up auth schema
-create schema if not exists auth;
-
--- Enable RLS
-alter table auth.users enable row level security;
-
--- Create tables
-create table if not exists public.courses (
-  id uuid default uuid_generate_v4() primary key,
-  title text not null,
-  description text not null,
-  content_json_url text,
-  teacher_id uuid references auth.users(id),
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+CREATE TABLE public.admin_audit_logs (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  admin_id uuid,
+  action text NOT NULL,
+  target_user_id uuid,
+  details jsonb,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT admin_audit_logs_pkey PRIMARY KEY (id),
+  CONSTRAINT admin_audit_logs_admin_id_fkey FOREIGN KEY (admin_id) REFERENCES public.profiles(id),
+  CONSTRAINT admin_audit_logs_target_user_id_fkey FOREIGN KEY (target_user_id) REFERENCES public.profiles(id)
 );
-
-create table if not exists public.modules (
-  id uuid default uuid_generate_v4() primary key,
-  title text not null,
-  description text not null,
-  content text not null,
-  course_id uuid references public.courses(id) on delete cascade,
-  video_url text,
-  lab_url text,
-  "order" integer not null,
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+CREATE TABLE public.certificates (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  student_id uuid,
+  course_id uuid,
+  issued_at timestamp with time zone DEFAULT now(),
+  course_name text,
+  certificate_url text,
+  CONSTRAINT certificates_pkey PRIMARY KEY (id),
+  CONSTRAINT certificates_student_id_fkey FOREIGN KEY (student_id) REFERENCES auth.users(id),
+  CONSTRAINT certificates_course_id_fkey FOREIGN KEY (course_id) REFERENCES public.courses(id)
 );
-
-create table if not exists public.user_progress (
-  id uuid default uuid_generate_v4() primary key,
-  user_id uuid references auth.users(id) on delete cascade,
-  course_id uuid references public.courses(id) on delete cascade,
-  module_id uuid references public.modules(id) on delete cascade,
-  completed boolean default false,
-  quiz_score integer,
-  source text,
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  unique(user_id, module_id)
+CREATE TABLE public.courses (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  title text NOT NULL,
+  description text,
+  created_by uuid,
+  is_published boolean DEFAULT false,
+  certificate_enabled boolean DEFAULT false,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT courses_pkey PRIMARY KEY (id),
+  CONSTRAINT courses_created_by_fkey FOREIGN KEY (created_by) REFERENCES auth.users(id)
 );
-
-create table if not exists public.assessment_responses (
-  id uuid default uuid_generate_v4() primary key,
-  attempt_id uuid,
-  user_id uuid references auth.users(id) on delete cascade,
-  question_id text not null,
-  selected_answer integer not null,
-  confidence_level integer not null,
-  is_correct boolean not null,
-  time_taken_seconds integer not null,
-  context text not null,
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+CREATE TABLE public.enrollments (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  student_id uuid,
+  course_id uuid,
+  enrolled_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT enrollments_pkey PRIMARY KEY (id),
+  CONSTRAINT enrollments_student_id_fkey FOREIGN KEY (student_id) REFERENCES auth.users(id),
+  CONSTRAINT enrollments_course_id_fkey FOREIGN KEY (course_id) REFERENCES public.courses(id)
 );
-
-create table if not exists public.user_certificates (
-  id uuid default uuid_generate_v4() primary key,
-  user_id uuid references auth.users(id) on delete cascade,
-  course_name text not null,
-  issued_date timestamp with time zone not null,
-  certificate_url text not null,
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+CREATE TABLE public.generation_jobs (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  course_title text NOT NULL,
+  status text NOT NULL DEFAULT 'PENDING'::text,
+  progress integer DEFAULT 0,
+  current_module text,
+  metadata jsonb,
+  results jsonb,
+  error text,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  created_by uuid,
+  CONSTRAINT generation_jobs_pkey PRIMARY KEY (id),
+  CONSTRAINT generation_jobs_created_by_fkey FOREIGN KEY (created_by) REFERENCES auth.users(id)
 );
-
--- Set up RLS policies
-alter table public.courses enable row level security;
-alter table public.modules enable row level security;
-alter table public.user_progress enable row level security;
-alter table public.assessment_responses enable row level security;
-alter table public.user_certificates enable row level security;
-
--- Courses policies
-create policy "Public courses are viewable by everyone"
-  on public.courses for select
-  using (true);
-
-create policy "Teachers can insert courses"
-  on public.courses for insert
-  with check (auth.uid() in (
-    select id from auth.users where role = 'teacher'
-  ));
-
-create policy "Teachers can update their own courses"
-  on public.courses for update
-  using (auth.uid() = teacher_id);
-
--- Modules policies
-create policy "Everyone can view modules"
-  on public.modules for select
-  using (true);
-
-create policy "Teachers can insert modules to their courses"
-  on public.modules for insert
-  with check (
-    exists (
-      select 1 from public.courses 
-      where id = course_id 
-      and teacher_id = auth.uid()
-    )
-  );
-
-create policy "Teachers can update modules in their courses"
-  on public.modules for update
-  using (
-    exists (
-      select 1 from public.courses 
-      where id = course_id 
-      and teacher_id = auth.uid()
-    )
-  );
-
--- User progress policies
-create policy "Users can view their own progress"
-  on public.user_progress for select
-  using (auth.uid() = user_id);
-
-create policy "Users can update their own progress"
-  on public.user_progress for insert
-  with check (auth.uid() = user_id);
-
-create policy "Users can update their own progress"
-  on public.user_progress for update
-  using (auth.uid() = user_id);
-
--- Assessment responses policies
-create policy "Users can view their own responses"
-  on public.assessment_responses for select
-  using (auth.uid() = user_id);
-
-create policy "Users can insert their own responses"
-  on public.assessment_responses for insert
-  with check (auth.uid() = user_id);
-
--- Certificates policies
-create policy "Users can view their own certificates"
-  on public.user_certificates for select
-  using (auth.uid() = user_id);
-
-create policy "Users can insert their own certificates"
-  on public.user_certificates for insert
-  with check (auth.uid() = user_id);
-
--- Functions
-create or replace function public.get_module_completion(course_id uuid, user_id uuid)
-returns table (
-  completed_count bigint,
-  total_count bigint,
-  progress numeric
-)
-language sql
-security definer
-as $$
-  with counts as (
-    select 
-      count(*) filter (where up.completed) as completed,
-      count(*) as total
-    from public.modules m
-    left join public.user_progress up 
-      on up.module_id = m.id 
-      and up.user_id = user_id
-    where m.course_id = course_id
-  )
-  select
-    completed,
-    total,
-    case 
-      when total = 0 then 0
-      else round((completed::numeric / total::numeric) * 100, 2)
-    end as progress
-  from counts;
-$$;
+CREATE TABLE public.lab_completions (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  student_id uuid NOT NULL,
+  lab_id text NOT NULL,
+  completed_at timestamp with time zone NOT NULL DEFAULT now(),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT lab_completions_pkey PRIMARY KEY (id),
+  CONSTRAINT lab_completions_student_id_fkey FOREIGN KEY (student_id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.module_progress (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  student_id uuid,
+  module_id uuid,
+  completed boolean DEFAULT false,
+  completed_at timestamp with time zone,
+  CONSTRAINT module_progress_pkey PRIMARY KEY (id),
+  CONSTRAINT module_progress_student_id_fkey FOREIGN KEY (student_id) REFERENCES auth.users(id),
+  CONSTRAINT module_progress_module_id_fkey FOREIGN KEY (module_id) REFERENCES public.modules(id)
+);
+CREATE TABLE public.modules (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  course_id uuid,
+  title text NOT NULL,
+  content_markdown text NOT NULL,
+  module_order integer NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  topics jsonb,
+  CONSTRAINT modules_pkey PRIMARY KEY (id),
+  CONSTRAINT modules_course_id_fkey FOREIGN KEY (course_id) REFERENCES public.courses(id)
+);
+CREATE TABLE public.profiles (
+  id uuid NOT NULL,
+  full_name text,
+  role text NOT NULL DEFAULT 'student'::text CHECK (role = ANY (ARRAY['admin'::text, 'teacher'::text, 'student'::text])),
+  created_at timestamp with time zone DEFAULT now(),
+  is_active boolean DEFAULT true,
+  CONSTRAINT profiles_pkey PRIMARY KEY (id),
+  CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.quiz_attempts (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  student_id uuid NOT NULL,
+  module_id uuid NOT NULL,
+  score integer NOT NULL DEFAULT 0 CHECK (score >= 0 AND score <= 100),
+  passed boolean NOT NULL DEFAULT false,
+  answers jsonb NOT NULL DEFAULT '{}'::jsonb,
+  proctoring_session_id text,
+  violation_count integer DEFAULT 0,
+  completed_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT quiz_attempts_pkey PRIMARY KEY (id),
+  CONSTRAINT quiz_attempts_student_id_fkey FOREIGN KEY (student_id) REFERENCES auth.users(id),
+  CONSTRAINT quiz_attempts_module_id_fkey FOREIGN KEY (module_id) REFERENCES public.modules(id)
+);
+CREATE TABLE public.quizzes (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  module_id uuid,
+  question text NOT NULL,
+  options jsonb NOT NULL,
+  correct_option integer NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT quizzes_pkey PRIMARY KEY (id),
+  CONSTRAINT quizzes_module_id_fkey FOREIGN KEY (module_id) REFERENCES public.modules(id)
+);
+CREATE TABLE public.teacher_details (
+  id uuid NOT NULL,
+  specialization text,
+  bio text,
+  signature_url text,
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT teacher_details_pkey PRIMARY KEY (id),
+  CONSTRAINT teacher_details_id_fkey FOREIGN KEY (id) REFERENCES public.profiles(id)
+);
