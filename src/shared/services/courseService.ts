@@ -479,6 +479,34 @@ class CourseService {
       throw error;
     }
   }
+  // Assessment Submission
+  async submitAssessment(moduleId: string, answers: Record<string, number>, proctoringSessionId?: string) {
+    try {
+      const response = await fetch('/api/student/assessment/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Header authorization is handled by the browser cookie or intercepted if using a token approach
+          // Assuming cookie-based session or global interceptor adds token
+        },
+        body: JSON.stringify({
+          moduleId,
+          answers,
+          proctoringSessionId
+        })
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Submission failed');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Submit assessment error:', error);
+      throw error;
+    }
+  }
 }
 
 export const courseService = new CourseService();

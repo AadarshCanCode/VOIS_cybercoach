@@ -4,7 +4,7 @@ import { ArrowLeft, CheckCircle, XCircle, Clock } from 'lucide-react';
 interface ModuleTestProps {
   moduleId: string;
   moduleTitle: string;
-  onComplete: (score: number) => void;
+  onComplete: (score: number, answers: number[]) => void;
   onBack: () => void;
   questions?: { question: string; options: string[]; correctAnswer: number; explanation?: string }[];
 }
@@ -122,7 +122,7 @@ export const ModuleTest: React.FC<ModuleTestProps> = ({ moduleId, moduleTitle, o
 
             <div className="flex justify-center space-x-4">
               <button
-                onClick={() => onComplete(score)}
+                onClick={() => onComplete(score, answers)}
                 disabled={!passed}
                 className={`px-6 py-3 rounded-lg font-medium ${passed
                   ? 'bg-green-600 text-white hover:bg-green-700'
