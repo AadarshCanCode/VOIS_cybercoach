@@ -186,19 +186,19 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
   // Check if a module can be accessed (prerequisites met)
   const canAccessModule = (moduleIndex: number): boolean => {
     if (moduleIndex < 0 || moduleIndex >= allModules.length) return false;
-    
+
     // First module is always accessible
     if (moduleIndex === 0) return true;
-    
+
     // Admin can access all modules
     if (user?.role === 'admin') return true;
-    
+
     // Check if previous module is completed
     const previousModule = allModules[moduleIndex - 1];
     if (!previousModule?.completed) {
       return false;
     }
-    
+
     // For modules with quizzes, check if minimum score is met (70%)
     if (previousModule.testScore !== undefined && previousModule.testScore < 70) {
       // Allow if it's an initial assessment (can proceed even if failed)
@@ -207,7 +207,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
       }
       return false;
     }
-    
+
     return true;
   };
 
@@ -220,12 +220,12 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
 
       const nextIndex = currentIndex + 1;
       const next = allModules[nextIndex];
-      
+
       // Validate prerequisites before navigating
       if (!canAccessModule(nextIndex)) {
         const previousModule = allModules[currentIndex];
         let message = 'Cannot proceed to next module. ';
-        
+
         if (!previousModule.completed) {
           message += 'Please complete the current module first.';
         } else if (previousModule.testScore !== undefined && previousModule.testScore < 70) {
@@ -233,7 +233,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
         } else {
           message += 'Prerequisites not met.';
         }
-        
+
         alert(message);
         return;
       }
@@ -254,7 +254,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
       if (user?.id && user.role !== 'admin' && !module.testScore) {
         const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.VITE_API_URL || 'http://localhost:4000';
         const token = (await supabase.auth.getSession()).data.session?.access_token;
-        
+
         try {
           const response = await fetch(`${backendUrl}/api/student/experience/${courseId}/${moduleId}`, {
             headers: token ? { Authorization: `Bearer ${token}` } : {}
@@ -329,13 +329,36 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
           }
         });
 
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/625e3bb0-0cfe-45c3-b3c4-22d6b96e2361', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId: 'debug-session',
+            runId: 'pre-fix',
+            hypothesisId: 'H1',
+            location: 'ModuleViewer.tsx:handleTestCompletion',
+            message: 'Before submitAssessment',
+            data: {
+              courseId,
+              moduleId,
+              score,
+              answersLength: answers.length,
+              answersMapKeys: Object.keys(answersMap),
+              hasProctoringSessionId: !!proctoringSessionId
+            },
+            timestamp: Date.now()
+          })
+        }).catch(() => { });
+        // #endregion
+
         // If the map is empty (no IDs), we can't easily grade securely by ID.
         // However, `courseService.updateProgress` (legacy) works.
         // Let's try to submit. IF questions don't have IDs, this map is empty.
 
         // Temporary: Fallback to legacy behavior if IDs are missing, BUT try new route first
         if (Object.keys(answersMap).length > 0) {
-          const result = await courseService.submitAssessment(moduleId, answersMap, proctoringSessionId);
+          await courseService.submitAssessment(moduleId, answersMap, proctoringSessionId);
           if (onModuleStatusChange) onModuleStatusChange();
           // Rebalance learning path after success
           await learningPathService.rebalance(user.id, courseId);
@@ -344,6 +367,13 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
           await courseService.updateProgress(user.id, moduleId, true, score);
           await learningPathService.rebalance(user.id, courseId);
           if (onModuleStatusChange) onModuleStatusChange();
+        }
+
+        // Auto-navigate for initial assessments
+        if (module.type === 'initial_assessment') {
+          setTimeout(() => {
+            goToNextModule();
+          }, 500);
         }
       }
     } catch (e) {
@@ -607,7 +637,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
                   Retake Test
                 </Button>
                 {currentIndex < allModules.length - 1 && (
-                  <Button 
+                  <Button
                     onClick={goToNextModule}
                     disabled={!canAccessModule(currentIndex + 1)}
                   >

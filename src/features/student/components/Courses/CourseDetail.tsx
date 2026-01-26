@@ -69,6 +69,31 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
                 };
               }).filter(Boolean) as CourseModuleLike[];
 
+              // #region agent log
+              fetch('http://127.0.0.1:7242/ingest/625e3bb0-0cfe-45c3-b3c4-22d6b96e2361', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  sessionId: 'debug-session',
+                  runId: 'pre-fix',
+                  hypothesisId: 'H2',
+                  location: 'CourseDetail.tsx:load',
+                  message: 'Normalized modules with progress',
+                  data: {
+                    courseId,
+                    userId: user.id,
+                    moduleProgressKeys: Object.keys(moduleProgress || {}),
+                    modules: normalized.map(m => ({
+                      id: m.id,
+                      completed: m.completed,
+                      testScore: m.testScore
+                    }))
+                  },
+                  timestamp: Date.now()
+                })
+              }).catch(() => {});
+              // #endregion
+
               setCourse({ ...data, modules: normalized });
             } catch (e) {
               // ...
@@ -121,6 +146,31 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
               testScore: (moduleProgress[modId]?.quiz_score ?? m.testScore) ?? undefined
             };
           });
+
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/625e3bb0-0cfe-45c3-b3c4-22d6b96e2361', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sessionId: 'debug-session',
+              runId: 'pre-fix',
+              hypothesisId: 'H3',
+              location: 'CourseDetail.tsx:refreshCourse',
+              message: 'Refreshed modules with progress',
+              data: {
+                courseId,
+                userId: user.id,
+                moduleProgressKeys: Object.keys(moduleProgress || {}),
+                modules: normalized.map(m => ({
+                  id: m.id,
+                  completed: m.completed,
+                  testScore: m.testScore
+                }))
+              },
+              timestamp: Date.now()
+            })
+          }).catch(() => {});
+          // #endregion
 
           setCourse({ ...data, modules: normalized });
         } else {

@@ -51,31 +51,33 @@ export class ProgressService {
             }
         }
 
-        // For UUID modules or if MongoDB didn't have it, check Supabase
-        try {
-            const { data, error } = await supabase
-                .from('module_progress')
-                .select('*')
-                .eq('student_id', studentId)
-                .eq('module_id', moduleId)
-                .maybeSingle();
+        // For UUID modules, check Supabase
+        if (isUUID) {
+            try {
+                const { data, error } = await supabase
+                    .from('module_progress')
+                    .select('*')
+                    .eq('student_id', studentId)
+                    .eq('module_id', moduleId)
+                    .maybeSingle();
 
-            if (error && error.code !== 'PGRST116') { // PGRST116 is "not found", which is OK
-                logger.error('Error fetching Supabase progress', error);
-                return null;
-            }
+                if (error && error.code !== 'PGRST116') { // PGRST116 is "not found", which is OK
+                    logger.error('Error fetching Supabase progress', error);
+                    return null;
+                }
 
-            if (data) {
-                return {
-                    moduleId: data.module_id,
-                    completed: data.completed,
-                    quizScore: data.quiz_score || undefined,
-                    completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
-                    updatedAt: data.completed_at ? new Date(data.completed_at) : undefined
-                };
+                if (data) {
+                    return {
+                        moduleId: data.module_id,
+                        completed: data.completed,
+                        quizScore: data.quiz_score || undefined,
+                        completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
+                        updatedAt: data.completed_at ? new Date(data.completed_at) : undefined
+                    };
+                }
+            } catch (error) {
+                logger.error('Error fetching Supabase progress', error instanceof Error ? error : new Error(String(error)));
             }
-        } catch (error) {
-            logger.error('Error fetching Supabase progress', error instanceof Error ? error : new Error(String(error)));
         }
 
         return null;

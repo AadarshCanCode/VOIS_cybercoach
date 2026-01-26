@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, CheckCircle, XCircle, Clock, AlertCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, Clock, Shield } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@shared/components/ui/card';
 import { Button } from '@shared/components/ui/button';
 import { Progress } from '@shared/components/ui/progress';
@@ -82,16 +82,20 @@ export const ModuleTest: React.FC<ModuleTestProps> = ({ moduleId, moduleTitle, o
 
     return (
       <div className="flex flex-col gap-6 p-4 md:p-8 animate-in fade-in duration-500 max-w-4xl mx-auto w-full">
-        <Card className={cn("border-border/50", canProceed ? "bg-green-500/5 border-green-500/20" : "bg-destructive/5 border-destructive/20")}>
+        <Card className={cn(
+          "border-border/50",
+          isInitialAssessment ? "bg-primary/5 border-primary/20" :
+            passed ? "bg-green-500/5 border-green-500/20" : "bg-destructive/5 border-destructive/20"
+        )}>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
             <div className="mb-6">
-              {passed ? (
+              {isInitialAssessment ? (
+                <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Shield className="h-10 w-10 text-primary" />
+                </div>
+              ) : passed ? (
                 <div className="h-20 w-20 rounded-full bg-green-500/10 flex items-center justify-center">
                   <CheckCircle className="h-10 w-10 text-green-500" />
-                </div>
-              ) : isInitialAssessment ? (
-                <div className="h-20 w-20 rounded-full bg-yellow-500/10 flex items-center justify-center">
-                  <AlertCircle className="h-10 w-10 text-yellow-500" />
                 </div>
               ) : (
                 <div className="h-20 w-20 rounded-full bg-destructive/10 flex items-center justify-center">
@@ -100,8 +104,10 @@ export const ModuleTest: React.FC<ModuleTestProps> = ({ moduleId, moduleTitle, o
               )}
             </div>
 
-            <h2 className="text-2xl font-bold tracking-tight mb-2">Test Complete!</h2>
-            <div className={cn("text-5xl font-black mb-2", passed ? "text-green-500" : isInitialAssessment ? "text-yellow-500" : "text-destructive")}>
+            <h2 className="text-2xl font-bold tracking-tight mb-2">
+              {isInitialAssessment ? 'Assessment Complete!' : 'Test Complete!'}
+            </h2>
+            <div className={cn("text-5xl font-black mb-2", isInitialAssessment ? "text-primary" : passed ? "text-green-500" : "text-destructive")}>
               {score}%
             </div>
             <p className="text-lg text-muted-foreground mb-8">
@@ -124,9 +130,12 @@ export const ModuleTest: React.FC<ModuleTestProps> = ({ moduleId, moduleTitle, o
                 onClick={() => onComplete(score, answers)}
                 disabled={!canProceed}
                 variant={canProceed ? "default" : "secondary"}
-                className={cn(passed && "bg-green-600 hover:bg-green-700", !passed && isInitialAssessment && "bg-yellow-600 hover:bg-yellow-700")}
+                className={cn(
+                  isInitialAssessment ? "bg-primary hover:bg-primary/90" :
+                    passed ? "bg-green-600 hover:bg-green-700" : ""
+                )}
               >
-                {canProceed ? 'Complete Module' : 'Retake Required'}
+                {isInitialAssessment ? 'Begin Your Journey' : canProceed ? 'Complete Module' : 'Retake Required'}
               </Button>
               <Button onClick={onBack} variant="outline">
                 Back to Module
