@@ -80,7 +80,7 @@ export function DashboardHeader({ activeTab, onTabChange }: DashboardHeaderProps
                                 <p className="text-sm font-medium text-foreground">{user?.name}</p>
                             </div>
                             <Avatar className="h-8 w-8 border border-border">
-                                <AvatarImage src={user?.avatar_url || ""} />
+                                {user?.avatar_url && <AvatarImage src={user.avatar_url} />}
                                 <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
                                     {user?.name?.split(' ').map((n: string) => n[0]).join('') || 'U'}
                                 </AvatarFallback>

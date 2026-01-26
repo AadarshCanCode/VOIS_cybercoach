@@ -159,7 +159,7 @@ export const CommunityPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                 <form onSubmit={handlePostSubmit}>
                                     <div className="flex gap-4">
                                         <Avatar className="h-10 w-10">
-                                            <AvatarImage src={user?.avatar_url} />
+                                            {user?.avatar_url && <AvatarImage src={user.avatar_url} />}
                                             <AvatarFallback>{getInitials(user?.name || 'Student')}</AvatarFallback>
                                         </Avatar>
                                         <div className="flex-1 space-y-4">
