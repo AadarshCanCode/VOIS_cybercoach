@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import mermaid from 'mermaid';
 import { labs } from '@data/labs';
 import { ArrowLeft, ArrowRight, FileText, CheckCircle, Award, Terminal, Play, Shield, ChevronRight } from 'lucide-react';
@@ -11,6 +11,7 @@ import { learningPathService } from '../../../../shared/services/learningPathSer
 import { useAuth } from '@context/AuthContext';
 import { useExperienceTracker } from '../../../../shared/hooks/useExperienceTracker';
 import { useProctoring } from '../../../../shared/hooks/useProctoring';
+import { supabase } from '@lib/supabase';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@components/ui/card';
 import { Button } from '@components/ui/button';
 import { Skeleton } from '@components/ui/skeleton';
@@ -53,6 +54,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
   // Proctoring State
   const [isProctoringActive, setIsProctoringActive] = useState(false);
   const [violationCount, setViolationCount] = useState(0);
+  const [proctoringSessionId, setProctoringSessionId] = useState<string | undefined>(undefined);
 
   // Experience Tracking
   useExperienceTracker({
@@ -62,13 +64,23 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
     enabled: !!user?.id
   });
 
-  // Backend Proctoring Logging
+  // Backend Proctoring Logging - Generate stable attemptId per module session
+  const attemptId = useMemo(() => `${moduleId}-${Date.now()}`, [moduleId]);
   const { logEvent } = useProctoring({
     studentId: user?.id || 'anonymous',
     courseId,
-    attemptId: `${moduleId}-${Date.now()}`,
+    attemptId,
     enabled: isProctoringActive
   });
+
+  // Set proctoring session ID when proctoring becomes active
+  useEffect(() => {
+    if (isProctoringActive && !proctoringSessionId) {
+      setProctoringSessionId(attemptId);
+    } else if (!isProctoringActive) {
+      setProctoringSessionId(undefined);
+    }
+  }, [isProctoringActive, attemptId, proctoringSessionId]);
 
   const module: Module | undefined = (course?.course_modules ?? course?.modules ?? []).find((m: Module) => m.id === moduleId);
 
@@ -171,6 +183,34 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
   const allModules = course.course_modules ?? course.modules ?? [];
   const currentIndex = allModules.findIndex((m: Module) => m.id === moduleId);
 
+  // Check if a module can be accessed (prerequisites met)
+  const canAccessModule = (moduleIndex: number): boolean => {
+    if (moduleIndex < 0 || moduleIndex >= allModules.length) return false;
+    
+    // First module is always accessible
+    if (moduleIndex === 0) return true;
+    
+    // Admin can access all modules
+    if (user?.role === 'admin') return true;
+    
+    // Check if previous module is completed
+    const previousModule = allModules[moduleIndex - 1];
+    if (!previousModule?.completed) {
+      return false;
+    }
+    
+    // For modules with quizzes, check if minimum score is met (70%)
+    if (previousModule.testScore !== undefined && previousModule.testScore < 70) {
+      // Allow if it's an initial assessment (can proceed even if failed)
+      if (previousModule.type === 'initial_assessment') {
+        return true;
+      }
+      return false;
+    }
+    
+    return true;
+  };
+
   const goToNextModule = async () => {
     if (currentIndex >= 0 && currentIndex < allModules.length - 1) {
       // Ensure current module is marked complete before moving on
@@ -178,7 +218,26 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
         await markModuleCompleted();
       }
 
-      const next = allModules[currentIndex + 1];
+      const nextIndex = currentIndex + 1;
+      const next = allModules[nextIndex];
+      
+      // Validate prerequisites before navigating
+      if (!canAccessModule(nextIndex)) {
+        const previousModule = allModules[currentIndex];
+        let message = 'Cannot proceed to next module. ';
+        
+        if (!previousModule.completed) {
+          message += 'Please complete the current module first.';
+        } else if (previousModule.testScore !== undefined && previousModule.testScore < 70) {
+          message += 'You need to score at least 70% on the quiz to proceed.';
+        } else {
+          message += 'Prerequisites not met.';
+        }
+        
+        alert(message);
+        return;
+      }
+
       if (onNavigateToModule) {
         onNavigateToModule(next.id);
         return;
@@ -191,12 +250,34 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
 
   const markModuleCompleted = async (_skipTest = false) => {
     try {
-      module.completed = true;
+      // Validate experience-based completion requirements (unless admin or test completion)
+      if (user?.id && user.role !== 'admin' && !module.testScore) {
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.VITE_API_URL || 'http://localhost:4000';
+        const token = (await supabase.auth.getSession()).data.session?.access_token;
+        
+        try {
+          const response = await fetch(`${backendUrl}/api/student/experience/${courseId}/${moduleId}`, {
+            headers: token ? { Authorization: `Bearer ${token}` } : {}
+          });
+
+          if (response.ok) {
+            const experienceData = await response.json();
+            if (!experienceData.canComplete) {
+              alert(`Cannot complete module: ${experienceData.reason}`);
+              return;
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to validate experience data, proceeding anyway:', e);
+          // Don't block completion if experience check fails - fail gracefully
+        }
+      }
+
       module.completed = true;
       // setCourse({ ...course }); // Cannot update prop directly, rely on refresh callback
 
       if (user?.id) {
-        await courseService.updateProgress(user.id, moduleId, true, module.testScore ?? undefined);
+        await courseService.updateProgress(user.id, moduleId, true, module.testScore ?? undefined, courseId);
         await learningPathService.rebalance(user.id, courseId);
         if (onModuleStatusChange) onModuleStatusChange();
       }
@@ -254,7 +335,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
 
         // Temporary: Fallback to legacy behavior if IDs are missing, BUT try new route first
         if (Object.keys(answersMap).length > 0) {
-          const result = await courseService.submitAssessment(moduleId, answersMap);
+          const result = await courseService.submitAssessment(moduleId, answersMap, proctoringSessionId);
           if (onModuleStatusChange) onModuleStatusChange();
           // Rebalance learning path after success
           await learningPathService.rebalance(user.id, courseId);
@@ -376,7 +457,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
           <Button
             variant="outline"
             onClick={goToNextModule}
-            disabled={currentIndex < 0 || currentIndex >= allModules.length - 1 || (!module.completed && user?.role !== 'admin')}
+            disabled={currentIndex < 0 || currentIndex >= allModules.length - 1 || (!canAccessModule(currentIndex + 1) && user?.role !== 'admin')}
           >
             Next Module
             <ChevronRight className="ml-2 h-4 w-4" />
@@ -526,7 +607,10 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
                   Retake Test
                 </Button>
                 {currentIndex < allModules.length - 1 && (
-                  <Button onClick={goToNextModule}>
+                  <Button 
+                    onClick={goToNextModule}
+                    disabled={!canAccessModule(currentIndex + 1)}
+                  >
                     Next Module
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>

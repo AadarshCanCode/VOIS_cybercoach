@@ -340,13 +340,43 @@ class CourseService {
     }
   }
 
-  async updateProgress(userId: string, moduleId: string, completed: boolean, quizScore?: number) {
+  async updateProgress(userId: string, moduleId: string, completed: boolean, quizScore?: number, courseId?: string) {
     try {
+      // Try to update via backend API first (handles both MongoDB and Supabase)
+      // This ensures unified storage strategy
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.VITE_API_URL || 'http://localhost:4000';
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
+      
+      if (courseId && token) {
+        try {
+          const response = await fetch(`${backendUrl}/api/student/progress/${courseId}/${moduleId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              completed,
+              quizScore
+            })
+          });
+
+          if (response.ok) {
+            // Backend update succeeded (handles both MongoDB and Supabase)
+            return;
+          }
+        } catch (apiError) {
+          console.warn('Backend progress update failed, falling back to Supabase:', apiError);
+          // Fall through to Supabase update
+        }
+      }
+
+      // Fallback: Update Supabase directly (for UUID modules only)
       // UUID Validation: PostgreSQL expects a valid UUID. If this is a MongoDB ID (24 hex), we cannot store it in this table.
       const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(moduleId);
 
       if (!isUUID) {
-        console.warn(`Skipping Supabase progress sync for non-UUID moduleId: ${moduleId}. This is expected for AI-generated courses.`);
+        console.warn(`Skipping Supabase progress sync for non-UUID moduleId: ${moduleId}. This is expected for AI-generated courses. Progress should be updated via backend API.`);
         return;
       }
 

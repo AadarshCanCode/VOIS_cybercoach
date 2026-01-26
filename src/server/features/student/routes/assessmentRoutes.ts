@@ -5,6 +5,8 @@ import { authenticateUser } from '../../../shared/middleware/auth.js';
 import { logger } from '../../../shared/lib/logger.js';
 import { supabase } from '../../../shared/lib/supabase.js';
 import { Course } from '../../../shared/models/Course.js';
+import { ProctoringLog } from '../models/ProctoringLog.js';
+import { StudentProgress } from '../../../shared/models/StudentProgress.js';
 
 const router = Router();
 
@@ -14,18 +16,25 @@ interface QuizSubmission {
     proctoringSessionId?: string;
 }
 
-// Helper to check MongoDB for violations (Stub - assuming Mongo connection availability)
-// In a real scenario, we'd import the ProctoringLog model here.
-// For now, we'll trust the client to send the session ID, and separate service can async verify.
-/* 
-import { ProctoringLog } from '../models/ProctoringLog';
-async function countViolations(attemptId: string): Promise<number> {
+// Helper to check MongoDB for violations
+async function countViolations(attemptId: string, studentId: string, courseId: string): Promise<number> {
     if (!attemptId) return 0;
     try {
-        return await ProctoringLog.countDocuments({ attemptId });
-    } catch { return 0; }
+        // Count violations for this specific attempt
+        const violationCount = await ProctoringLog.countDocuments({ 
+            attemptId,
+            studentId,
+            courseId,
+            eventType: { 
+                $in: ['tab-switch', 'exit-fullscreen', 'window-blur', 'face-missing', 'multiple-faces', 'suspicious-activity'] 
+            }
+        });
+        return violationCount;
+    } catch (error) {
+        logger.error('Error counting violations', error instanceof Error ? error : new Error(String(error)));
+        return 0;
+    }
 }
-*/
 
 router.post('/submit', authenticateUser, async (req: AuthenticatedRequest, res: Response) => {
     try {
@@ -111,9 +120,30 @@ router.post('/submit', authenticateUser, async (req: AuthenticatedRequest, res: 
         const score = Math.round((correctCount / quizzes.length) * 100);
         const passed = score >= 70; // 70% passing threshold
 
-        // 3. Store Attempt in Postgres (History)
-        // We'll trust studentId/moduleId are handled okay even if IDs vary (Module ID is Mongo ID)
+        // 2.5. Validate Proctoring (Server-Side Enforcement)
+        const courseId = course._id.toString();
+        let violationCount = 0;
+        const MAX_VIOLATIONS = 3; // Maximum allowed violations before rejection
 
+        if (proctoringSessionId) {
+            violationCount = await countViolations(proctoringSessionId, studentId, courseId);
+            
+            if (violationCount > MAX_VIOLATIONS) {
+                logger.warn('Quiz submission rejected due to proctoring violations', {
+                    studentId,
+                    moduleId,
+                    violationCount,
+                    proctoringSessionId
+                });
+                return res.status(403).json({ 
+                    error: 'Submission rejected due to proctoring violations',
+                    violationCount,
+                    maxAllowed: MAX_VIOLATIONS
+                });
+            }
+        }
+
+        // 3. Store Attempt in Postgres (History) - Only for UUID modules
         const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(moduleId);
 
         if (isUUID) {
@@ -126,42 +156,69 @@ router.post('/submit', authenticateUser, async (req: AuthenticatedRequest, res: 
                     passed,
                     answers, // Storing raw answers
                     proctoring_session_id: proctoringSessionId,
-                    violation_count: 0
+                    violation_count: violationCount
                 });
-        } else {
-            console.warn(`Skipping Supabase quiz_attempts sync for non-UUID moduleId: ${moduleId}`);
         }
 
-        // 4. Mark Module as Completed in MONGODB (Optional? or Supabase?)
-        // The frontend checks `moduleProgress` from Supabase (via courseService).
-        // So we MUST update Supabase `module_progress`.
-
-        if (passed && isUUID) {
-            const { data: existingProgress } = await authClient
-                .from('module_progress')
-                .select('id')
-                .eq('student_id', studentId)
-                .eq('module_id', moduleId)
-                .maybeSingle();
-
-            if (existingProgress) {
-                await authClient
-                    .from('module_progress')
-                    .update({ completed: true, completed_at: new Date().toISOString() })
-                    .eq('id', existingProgress.id);
-            } else {
-                await authClient
-                    .from('module_progress')
-                    .insert({
-                        student_id: studentId,
-                        module_id: moduleId,
+        // 4. Update Progress in MongoDB (Primary storage for all courses)
+        const studentEmail = req.user?.email || '';
+        if (studentEmail && passed) {
+            try {
+                await StudentProgress.findOneAndUpdate(
+                    {
+                        studentEmail,
+                        courseId,
+                        moduleId
+                    },
+                    {
                         completed: true,
-                        completed_at: new Date().toISOString()
-                    });
+                        quizScore: score,
+                        updatedAt: new Date()
+                    },
+                    { upsert: true, new: true }
+                );
+                logger.info('Progress updated in MongoDB', { studentEmail, courseId, moduleId, score });
+            } catch (mongoError) {
+                logger.error('Failed to update MongoDB progress', mongoError instanceof Error ? mongoError : new Error(String(mongoError)));
+                // Don't fail the request, but log the error
             }
         }
 
-        logger.info('Quiz submitted (Mongo)', { studentId, moduleId, score, passed });
+        // 5. Update Progress in Supabase (Secondary storage for UUID modules only)
+        if (passed && isUUID) {
+            try {
+                const { data: existingProgress } = await authClient
+                    .from('module_progress')
+                    .select('id')
+                    .eq('student_id', studentId)
+                    .eq('module_id', moduleId)
+                    .maybeSingle();
+
+                if (existingProgress) {
+                    await authClient
+                        .from('module_progress')
+                        .update({ 
+                            completed: true, 
+                            completed_at: new Date().toISOString() 
+                        })
+                        .eq('id', existingProgress.id);
+                } else {
+                    await authClient
+                        .from('module_progress')
+                        .insert({
+                            student_id: studentId,
+                            module_id: moduleId,
+                            completed: true,
+                            completed_at: new Date().toISOString()
+                        });
+                }
+            } catch (supabaseError) {
+                logger.error('Failed to update Supabase progress', supabaseError instanceof Error ? supabaseError : new Error(String(supabaseError)));
+                // Don't fail the request, but log the error
+            }
+        }
+
+        logger.info('Quiz submitted', { studentId, moduleId, courseId, score, passed, violationCount });
 
         res.json({
             success: true,
