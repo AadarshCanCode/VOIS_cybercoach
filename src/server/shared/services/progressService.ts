@@ -6,6 +6,7 @@ export interface ProgressData {
     moduleId: string;
     completed: boolean;
     quizScore?: number;
+    completedTopics?: string[]; // Granular topic completion
     completedAt?: Date;
     updatedAt?: Date;
 }
@@ -42,6 +43,7 @@ export class ProgressService {
                         moduleId: progress.moduleId,
                         completed: progress.completed,
                         quizScore: progress.quizScore || undefined,
+                        completedTopics: progress.completedTopics || [],
                         completedAt: progress.updatedAt,
                         updatedAt: progress.updatedAt
                     };
@@ -106,6 +108,7 @@ export class ProgressService {
                     moduleId: progress.moduleId,
                     completed: progress.completed,
                     quizScore: progress.quizScore || undefined,
+                    completedTopics: progress.completedTopics || [],
                     completedAt: progress.updatedAt,
                     updatedAt: progress.updatedAt
                 });
@@ -151,7 +154,8 @@ export class ProgressService {
         moduleId: string,
         courseId: string,
         completed: boolean,
-        quizScore?: number
+        quizScore?: number,
+        completedTopics?: string[]
     ): Promise<void> {
         const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(moduleId);
 
@@ -166,6 +170,7 @@ export class ProgressService {
                 {
                     completed,
                     quizScore: quizScore !== undefined ? quizScore : null,
+                    completedTopics: completedTopics || [],
                     updatedAt: new Date()
                 },
                 { upsert: true, new: true }

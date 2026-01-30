@@ -40,6 +40,8 @@ export interface Module {
   videoUrl?: string;
   labUrl?: string;
   order?: number;
+  topics?: { title: string; content: string }[];
+  completedTopics?: string[];
 
   /* Compatibility fields used elsewhere */
   module_order?: number;

@@ -23,6 +23,9 @@ const studentProgressSchema = new mongoose.Schema({
         type: Number,
         default: null
     },
+    completedTopics: [{
+        type: String // Store topic titles or IDs
+    }],
     updatedAt: {
         type: Date,
         default: Date.now
