@@ -56,6 +56,9 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
   const [violationCount, setViolationCount] = useState(0);
   const [proctoringSessionId, setProctoringSessionId] = useState<string | undefined>(undefined);
 
+  // Topics State
+  const [currentTopicIndex, setCurrentTopicIndex] = useState(0);
+
   // Experience Tracking
   useExperienceTracker({
     studentId: user?.id || 'anonymous',
@@ -269,15 +272,13 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
           }
         } catch (e) {
           console.warn('Failed to validate experience data, proceeding anyway:', e);
-          // Don't block completion if experience check fails - fail gracefully
         }
       }
 
-      module.completed = true;
-      // setCourse({ ...course }); // Cannot update prop directly, rely on refresh callback
-
       if (user?.id) {
-        await courseService.updateProgress(user.id, moduleId, true, module.testScore ?? undefined, courseId);
+        // If it's a topic-based module, we should ideally mark all topics as completed too
+        const topics = module.topics?.map(t => t.title) || [];
+        await courseService.updateProgress(user.id, moduleId, true, module.testScore ?? undefined, courseId, topics);
         await learningPathService.rebalance(user.id, courseId);
         if (onModuleStatusChange) onModuleStatusChange();
       }
@@ -303,27 +304,13 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
   };
 
   const handleTestCompletion = async (score: number, answers: number[]) => {
-    module.completed = true;
-    module.testScore = score;
     setShowTest(false);
 
     try {
       if (user?.id) {
         // Transform answers array to map { questionId: answerIndex }
-        // Note: We need question IDs from the module questions
         const answersMap: Record<string, number> = {};
         (module.questions || []).forEach((q: any, i: number) => {
-          // If questions don't have IDs on the frontend, we might have an issue mapping.
-          // Backend expects map. If frontend only has array, we might need to rely on index matching or 
-          // ensure questions have IDs.
-          // For now, let's assume questions have 'id' or we use a convention.
-          // If the backend `assessmentRoutes.ts` handles map by ID, we need IDs.
-          // Fallback: If no ID, use index as key? Backend needs to handle that. 
-          // Let's assume sending by ID is safer if possible, but if missing, check backend logic.
-          // Backend implementation: `answers[q.id]`
-
-          // Check if Question has ID. If not, this logic is brittle.
-          // Assuming questions loaded from DB have IDs.
           if (q.id) {
             answersMap[q.id] = answers[i];
           }
@@ -335,36 +322,29 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             sessionId: 'debug-session',
-            runId: 'pre-fix',
+            runId: 'exec-v1',
             hypothesisId: 'H1',
             location: 'ModuleViewer.tsx:handleTestCompletion',
-            message: 'Before submitAssessment',
+            message: 'Submitting assessment',
             data: {
               courseId,
               moduleId,
               score,
-              answersLength: answers.length,
-              answersMapKeys: Object.keys(answersMap),
-              hasProctoringSessionId: !!proctoringSessionId
+              answersLength: answers.length
             },
             timestamp: Date.now()
           })
         }).catch(() => { });
         // #endregion
 
-        // If the map is empty (no IDs), we can't easily grade securely by ID.
-        // However, `courseService.updateProgress` (legacy) works.
-        // Let's try to submit. IF questions don't have IDs, this map is empty.
-
-        // Temporary: Fallback to legacy behavior if IDs are missing, BUT try new route first
         if (Object.keys(answersMap).length > 0) {
           await courseService.submitAssessment(moduleId, answersMap, proctoringSessionId);
           if (onModuleStatusChange) onModuleStatusChange();
-          // Rebalance learning path after success
           await learningPathService.rebalance(user.id, courseId);
         } else {
-          // Legacy fallback (Insecure but keeps UI working if IDs missing)
-          await courseService.updateProgress(user.id, moduleId, true, score);
+          // Legacy fallback / Simple progress update
+          const topics = module.topics?.map(t => t.title) || [];
+          await courseService.updateProgress(user.id, moduleId, true, score, courseId, topics);
           await learningPathService.rebalance(user.id, courseId);
           if (onModuleStatusChange) onModuleStatusChange();
         }
@@ -380,7 +360,9 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
       console.error('Failed to persist progress or rebalance:', e);
       // Fallback
       if (user?.id) {
-        await courseService.updateProgress(user.id, moduleId, true, score);
+        const topics = module.topics?.map(t => t.title) || [];
+        await courseService.updateProgress(user.id, moduleId, true, score, courseId, topics);
+        if (onModuleStatusChange) onModuleStatusChange();
       }
     }
   };
@@ -554,28 +536,136 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
 
         <CardContent className="p-6">
           {activeTab === 'content' && (
-            <div
-              className="prose max-w-none module-content"
-              onClick={(e) => {
-                const target = e.target as HTMLElement;
-                const labBtn = target.closest('[data-lesson-action="launch-lab"]');
-                if (labBtn) {
-                  const labId = labBtn.getAttribute('data-lab-id');
-                  if (labId) {
-                    const lab = labs.find((l: any) => l.id === labId);
-                    if (lab && lab.liveUrl) {
-                      window.open(lab.liveUrl, '_blank');
-                    } else {
-                      const evt = new CustomEvent('navigateToTab', {
-                        detail: { tab: 'labs', labId: labId }
-                      });
-                      window.dispatchEvent(evt);
+            <div className="flex flex-col md:flex-row gap-6">
+              {/* Topics Sidebar (Mobile-friendly list) */}
+              {module.topics && module.topics.length > 0 && (
+                <div className="w-full md:w-64 flex-shrink-0 border-r border-border/50 pr-6 space-y-2">
+                  <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-2">
+                    Topics
+                  </h4>
+                  {module.topics.map((topic, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentTopicIndex(index)}
+                      className={cn(
+                        "w-full text-left px-3 py-2 rounded-lg text-sm transition-all flex items-center gap-3",
+                        currentTopicIndex === index
+                          ? "bg-primary/10 text-primary border border-primary/20 font-medium"
+                          : "text-muted-foreground hover:bg-muted"
+                      )}
+                    >
+                      <div className={cn(
+                        "h-2 w-2 rounded-full",
+                        module.completedTopics?.includes(topic.title)
+                          ? "bg-primary"
+                          : currentTopicIndex === index ? "bg-primary/50" : "bg-muted-foreground/30"
+                      )} />
+                      <span className="truncate">{topic.title}</span>
+                      {module.completedTopics?.includes(topic.title) && (
+                        <CheckCircle className="h-4 w-4 ml-auto text-primary" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Main Content Area */}
+              <div
+                className="prose max-w-none flex-1 module-content"
+                onClick={(e) => {
+                  const target = e.target as HTMLElement;
+                  const labBtn = target.closest('[data-lesson-action="launch-lab"]');
+                  if (labBtn) {
+                    const labId = labBtn.getAttribute('data-lab-id');
+                    if (labId) {
+                      const lab = labs.find((l: any) => l.id === labId);
+                      if (lab && lab.liveUrl) {
+                        window.open(lab.liveUrl, '_blank');
+                      } else {
+                        const evt = new CustomEvent('navigateToTab', {
+                          detail: { tab: 'labs', labId: labId }
+                        });
+                        window.dispatchEvent(evt);
+                      }
                     }
                   }
-                }
-              }}
-            >
-              <div dangerouslySetInnerHTML={{ __html: processContent(module.content || '') }} />
+                }}
+              >
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: processContent(
+                      module.topics && module.topics.length > 0
+                        ? module.topics[currentTopicIndex]?.content
+                        : module.content || ''
+                    )
+                  }}
+                />
+
+                {/* Topic Navigation Buttons */}
+                {module.topics && module.topics.length > 0 && (
+                  <div className="flex items-center justify-between mt-12 pt-8 border-t border-border/50">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={currentTopicIndex === 0}
+                      onClick={() => setCurrentTopicIndex(prev => Math.max(0, prev - 1))}
+                    >
+                      Previous Topic
+                    </Button>
+                    <div className="text-sm text-muted-foreground">
+                      Topic {currentTopicIndex + 1} of {module.topics.length}
+                    </div>
+                    {currentTopicIndex < module.topics.length - 1 ? (
+                      <Button
+                        size="sm"
+                        onClick={async () => {
+                          // Mark topic as completed
+                          const currentTopic = module.topics![currentTopicIndex];
+                          const alreadyCompleted = module.completedTopics?.includes(currentTopic.title);
+
+                          if (!alreadyCompleted && user?.id) {
+                            const newCompletedTopics = [...(module.completedTopics || []), currentTopic.title];
+                            // Check if this was the last topic
+                            const isLastTopic = newCompletedTopics.length === module.topics!.length;
+
+                            await courseService.updateProgress(
+                              user.id,
+                              moduleId,
+                              isLastTopic,
+                              module.testScore || 0,
+                              courseId,
+                              newCompletedTopics
+                            );
+                            if (onModuleStatusChange) onModuleStatusChange();
+                          }
+                          setCurrentTopicIndex(prev => prev + 1);
+                        }}
+                      >
+                        Next Topic
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        onClick={async () => {
+                          const currentTopic = module.topics![currentTopicIndex];
+                          const alreadyCompleted = module.completedTopics?.includes(currentTopic.title);
+                          if (!alreadyCompleted && user?.id) {
+                            const newCompletedTopics = [...(module.completedTopics || []), currentTopic.title];
+                            const isLastTopic = newCompletedTopics.length === module.topics!.length;
+                            await courseService.updateProgress(user.id, moduleId, isLastTopic, module.testScore || 0, courseId, newCompletedTopics);
+                            if (onModuleStatusChange) onModuleStatusChange();
+                          }
+                          setShowTest(true);
+                        }}
+                      >
+                        Proceed to Test
+                        <CheckCircle className="ml-2 h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 

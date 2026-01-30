@@ -340,13 +340,13 @@ class CourseService {
     }
   }
 
-  async updateProgress(userId: string, moduleId: string, completed: boolean, quizScore?: number, courseId?: string) {
+  async updateProgress(userId: string, moduleId: string, completed: boolean, quizScore?: number, courseId?: string, completedTopics?: string[]) {
     try {
       // Try to update via backend API first (handles both MongoDB and Supabase)
       // This ensures unified storage strategy
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.VITE_API_URL || 'http://localhost:4000';
       const token = (await supabase.auth.getSession()).data.session?.access_token;
-      
+
       if (courseId && token) {
         try {
           const response = await fetch(`${backendUrl}/api/student/progress/${courseId}/${moduleId}`, {
@@ -357,7 +357,8 @@ class CourseService {
             },
             body: JSON.stringify({
               completed,
-              quizScore
+              quizScore,
+              completedTopics
             })
           });
 

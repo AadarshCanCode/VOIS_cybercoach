@@ -7,9 +7,15 @@ const questionSchema = new mongoose.Schema({
     correctAnswer: { type: String, required: true },
 });
 
-const moduleSchema = new mongoose.Schema({
+const topicSchema = new mongoose.Schema({
     title: { type: String, required: true },
     content: { type: String, required: true },
+});
+
+const moduleSchema = new mongoose.Schema({
+    title: { type: String, required: true },
+    content: { type: String, required: false }, // Made optional if topics exist
+    topics: [topicSchema], // Support granular topics
     type: { type: String, enum: ['lecture', 'quiz', 'initial_assessment', 'final_assessment'], default: 'lecture' },
     quiz: [questionSchema], // Array of questions
 });

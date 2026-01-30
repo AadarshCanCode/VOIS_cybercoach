@@ -19,6 +19,7 @@ type ProgressRow = {
   module_id?: string;
   completed?: boolean | null;
   quiz_score?: number | null;
+  completedTopics?: string[];
 };
 
 type CourseModuleLike = Module & {
@@ -52,20 +53,17 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
               }, {});
 
               const rawModules = data.course_modules ?? data.modules ?? [];
-              if (!Array.isArray(rawModules)) {
-                console.error('Modules is not an array:', rawModules);
-                throw new Error('Modules data is malformed');
-              }
-              const modules = rawModules as CourseModuleLike[];
+              const modules = Array.isArray(rawModules) ? rawModules : [];
 
               const normalized = modules.map((m: any) => {
-                if (!m) return null;
                 const modId = m.id || m._id;
+                const prog = moduleProgress[modId];
                 return {
                   ...m,
-                  id: modId, // Ensure ID is present
-                  completed: !!moduleProgress[modId]?.completed,
-                  testScore: (moduleProgress[modId]?.quiz_score ?? m.testScore) ?? undefined
+                  id: modId,
+                  completed: !!prog?.completed,
+                  testScore: (prog?.quiz_score ?? m.testScore) ?? undefined,
+                  completedTopics: prog?.completedTopics || []
                 };
               }).filter(Boolean) as CourseModuleLike[];
 
@@ -75,41 +73,37 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                   sessionId: 'debug-session',
-                  runId: 'pre-fix',
+                  runId: 'exec-v1',
                   hypothesisId: 'H2',
                   location: 'CourseDetail.tsx:load',
-                  message: 'Normalized modules with progress',
+                  message: 'Normalized modules with topics progress',
                   data: {
                     courseId,
                     userId: user.id,
-                    moduleProgressKeys: Object.keys(moduleProgress || {}),
                     modules: normalized.map(m => ({
                       id: m.id,
                       completed: m.completed,
-                      testScore: m.testScore
+                      completedTopicsCount: m.completedTopics?.length || 0
                     }))
                   },
                   timestamp: Date.now()
                 })
-              }).catch(() => {});
+              }).catch(() => { });
               // #endregion
 
               setCourse({ ...data, modules: normalized });
             } catch (e) {
-              // ...
+              console.error('Failed to load user progress:', e);
+              setCourse(data);
             }
           } else {
             // Guest user ID normalization
             const rawModules = data.course_modules ?? data.modules ?? [];
-            if (Array.isArray(rawModules)) {
-              const normalized = rawModules.map((m: any) => ({
-                ...m,
-                id: m.id || m._id
-              }));
-              setCourse({ ...data, modules: normalized });
-            } else {
-              setCourse(data);
-            }
+            const normalized = (Array.isArray(rawModules) ? rawModules : []).map((m: any) => ({
+              ...m,
+              id: m.id || m._id
+            }));
+            setCourse({ ...data, modules: normalized });
           }
         }
       } catch (e) {
@@ -139,11 +133,13 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
           const modules = (data.course_modules ?? data.modules ?? []) as any[];
           const normalized = modules.map((m) => {
             const modId = m.id || m._id;
+            const prog = moduleProgress[modId];
             return {
               ...m,
               id: modId,
-              completed: !!moduleProgress[modId]?.completed,
-              testScore: (moduleProgress[modId]?.quiz_score ?? m.testScore) ?? undefined
+              completed: !!prog?.completed,
+              testScore: (prog?.quiz_score ?? m.testScore) ?? undefined,
+              completedTopics: prog?.completedTopics || []
             };
           });
 
@@ -153,23 +149,22 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               sessionId: 'debug-session',
-              runId: 'pre-fix',
+              runId: 'exec-v1',
               hypothesisId: 'H3',
               location: 'CourseDetail.tsx:refreshCourse',
-              message: 'Refreshed modules with progress',
+              message: 'Refreshed modules with topics progress',
               data: {
                 courseId,
                 userId: user.id,
-                moduleProgressKeys: Object.keys(moduleProgress || {}),
                 modules: normalized.map(m => ({
                   id: m.id,
                   completed: m.completed,
-                  testScore: m.testScore
+                  completedTopicsCount: m.completedTopics?.length || 0
                 }))
               },
               timestamp: Date.now()
             })
-          }).catch(() => {});
+          }).catch(() => { });
           // #endregion
 
           setCourse({ ...data, modules: normalized });

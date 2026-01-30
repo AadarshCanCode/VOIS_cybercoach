@@ -33,17 +33,17 @@ router.get('/courses', async (_req: Request, res: Response) => {
     // Check cache first
     const cacheKey = CacheKeys.courseList();
     const cached = cache.get(cacheKey);
-    
+
     if (cached) {
       return res.json(cached);
     }
 
     // Fetch from database
     const courses = await Course.find({ published: true }).select('-teacherEmail');
-    
+
     // Cache for 5 minutes
     cache.set(cacheKey, courses, 5 * 60 * 1000);
-    
+
     res.json(courses);
   } catch (error) {
     logger.error('Error fetching courses', error instanceof Error ? error : new Error(String(error)));
@@ -57,7 +57,7 @@ router.get('/courses/:id', async (req: Request, res: Response) => {
     // Check cache first
     const cacheKey = CacheKeys.course(id);
     const cached = cache.get(cacheKey);
-    
+
     if (cached) {
       return res.json(cached);
     }
@@ -176,7 +176,7 @@ router.get('/progress/:courseId/:moduleId', authenticateUser, async (req: Authen
     // Check cache first (shorter TTL for progress data - 1 minute)
     const cacheKey = CacheKeys.moduleProgress(studentId, courseId, moduleId);
     const cached = cache.get(cacheKey);
-    
+
     if (cached) {
       return res.json(cached);
     }
@@ -241,7 +241,7 @@ router.get('/progress/:courseId', authenticateUser, async (req: AuthenticatedReq
 router.put('/progress/:courseId/:moduleId', authenticateUser, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { courseId, moduleId } = req.params;
-    const { completed, quizScore } = req.body;
+    const { completed, quizScore, completedTopics } = req.body;
     const studentId = req.user?.id;
     const studentEmail = req.user?.email || '';
 
@@ -259,13 +259,14 @@ router.put('/progress/:courseId/:moduleId', authenticateUser, async (req: Authen
       moduleId,
       courseId,
       completed,
-      quizScore
+      quizScore,
+      completedTopics
     );
 
     // Invalidate cache for this progress entry
     const cacheKey = CacheKeys.moduleProgress(studentId, courseId, moduleId);
     cache.delete(cacheKey);
-    
+
     // Also invalidate course progress cache
     const courseProgressKey = CacheKeys.courseProgress(studentId, courseId);
     cache.delete(courseProgressKey);
@@ -307,7 +308,7 @@ router.get('/experience/:courseId/:moduleId', authenticateUser, async (req: Auth
     }
 
     const moduleStat = experience.moduleStats.find((stat: any) => stat.moduleId === moduleId);
-    
+
     if (!moduleStat) {
       return res.json({
         timeSpent: 0,
@@ -330,9 +331,9 @@ router.get('/experience/:courseId/:moduleId', authenticateUser, async (req: Auth
       canComplete,
       minTimeSpent: MIN_TIME_SPENT,
       minScrollDepth: MIN_SCROLL_DEPTH,
-      reason: canComplete ? 'Engagement requirements met' : 
+      reason: canComplete ? 'Engagement requirements met' :
         timeSpent < MIN_TIME_SPENT ? `Minimum ${MIN_TIME_SPENT} seconds required (spent ${Math.round(timeSpent)}s)` :
-        `Minimum ${MIN_SCROLL_DEPTH}% scroll depth required (reached ${Math.round(scrollDepth)}%)`
+          `Minimum ${MIN_SCROLL_DEPTH}% scroll depth required (reached ${Math.round(scrollDepth)}%)`
     });
   } catch (error) {
     logger.error('Error fetching experience data', error instanceof Error ? error : new Error(String(error)), {
