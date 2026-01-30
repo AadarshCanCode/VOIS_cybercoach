@@ -134,14 +134,18 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
   };
 
   useEffect(() => {
-    if (module?.type === 'final_assessment' || module?.type === 'initial_assessment') {
+    // Only auto-start tests if the module has no topics
+    if ((module?.type === 'final_assessment' || module?.type === 'initial_assessment') && (!module.topics || module.topics.length === 0)) {
       setActiveTab('test');
       setShowTest(true);
       setIsProctoringActive(true); // Enable proctoring automatically
+    } else if (module?.type === 'final_assessment' || module?.type === 'initial_assessment') {
+      // If it has topics, we stay on content tab but enable proctoring readiness
+      setIsProctoringActive(true);
     } else {
       setIsProctoringActive(false);
     }
-  }, [module?.id, module?.type]);
+  }, [module?.id, module?.type, module?.topics]);
 
   useEffect(() => {
     if (activeTab === 'content') {
@@ -310,9 +314,12 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
       if (user?.id) {
         // Transform answers array to map { questionId: answerIndex }
         const answersMap: Record<string, number> = {};
-        (module.questions || []).forEach((q: any, i: number) => {
-          if (q.id) {
-            answersMap[q.id] = answers[i];
+        const quizQuestions = module.quiz || module.questions || [];
+
+        quizQuestions.forEach((q: any, i: number) => {
+          const qId = q.id || q._id;
+          if (qId) {
+            answersMap[qId.toString()] = answers[i];
           }
         });
 
@@ -443,6 +450,75 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
     return content;
   };
 
+  const isAssessment = module.type === 'initial_assessment' || module.type === 'final_assessment' || moduleId === 'vu-final-exam';
+
+  // Assessment Landing View (Special) - High Stakes / Diagnostic Home
+  if (isAssessment && !module.completed && !showTest) {
+    return (
+      <div className="flex flex-col gap-6 p-4 md:p-8 animate-in fade-in duration-500 max-w-4xl mx-auto w-full">
+        <Button variant="ghost" onClick={onBack} className="w-fit -ml-2 text-muted-foreground hover:text-foreground">
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Course
+        </Button>
+
+        <Card className="border-primary/20 bg-primary/5 shadow-2xl shadow-primary/5">
+          <CardHeader className="text-center py-12">
+            <div className="p-4 rounded-full bg-primary/10 border border-primary/20 w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+              <Shield className="h-12 w-12 text-primary" />
+            </div>
+            <CardTitle className="text-4xl font-black tracking-tight bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
+              {module.type === 'initial_assessment' ? 'Diagnostic Assessment' : 'Final Examination'}
+            </CardTitle>
+            <CardDescription className="text-lg max-w-lg mx-auto mt-4 leading-relaxed">
+              {module.description || "This evaluation helps tailor your learning path and validate your expertise."}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-10 pb-16">
+            {/* Instructions / Content Section */}
+            {(module.content || (module.topics && module.topics.length > 0)) && (
+              <div className="bg-background/40 backdrop-blur-sm rounded-2xl p-8 border border-border/50 shadow-inner">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="h-1.5 w-8 rounded-full bg-primary" />
+                  <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.2em]">
+                    Preparation & Instructions
+                  </h3>
+                </div>
+                <div
+                  className="prose prose-invert max-w-none text-muted-foreground/90 selection:bg-primary/30"
+                  dangerouslySetInnerHTML={{
+                    __html: processContent(
+                      module.content || (module.topics && module.topics.length > 0 ? module.topics.map(t => `### ${t.title}\n${t.content}`).join('\n\n') : '')
+                    )
+                  }}
+                />
+              </div>
+            )}
+
+            <div className="flex flex-col items-center gap-6">
+              <Button
+                size="lg"
+                className="px-16 py-8 text-xl font-black rounded-2xl shadow-2xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all bg-primary text-primary-foreground"
+                onClick={() => setShowTest(true)}
+              >
+                Start Assessment
+                <ArrowRight className="ml-3 h-6 w-6" />
+              </Button>
+              <div className="flex flex-col items-center gap-2">
+                <p className="text-xs font-medium text-muted-foreground flex items-center gap-2 opacity-70">
+                  <Shield className="h-3.5 w-3.5 text-primary" />
+                  Proctored Session Active
+                </p>
+                <p className="text-[10px] text-muted-foreground/50 uppercase tracking-widest">
+                  Secure Environment Initialized
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-6 p-4 md:p-8 animate-in fade-in duration-500">
       {/* Header */}
@@ -455,7 +531,8 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
           <Button
             variant={module.completed ? "outline" : "default"}
             onClick={() => markModuleCompleted(true)}
-            disabled={module.completed}
+            disabled={module.completed || module.type === 'initial_assessment' || module.type === 'final_assessment'}
+            className={cn((module.type === 'initial_assessment' || module.type === 'final_assessment') && !module.completed && "hidden")}
           >
             {module.completed ? (
               <>
@@ -717,8 +794,14 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
                   <CheckCircle className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-primary">Module Completed!</h3>
-                  <p className="text-muted-foreground text-sm">You've successfully completed this training module.</p>
+                  <h3 className="font-semibold text-primary">
+                    {module.type === 'initial_assessment' ? 'Diagnostic Complete!' : 'Module Completed!'}
+                  </h3>
+                  <p className="text-muted-foreground text-sm">
+                    {module.type === 'initial_assessment'
+                      ? "Your pre-course assessment is finished. You can now proceed to the main course."
+                      : "You've successfully completed this training module."}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">

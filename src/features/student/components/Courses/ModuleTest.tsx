@@ -59,12 +59,22 @@ export const ModuleTest: React.FC<ModuleTestProps> = ({ moduleId, moduleTitle, o
   const calculateScore = (userAnswers: number[]) => {
     let correct = 0;
     questions.forEach((question, index) => {
-      // Robust comparison for string/number types
-      if (Number(userAnswers[index]) === Number(question.correctAnswer)) {
+      const userAnswerIndex = userAnswers[index];
+      if (userAnswerIndex === undefined || userAnswerIndex === null) return;
+
+      const userAnswerText = question.options[userAnswerIndex];
+      const correctAnswer = question.correctAnswer;
+
+      // Robust comparison for index or text match
+      const isCorrect =
+        String(userAnswerIndex) === String(correctAnswer) ||
+        userAnswerText === correctAnswer;
+
+      if (isCorrect) {
         correct++;
       }
     });
-    return Math.round((correct / questions.length) * 100);
+    return Math.round((correct / (questions.length || 1)) * 100);
   };
 
   const formatTime = (seconds: number) => {

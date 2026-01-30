@@ -21,12 +21,12 @@ async function countViolations(attemptId: string, studentId: string, courseId: s
     if (!attemptId) return 0;
     try {
         // Count violations for this specific attempt
-        const violationCount = await ProctoringLog.countDocuments({ 
+        const violationCount = await ProctoringLog.countDocuments({
             attemptId,
             studentId,
             courseId,
-            eventType: { 
-                $in: ['tab-switch', 'exit-fullscreen', 'window-blur', 'face-missing', 'multiple-faces', 'suspicious-activity'] 
+            eventType: {
+                $in: ['tab-switch', 'exit-fullscreen', 'window-blur', 'face-missing', 'multiple-faces', 'suspicious-activity']
             }
         });
         return violationCount;
@@ -127,7 +127,7 @@ router.post('/submit', authenticateUser, async (req: AuthenticatedRequest, res: 
 
         if (proctoringSessionId) {
             violationCount = await countViolations(proctoringSessionId, studentId, courseId);
-            
+
             if (violationCount > MAX_VIOLATIONS) {
                 logger.warn('Quiz submission rejected due to proctoring violations', {
                     studentId,
@@ -135,7 +135,7 @@ router.post('/submit', authenticateUser, async (req: AuthenticatedRequest, res: 
                     violationCount,
                     proctoringSessionId
                 });
-                return res.status(403).json({ 
+                return res.status(403).json({
                     error: 'Submission rejected due to proctoring violations',
                     violationCount,
                     maxAllowed: MAX_VIOLATIONS
@@ -162,7 +162,9 @@ router.post('/submit', authenticateUser, async (req: AuthenticatedRequest, res: 
 
         // 4. Update Progress in MongoDB (Primary storage for all courses)
         const studentEmail = req.user?.email || '';
-        if (studentEmail && passed) {
+        const isInitialAssessment = module.type === 'initial_assessment';
+
+        if (studentEmail && (passed || isInitialAssessment)) {
             try {
                 await StudentProgress.findOneAndUpdate(
                     {
@@ -185,7 +187,7 @@ router.post('/submit', authenticateUser, async (req: AuthenticatedRequest, res: 
         }
 
         // 5. Update Progress in Supabase (Secondary storage for UUID modules only)
-        if (passed && isUUID) {
+        if ((passed || isInitialAssessment) && isUUID) {
             try {
                 const { data: existingProgress } = await authClient
                     .from('module_progress')
@@ -197,9 +199,9 @@ router.post('/submit', authenticateUser, async (req: AuthenticatedRequest, res: 
                 if (existingProgress) {
                     await authClient
                         .from('module_progress')
-                        .update({ 
-                            completed: true, 
-                            completed_at: new Date().toISOString() 
+                        .update({
+                            completed: true,
+                            completed_at: new Date().toISOString()
                         })
                         .eq('id', existingProgress.id);
                 } else {
