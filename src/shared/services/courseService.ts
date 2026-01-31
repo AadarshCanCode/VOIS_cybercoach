@@ -1,5 +1,82 @@
 import { supabase } from '@lib/supabase';
+import { getApiUrl } from '@lib/apiConfig';
 import type { Course, Module } from '@types';
+
+/**
+ * Fetch with timeout and retry for CDN content
+ * @param url - URL to fetch
+ * @param options - Fetch options
+ * @param timeout - Timeout in milliseconds (default: 10000)
+ * @param retries - Number of retries (default: 2)
+ */
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit = {},
+  timeout = 10000,
+  retries = 2
+): Promise<Response> {
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      return response;
+    } catch (error) {
+      clearTimeout(timeoutId);
+      lastError = error instanceof Error ? error : new Error(String(error));
+
+      // Don't retry on non-network errors
+      if (lastError.name !== 'AbortError' && !lastError.message.includes('fetch')) {
+        throw lastError;
+      }
+
+      // Wait before retrying (exponential backoff)
+      if (attempt < retries) {
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 500));
+      }
+    }
+  }
+
+  throw lastError || new Error('Fetch failed after retries');
+}
+
+/**
+ * Normalizes a module object to ensure it has an 'id' field and consistent structure.
+ * Handles both Supabase (id) and MongoDB (_id) formats.
+ */
+function normalizeModule(module: any): Module {
+  if (!module) return module;
+  const id = (module.id || module._id || '').toString();
+  return {
+    ...module,
+    id,
+    content: module.content || module.content_markdown || '',
+    order: module.order ?? module.module_order ?? 0
+  };
+}
+
+/**
+ * Normalizes a course object to ensure it has an 'id' field and consistent module structure.
+ */
+function normalizeCourse(course: any): Course {
+  if (!course) return course;
+  const modules = (course.modules || course.course_modules || [])
+    .map(normalizeModule);
+
+  return {
+    ...course,
+    id: (course.id || course._id || '').toString(),
+    modules,
+    module_count: modules.length
+  };
+}
 
 class CourseService {
   // Course Management
@@ -162,18 +239,26 @@ class CourseService {
 
   async getAllCourses(): Promise<Course[]> {
     try {
-      console.log('Fetching courses from Supabase...');
+      // Primary: Fetch from backend API (MongoDB) for consistency with getCourseById
+      const response = await fetch(getApiUrl('/api/student/courses'));
+
+      if (response.ok) {
+        const courses = await response.json();
+        return (courses || []).map(normalizeCourse);
+      }
+
+      // Fallback: Fetch from Supabase if backend is unavailable
+      console.log('Backend unavailable, falling back to Supabase...');
       const { data, error } = await supabase
         .from('courses')
         .select('*')
-        .eq('is_published', true)
         .order('created_at', { ascending: false });
 
       if (error) throw new Error(`Failed to fetch courses: ${error.message}`);
 
       return (data || []).map((course: any) => ({
         ...course,
-        module_count: 0, // Will be updated if fetched with modules
+        module_count: 0,
         modules: [],
         skills: []
       }));
@@ -207,7 +292,7 @@ class CourseService {
       }
 
       const courseData = await response.json();
-      return courseData as Course;
+      return normalizeCourse(courseData);
 
     } catch (error) {
       console.error('Get course by id error:', error);
@@ -295,23 +380,24 @@ class CourseService {
               .from('courses')
               .getPublicUrl(content);
 
-            const response = await fetch(publicUrl);
+            const response = await fetchWithRetry(publicUrl);
             if (response.ok) {
               content = await response.text();
             } else {
-              content = `Error: Could not load module content (HTTP ${response.status})`;
+              console.error(`CDN returned HTTP ${response.status} for ${content}`);
+              content = `## ⚠️ Content Unavailable\n\nThe module content could not be loaded (HTTP ${response.status}). Please try refreshing the page or contact support if the issue persists.`;
             }
           } catch (e) {
+            const errorMsg = e instanceof Error ? e.message : 'Unknown error';
             console.error(`Failed to fetch module content from CDN for ${module.id}:`, e);
-            content = 'Error: Connection failed while loading module content';
+            content = `## ⚠️ Connection Error\n\nFailed to load module content: ${errorMsg.includes('abort') ? 'Request timed out' : errorMsg}. Please check your internet connection and refresh the page.`;
           }
         }
 
-        return {
+        return normalizeModule({
           ...module,
-          content: content, // Map to content field used by UI
-          order: module.module_order // Map to order field used by UI
-        };
+          content: content
+        });
       }));
 
       return resolvedModules;
@@ -342,12 +428,11 @@ class CourseService {
 
   async getCourseProgress(courseId: string) {
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.VITE_API_URL || 'http://localhost:4000';
       const token = (await supabase.auth.getSession()).data.session?.access_token;
 
       if (!token) return [];
 
-      const response = await fetch(`${backendUrl}/api/student/progress/${courseId}`, {
+      const response = await fetch(getApiUrl(`/api/student/progress/${courseId}`), {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -377,12 +462,11 @@ class CourseService {
     try {
       // Try to update via backend API first (handles both MongoDB and Supabase)
       // This ensures unified storage strategy
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.VITE_API_URL || 'http://localhost:4000';
       const token = (await supabase.auth.getSession()).data.session?.access_token;
 
       if (courseId && token) {
         try {
-          const response = await fetch(`${backendUrl}/api/student/progress/${courseId}/${moduleId}`, {
+          const response = await fetch(getApiUrl(`/api/student/progress/${courseId}/${moduleId}`), {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -404,13 +488,12 @@ class CourseService {
           // Fall through to Supabase update
         }
       }
-
-      // Fallback: Update Supabase directly (for UUID modules only)
-      // UUID Validation: PostgreSQL expects a valid UUID. If this is a MongoDB ID (24 hex), we cannot store it in this table.
       const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(moduleId);
 
       if (!isUUID) {
-        console.warn(`Skipping Supabase progress sync for non-UUID moduleId: ${moduleId}. This is expected for AI-generated courses. Progress should be updated via backend API.`);
+        // For non-UUID IDs (like MongoDB ObjectIDs), Supabase sync is skipped 
+        // because the module_id column expects a UUID. 
+        // Normal behavior as primary progress storage for these is MongoDB.
         return;
       }
 

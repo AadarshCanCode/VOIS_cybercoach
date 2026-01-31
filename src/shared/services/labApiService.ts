@@ -13,11 +13,11 @@ const getAuthHeaders = async () => {
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
   };
-  
+
   if (session?.access_token) {
     headers['Authorization'] = `Bearer ${session.access_token}`;
   }
-  
+
   return headers;
 };
 
@@ -42,6 +42,13 @@ export const labApiService = {
   },
 
   async getLabStats(): Promise<LabStats> {
+    const emptyStats: LabStats = {
+      totalLabs: 6,
+      completedLabs: 0,
+      completionPercentage: 0,
+      completedLabIds: [],
+    };
+
     try {
       const headers = await getAuthHeaders();
       const response = await fetch(`/api/student/labs/stats`, {
@@ -50,28 +57,17 @@ export const labApiService = {
       });
 
       if (!response.ok) {
-        // If auth fails, return empty stats instead of throwing
-        if (response.status === 401 || response.status === 403) {
-          console.warn('Unauthorized: Returning empty lab stats');
-          return {
-            totalLabs: 6,
-            completedLabs: 0,
-            completionPercentage: 0,
-            completedLabIds: [],
-          };
+        // Return empty stats for any non-ok response (auth issues, backend down, etc.)
+        if (response.status !== 500) {
+          console.warn(`Lab stats unavailable (HTTP ${response.status})`);
         }
-        throw new Error('Failed to fetch lab stats');
+        return emptyStats;
       }
       return await response.json();
     } catch (error) {
-      console.error('Error fetching lab stats:', error);
-      // Return empty stats on error so labs still display
-      return {
-        totalLabs: 6,
-        completedLabs: 0,
-        completionPercentage: 0,
-        completedLabIds: [],
-      };
+      // Network error, backend not running, etc. - just return empty stats
+      console.warn('Lab stats service unavailable:', error instanceof Error ? error.message : 'Unknown error');
+      return emptyStats;
     }
   },
 

@@ -1,4 +1,5 @@
 import { useEffect, useCallback, useRef } from 'react';
+import { getApiUrl } from '@lib/apiConfig';
 
 interface ProctoringConfig {
     studentId: string;
@@ -8,7 +9,6 @@ interface ProctoringConfig {
 }
 
 export const useProctoring = ({ studentId, courseId, attemptId, enabled }: ProctoringConfig) => {
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
 
     const logEvent = useCallback((eventType: string, details: any = {}) => {
         if (!enabled) return;
@@ -25,16 +25,16 @@ export const useProctoring = ({ studentId, courseId, attemptId, enabled }: Proct
         // Use sendBeacon for reliable, low-overhead logging
         if (navigator.sendBeacon) {
             const blob = new Blob([payload], { type: 'application/json' });
-            navigator.sendBeacon(`${backendUrl}/api/student/track/proctor/ingest`, blob);
+            navigator.sendBeacon(getApiUrl('/api/student/track/proctor/ingest'), blob);
         } else {
-            fetch(`${backendUrl}/api/student/track/proctor/ingest`, {
+            fetch(getApiUrl('/api/student/track/proctor/ingest'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: payload,
                 keepalive: true
             }).catch(() => { /* Silently fail */ });
         }
-    }, [studentId, courseId, attemptId, enabled, backendUrl]);
+    }, [studentId, courseId, attemptId, enabled]);
 
     useEffect(() => {
         if (!enabled) return;

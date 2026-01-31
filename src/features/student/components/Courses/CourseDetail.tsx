@@ -123,8 +123,8 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
     );
   }
 
-  const completedModules = (course.modules ?? course.course_modules ?? []).filter((m: Module) => m.completed).length;
-  const totalModules = (course.modules ?? course.course_modules ?? []).length;
+  const completedModules = (course.modules || []).filter((m: Module) => m.completed).length;
+  const totalModules = (course.modules || []).length;
   const progressPercentage = totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0;
 
   return (
@@ -201,7 +201,7 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
           </CardTitle>
         </CardHeader>
         <div className="divide-y divide-border/50">
-          {(course.modules ?? course.course_modules ?? []).map((module: Module, index: number, array: Module[]) => {
+          {(course.modules || []).map((module: Module, index: number, array: Module[]) => {
             const previousModule = index > 0 ? array[index - 1] : null;
             const isModuleUnlocked = user?.role === 'admin' ||
               index === 0 ||
@@ -313,15 +313,9 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
                       e.stopPropagation();
                       console.log('Button clicked for module:', module);
 
-                      const targetId = module.id || (module as any)._id;
-                      if (!targetId) {
-                        console.error('Module has no ID!', module);
-                        return;
-                      }
-
                       if (isModuleUnlocked) {
-                        console.log('Navigating to module:', targetId);
-                        setSelectedModuleId(targetId);
+                        console.log('Navigating to module:', module.id);
+                        setSelectedModuleId(module.id);
                       }
                     }}
                   >

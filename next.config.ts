@@ -19,22 +19,23 @@ const nextConfig: NextConfig = {
     },
     // Proxies for backend
     async rewrites() {
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
         return [
             {
                 source: '/api/:path*',
-                destination: 'http://localhost:4000/api/:path*',
+                destination: `${backendUrl}/api/:path*`,
             },
             {
                 source: '/proxy/:path*',
-                destination: 'http://localhost:4000/proxy/:path*',
+                destination: `${backendUrl}/proxy/:path*`,
             },
             {
                 source: '/proctor-logs/:path*',
-                destination: 'http://localhost:4000/proctor-logs/:path*',
+                destination: `${backendUrl}/proctor-logs/:path*`,
             },
             {
                 source: '/test-models/:path*',
-                destination: 'http://localhost:4000/test-models/:path*',
+                destination: `${backendUrl}/test-models/:path*`,
             },
         ];
     },

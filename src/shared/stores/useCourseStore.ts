@@ -50,22 +50,17 @@ export const useCourseStore = create<CourseState>((set, get) => ({
                     return acc;
                 }, {});
 
-                normalizedModules = normalizedModules.map((m: any) => {
-                    const modId = m.id || m._id;
-                    const prog = moduleProgress[modId];
+                normalizedModules = (data.modules || []).map((m: Module) => {
+                    const prog = moduleProgress[m.id];
                     return {
                         ...m,
-                        id: modId,
                         completed: !!prog?.completed,
                         testScore: (prog?.quiz_score ?? m.testScore) ?? undefined,
                         completedTopics: prog?.completedTopics || []
                     };
                 });
             } else {
-                normalizedModules = normalizedModules.map((m: any) => ({
-                    ...m,
-                    id: m.id || m._id
-                }));
+                normalizedModules = data.modules || [];
             }
 
             set({

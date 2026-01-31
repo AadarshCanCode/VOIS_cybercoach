@@ -56,19 +56,23 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
   const [selectedCourse, setSelectedCourse] = useState<CourseData | null>(null);
   const [dynamicCourses, setDynamicCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchCourses = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const courses = await courseService.getAllCourses();
+      setDynamicCourses(courses);
+    } catch (e) {
+      console.error('Failed to fetch dynamic courses:', e);
+      setError(e instanceof Error ? e.message : 'Failed to load courses. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchCourses = async () => {
-      setLoading(true);
-      try {
-        const courses = await courseService.getAllCourses();
-        setDynamicCourses(courses);
-      } catch (e) {
-        console.error('Failed to fetch dynamic courses:', e);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchCourses();
   }, []);
 
@@ -344,6 +348,30 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
                   Complete the initial assessment to unlock training modules.
                 </p>
               </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Error Banner */}
+      {error && (
+        <Card className="border-destructive/20 bg-destructive/5">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-full bg-destructive/10 border border-destructive/20">
+                  <svg className="h-6 w-6 text-destructive" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-destructive">Failed to Load Courses</h3>
+                  <p className="text-sm text-destructive/80">{error}</p>
+                </div>
+              </div>
+              <Button variant="outline" size="sm" onClick={fetchCourses} disabled={loading}>
+                {loading ? 'Retrying...' : 'Retry'}
+              </Button>
             </div>
           </CardContent>
         </Card>

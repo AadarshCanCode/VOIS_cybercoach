@@ -1,6 +1,7 @@
 /**
  * Service for syncing lab completion status from external render website
  */
+import { getApiUrl } from '@lib/apiConfig';
 
 interface LabSyncPayload {
     studentId: string;
@@ -9,9 +10,7 @@ interface LabSyncPayload {
     metadata?: Record<string, unknown>;
 }
 
-const WEBHOOK_URL = process.env.NEXT_PUBLIC_BACKEND_URL 
-    ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/student/labs/webhook/complete`
-    : 'http://localhost:4000/api/student/labs/webhook/complete';
+const WEBHOOK_URL = getApiUrl('/api/student/labs/webhook/complete');
 
 /**
  * Sync lab completion from external render website
@@ -43,9 +42,9 @@ export async function syncLabCompletion(payload: LabSyncPayload): Promise<{ succ
         return { success: true, message: data.message };
     } catch (error) {
         console.error('Failed to sync lab completion:', error);
-        return { 
-            success: false, 
-            message: error instanceof Error ? error.message : 'Unknown error' 
+        return {
+            success: false,
+            message: error instanceof Error ? error.message : 'Unknown error'
         };
     }
 }

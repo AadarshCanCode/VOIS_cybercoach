@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { getApiUrl } from '@lib/apiConfig';
 
 interface ExperienceDetail {
     moduleId: string;
@@ -14,7 +15,6 @@ interface ExperienceConfig {
 }
 
 export const useExperienceTracker = ({ studentId, courseId, moduleId, enabled }: ExperienceConfig) => {
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
     const startTimeRef = useRef<number>(Date.now());
     const maxScrollRef = useRef<number>(0);
     const scrollRequestRef = useRef<number | null>(null);
@@ -57,9 +57,9 @@ export const useExperienceTracker = ({ studentId, courseId, moduleId, enabled }:
             // Use sendBeacon for reliable, low-overhead logging
             if (navigator.sendBeacon) {
                 const blob = new Blob([payload], { type: 'application/json' });
-                navigator.sendBeacon(`${backendUrl}/api/student/track/experience/sync`, blob);
+                navigator.sendBeacon(getApiUrl('/api/student/track/experience/sync'), blob);
             } else {
-                fetch(`${backendUrl}/api/student/track/experience/sync`, {
+                fetch(getApiUrl('/api/student/track/experience/sync'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: payload,
@@ -81,7 +81,7 @@ export const useExperienceTracker = ({ studentId, courseId, moduleId, enabled }:
             clearInterval(intervalId);
             syncData(); // Final sync on unmount/module change
         };
-    }, [studentId, courseId, moduleId, enabled, backendUrl]);
+    }, [studentId, courseId, moduleId, enabled]);
 
     return {};
 };

@@ -12,6 +12,7 @@ import { useAuth } from '@context/AuthContext';
 import { useExperienceTracker } from '../../../../shared/hooks/useExperienceTracker';
 import { useProctoring } from '../../../../shared/hooks/useProctoring';
 import { supabase } from '@lib/supabase';
+import { getApiUrl } from '@lib/apiConfig';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@components/ui/card';
 import { Button } from '@components/ui/button';
 import { Skeleton } from '@components/ui/skeleton';
@@ -261,11 +262,10 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
     try {
       // Validate experience-based completion requirements (unless admin or test completion)
       if (user?.id && user.role !== 'admin' && !module.testScore) {
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.VITE_API_URL || 'http://localhost:4000';
         const token = (await supabase.auth.getSession()).data.session?.access_token;
 
         try {
-          const response = await fetch(`${backendUrl}/api/student/experience/${courseId}/${moduleId}`, {
+          const response = await fetch(getApiUrl(`/api/student/experience/${courseId}/${moduleId}`), {
             headers: token ? { Authorization: `Bearer ${token}` } : {}
           });
 
