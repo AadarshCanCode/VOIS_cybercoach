@@ -16,6 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@comp
 import { Button } from '@components/ui/button';
 import { Skeleton } from '@components/ui/skeleton';
 import { cn } from '@lib/utils';
+import { useCourseStore } from '@shared/stores/useCourseStore';
 
 mermaid.initialize({
   startOnLoad: false,
@@ -46,6 +47,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
   const [activeTab, setActiveTab] = useState<'content' | 'test'>('content');
   const [showTest, setShowTest] = useState(false);
   const { user } = useAuth();
+  const { completeModule, updateModuleLocal } = useCourseStore();
   const [showCertificate, setShowCertificate] = useState(false);
 
   // const [course, setCourse] = useState<Course | null>(null); // REMOVED local state
@@ -280,10 +282,8 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
       }
 
       if (user?.id) {
-        // If it's a topic-based module, we should ideally mark all topics as completed too
         const topics = module.topics?.map(t => t.title) || [];
-        await courseService.updateProgress(user.id, moduleId, true, module.testScore ?? undefined, courseId, topics);
-        await learningPathService.rebalance(user.id, courseId);
+        await completeModule(user.id, courseId, moduleId, module.testScore ?? undefined, topics);
         if (onModuleStatusChange) onModuleStatusChange();
       }
     } catch (e) {
@@ -312,6 +312,9 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
 
     try {
       if (user?.id) {
+        // Optimistic update locally
+        updateModuleLocal(moduleId, { completed: true, testScore: score });
+
         // Transform answers array to map { questionId: answerIndex }
         const answersMap: Record<string, number> = {};
         const quizQuestions = module.quiz || module.questions || [];
@@ -323,36 +326,15 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
           }
         });
 
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/625e3bb0-0cfe-45c3-b3c4-22d6b96e2361', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            sessionId: 'debug-session',
-            runId: 'exec-v1',
-            hypothesisId: 'H1',
-            location: 'ModuleViewer.tsx:handleTestCompletion',
-            message: 'Submitting assessment',
-            data: {
-              courseId,
-              moduleId,
-              score,
-              answersLength: answers.length
-            },
-            timestamp: Date.now()
-          })
-        }).catch(() => { });
-        // #endregion
-
         if (Object.keys(answersMap).length > 0) {
           await courseService.submitAssessment(moduleId, answersMap, proctoringSessionId);
+          // Just to be sure sync with store's full reload but after optimistic update
           if (onModuleStatusChange) onModuleStatusChange();
           await learningPathService.rebalance(user.id, courseId);
         } else {
           // Legacy fallback / Simple progress update
           const topics = module.topics?.map(t => t.title) || [];
-          await courseService.updateProgress(user.id, moduleId, true, score, courseId, topics);
-          await learningPathService.rebalance(user.id, courseId);
+          await completeModule(user.id, courseId, moduleId, score, topics);
           if (onModuleStatusChange) onModuleStatusChange();
         }
 
@@ -360,7 +342,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
         if (module.type === 'initial_assessment') {
           setTimeout(() => {
             goToNextModule();
-          }, 500);
+          }, 300); // Faster navigation with optimistic state
         }
       }
     } catch (e) {
@@ -368,7 +350,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
       // Fallback
       if (user?.id) {
         const topics = module.topics?.map(t => t.title) || [];
-        await courseService.updateProgress(user.id, moduleId, true, score, courseId, topics);
+        await completeModule(user.id, courseId, moduleId, score, topics);
         if (onModuleStatusChange) onModuleStatusChange();
       }
     }

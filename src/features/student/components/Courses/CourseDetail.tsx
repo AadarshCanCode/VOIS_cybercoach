@@ -9,6 +9,7 @@ import { Button } from '@components/ui/button';
 import { Progress } from '@shared/components/ui/progress';
 import { Skeleton } from '@components/ui/skeleton';
 import { cn } from '@lib/utils';
+import { useCourseStore } from '@shared/stores/useCourseStore';
 
 interface CourseDetailProps {
   courseId: string;
@@ -31,150 +32,22 @@ type CourseModuleLike = Module & {
 };
 
 export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) => {
+  const {
+    course,
+    loading,
+    fetchCourseProgress,
+    reset
+  } = useCourseStore();
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
-  const [course, setCourse] = useState<Course | null>(null);
-  const [loading, setLoading] = useState(false);
   const { user } = useAuth();
 
-
   useEffect(() => {
-    let mounted = true;
-    const load = async () => {
-      setLoading(true);
-      try {
-        const data = await courseService.getCourseById(courseId);
-        if (mounted && data) {
-          if (user?.id) {
-            try {
-              const progress = await courseService.getUserProgress(user.id) as ProgressRow[] | null;
-              const moduleProgress = (progress || []).reduce((acc: Record<string, ProgressRow>, p: ProgressRow) => {
-                if (p.module_id) acc[p.module_id] = p;
-                return acc;
-              }, {});
+    fetchCourseProgress(courseId, user?.id);
+    return () => reset();
+  }, [courseId, user?.id]);
 
-              const rawModules = data.course_modules ?? data.modules ?? [];
-              const modules = Array.isArray(rawModules) ? rawModules : [];
-
-              const normalized = modules.map((m: any) => {
-                const modId = m.id || m._id;
-                const prog = moduleProgress[modId];
-                return {
-                  ...m,
-                  id: modId,
-                  completed: !!prog?.completed,
-                  testScore: (prog?.quiz_score ?? m.testScore) ?? undefined,
-                  completedTopics: prog?.completedTopics || []
-                };
-              }).filter(Boolean) as CourseModuleLike[];
-
-              // #region agent log
-              fetch('http://127.0.0.1:7242/ingest/625e3bb0-0cfe-45c3-b3c4-22d6b96e2361', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  sessionId: 'debug-session',
-                  runId: 'exec-v1',
-                  hypothesisId: 'H2',
-                  location: 'CourseDetail.tsx:load',
-                  message: 'Normalized modules with topics progress',
-                  data: {
-                    courseId,
-                    userId: user.id,
-                    modules: normalized.map(m => ({
-                      id: m.id,
-                      completed: m.completed,
-                      completedTopicsCount: m.completedTopics?.length || 0
-                    }))
-                  },
-                  timestamp: Date.now()
-                })
-              }).catch(() => { });
-              // #endregion
-
-              setCourse({ ...data, modules: normalized });
-            } catch (e) {
-              console.error('Failed to load user progress:', e);
-              setCourse(data);
-            }
-          } else {
-            // Guest user ID normalization
-            const rawModules = data.course_modules ?? data.modules ?? [];
-            const normalized = (Array.isArray(rawModules) ? rawModules : []).map((m: any) => ({
-              ...m,
-              id: m.id || m._id
-            }));
-            setCourse({ ...data, modules: normalized });
-          }
-        }
-      } catch (e) {
-        console.error('Failed to load course:', e);
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    };
-    load();
-
-    // ... (event listeners)
-  }, [courseId, user]);
-
-  // ... (refreshCourse logic similar update recommended but let's focus on load first or update both)
-  // Updating refreshCourse as well for consistency
-  const refreshCourse = async () => {
-    try {
-      const data = await courseService.getCourseById(courseId);
-      if (data) {
-        if (user?.id) {
-          const progress = await courseService.getUserProgress(user.id) as ProgressRow[] | null;
-          const moduleProgress = (progress || []).reduce((acc: Record<string, ProgressRow>, p: ProgressRow) => {
-            if (p.module_id) acc[p.module_id] = p;
-            return acc;
-          }, {});
-
-          const modules = (data.course_modules ?? data.modules ?? []) as any[];
-          const normalized = modules.map((m) => {
-            const modId = m.id || m._id;
-            const prog = moduleProgress[modId];
-            return {
-              ...m,
-              id: modId,
-              completed: !!prog?.completed,
-              testScore: (prog?.quiz_score ?? m.testScore) ?? undefined,
-              completedTopics: prog?.completedTopics || []
-            };
-          });
-
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/625e3bb0-0cfe-45c3-b3c4-22d6b96e2361', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              sessionId: 'debug-session',
-              runId: 'exec-v1',
-              hypothesisId: 'H3',
-              location: 'CourseDetail.tsx:refreshCourse',
-              message: 'Refreshed modules with topics progress',
-              data: {
-                courseId,
-                userId: user.id,
-                modules: normalized.map(m => ({
-                  id: m.id,
-                  completed: m.completed,
-                  completedTopicsCount: m.completedTopics?.length || 0
-                }))
-              },
-              timestamp: Date.now()
-            })
-          }).catch(() => { });
-          // #endregion
-
-          setCourse({ ...data, modules: normalized });
-        } else {
-          setCourse(data);
-        }
-      }
-    } catch (e) {
-      console.error('Failed refreshing course:', e);
-    }
+  const refreshCourse = () => {
+    fetchCourseProgress(courseId, user?.id);
   };
 
   // ... (renders)
@@ -329,7 +202,14 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
         </CardHeader>
         <div className="divide-y divide-border/50">
           {(course.modules ?? course.course_modules ?? []).map((module: Module, index: number, array: Module[]) => {
-            const isModuleUnlocked = user?.role === 'admin' || index === 0 || array[index - 1]?.completed;
+            const previousModule = index > 0 ? array[index - 1] : null;
+            const isModuleUnlocked = user?.role === 'admin' ||
+              index === 0 ||
+              (previousModule?.completed && (
+                previousModule.testScore === undefined ||
+                previousModule.testScore >= 70 ||
+                previousModule.type === 'initial_assessment'
+              ));
 
             return (
               <div

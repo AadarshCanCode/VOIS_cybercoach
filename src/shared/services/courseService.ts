@@ -340,6 +340,39 @@ class CourseService {
     }
   }
 
+  async getCourseProgress(courseId: string) {
+    try {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.VITE_API_URL || 'http://localhost:4000';
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
+
+      if (!token) return [];
+
+      const response = await fetch(`${backendUrl}/api/student/progress/${courseId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        console.error('Failed to fetch course progress from backend:', response.statusText);
+        return [];
+      }
+
+      const progressData = await response.json();
+      // Backend returns a map object where keys are moduleIds.
+      // Convert to array format similar to getUserProgress for consistency
+      return Object.entries(progressData).map(([moduleId, prog]: [string, any]) => ({
+        module_id: moduleId,
+        completed: prog.completed,
+        quiz_score: prog.quizScore,
+        completedTopics: prog.completedTopics || []
+      }));
+    } catch (error) {
+      console.error('Get course progress error:', error);
+      return [];
+    }
+  }
+
   async updateProgress(userId: string, moduleId: string, completed: boolean, quizScore?: number, courseId?: string, completedTopics?: string[]) {
     try {
       // Try to update via backend API first (handles both MongoDB and Supabase)

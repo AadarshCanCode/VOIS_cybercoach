@@ -122,13 +122,15 @@ router.post('/submit', authenticateUser, async (req: AuthenticatedRequest, res: 
 
         // 2.5. Validate Proctoring (Server-Side Enforcement)
         const courseId = course._id.toString();
+        const isInitialAssessment = module.type === 'initial_assessment';
         let violationCount = 0;
         const MAX_VIOLATIONS = 3; // Maximum allowed violations before rejection
 
         if (proctoringSessionId) {
             violationCount = await countViolations(proctoringSessionId, studentId, courseId);
 
-            if (violationCount > MAX_VIOLATIONS) {
+            // ONLY enforce proctoring blocks for non-initial assessments
+            if (violationCount > MAX_VIOLATIONS && !isInitialAssessment) {
                 logger.warn('Quiz submission rejected due to proctoring violations', {
                     studentId,
                     moduleId,
@@ -162,7 +164,6 @@ router.post('/submit', authenticateUser, async (req: AuthenticatedRequest, res: 
 
         // 4. Update Progress in MongoDB (Primary storage for all courses)
         const studentEmail = req.user?.email || '';
-        const isInitialAssessment = module.type === 'initial_assessment';
 
         if (studentEmail && (passed || isInitialAssessment)) {
             try {
