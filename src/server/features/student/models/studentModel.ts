@@ -26,6 +26,17 @@ export class StudentProfile implements IStudentProfile {
     this.upcomingAssessments = upcomingAssessments;
     this.lastLogin = lastLogin;
   }
+
+  // Helper to convert plain object to StudentProfile instance
+  static fromObject(obj: any): StudentProfile {
+    return new StudentProfile({
+      id: obj.id || '',
+      name: obj.name || '',
+      enrolledCourses: obj.enrolledCourses || [],
+      upcomingAssessments: obj.upcomingAssessments || [],
+      lastLogin: obj.lastLogin || null
+    });
+  }
 }
 
 export interface IStudentCourseSummary {
@@ -54,6 +65,23 @@ export interface IStudentDashboardStats {
   completedCourses: number;
   activeCourses: number;
   courseSummaries: StudentCourseSummary[];
+  totalStudyTime: string;
+  activeCourse?: {
+    courseId: string;
+    title: string;
+    description: string;
+    progress: number;
+    currentModuleId: string;
+    currentModuleTitle: string;
+  };
+  activities: {
+    id: string;
+    action: string;
+    timestamp: Date;
+    type: 'completion' | 'start' | 'achievement' | 'certificate';
+    courseId?: string;
+    moduleId?: string;
+  }[];
 }
 
 export interface IStudentDashboardSummary {

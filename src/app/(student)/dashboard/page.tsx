@@ -6,6 +6,12 @@ export default function DashboardPage() {
     const router = useRouter();
 
     const handleTabChange = (tab: string) => {
+        // Handle direct paths like 'courses/id'
+        if (tab.startsWith('courses/')) {
+            router.push(`/${tab}`);
+            return;
+        }
+
         const routes: Record<string, string> = {
             courses: "/courses",
             labs: "/labs",

@@ -12,13 +12,16 @@ export interface RecentActivity {
     action: string;
     created_at: string;
     type: 'completion' | 'start' | 'achievement' | 'certificate';
+    courseId?: string;
+    moduleId?: string;
 }
 
 export interface ActiveOperation {
     courseId: string;
     title: string;
     description: string;
-    currentModule: string;
+    currentModuleId: string;
+    currentModuleTitle: string;
     progress: number;
     lastAccessed: string;
 }
@@ -33,7 +36,7 @@ export interface CourseProgress {
 class StudentService {
     async getDashboardStats(userId: string): Promise<StudentStats> {
         try {
-            // Get completed courses count
+            // 1. Get completed courses count
             const { count: coursesCompleted, error: coursesError } = await supabase
                 .from('module_progress')
                 .select('*', { count: 'exact', head: true })
@@ -42,32 +45,55 @@ class StudentService {
 
             if (coursesError) throw new Error(`Failed to fetch completed courses: ${coursesError.message}`);
 
-            // Get certificates count
+            // 2. Get certificates count
             const { count: certificatesEarned, error: certsError } = await supabase
                 .from('certificates')
                 .select('*', { count: 'exact', head: true })
                 .eq('student_id', userId);
 
-            if (certsError && certsError.code !== 'PGRST116') { // Ignore if table doesn't exist yet
+            if (certsError && certsError.code !== 'PGRST116') {
                 console.warn('Certificates table might not exist or error fetching:', certsError);
             }
 
-            // Try to get study time from user_progress aggregate (sum of time spent)
+            // 3. Get accurate study time from backend aggregation
+            let studyTime = '0 mins';
+            try {
+                const session = (await supabase.auth.getSession()).data.session;
+                const token = session?.access_token;
+
+                const response = await fetch('/api/student/overview', {
+                    headers: token ? { Authorization: `Bearer ${token}` } : {}
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    studyTime = data.stats.totalStudyTime || '0 mins';
+
+                    return {
+                        coursesCompleted: data.stats.completedCourses || 0,
+                        certificatesEarned: certificatesEarned || 0,
+                        liveLabsCompleted: 0,
+                        studyTime
+                    };
+                }
+            } catch (e) {
+                console.warn('Failed to fetch real study time, using estimate:', e);
+            }
+
+            // Fallback: Estimate study time based on completed modules if backend is down
             const { data: progressData } = await supabase
                 .from('module_progress')
                 .select('id')
                 .eq('student_id', userId);
 
-            // Estimate study time based on completed modules (rough estimate: 1 module = 10 minutes)
             const completedModules = progressData?.length || 0;
             const estimatedMinutes = completedModules * 10;
             const hours = Math.floor(estimatedMinutes / 60);
-            const studyTime = hours > 0 ? `${hours} hours` : `${estimatedMinutes} mins`;
+            studyTime = hours > 0 ? `${hours} hours` : `${estimatedMinutes} mins`;
 
             return {
                 coursesCompleted: coursesCompleted || 0,
                 certificatesEarned: certificatesEarned || 0,
-                liveLabsCompleted: 0, // Placeholder for now, or fetch from a future labs table
+                liveLabsCompleted: 0,
                 studyTime
             };
         } catch (error) {
@@ -78,41 +104,92 @@ class StudentService {
 
     async getRecentActivity(userId: string): Promise<RecentActivity[]> {
         try {
-            // Fetch recent progress updates
+            // Try backend first for MongoDB activities
+            try {
+                const session = (await supabase.auth.getSession()).data.session;
+                const token = session?.access_token;
+
+                const response = await fetch('/api/student/overview', {
+                    headers: token ? { Authorization: `Bearer ${token}` } : {}
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.stats.activities?.length > 0) {
+                        return data.stats.activities.map((a: any) => ({
+                            id: a.id,
+                            action: a.action,
+                            created_at: a.timestamp,
+                            type: a.type,
+                            courseId: a.courseId,
+                            moduleId: a.moduleId
+                        }));
+                    }
+                }
+            } catch (e) {
+                console.warn('Backend activity fetch failed, falling back to Supabase:', e);
+            }
+
+            // Fallback to Supabase
             const { data: progressData, error: progressError } = await supabase
                 .from('module_progress')
                 .select(`
-          id,
-          completed_at,
-          completed,
-          module:modules(title)
-        `)
+                  id,
+                  completed_at,
+                  completed,
+                  module_id
+                `)
                 .eq('student_id', userId)
                 .order('completed_at', { ascending: false })
                 .limit(5);
 
             if (progressError) throw new Error(`Failed to fetch recent activity: ${progressError.message}`);
 
-            // Transform to RecentActivity format
-            // This is a simplified version. In a real app, you might union multiple tables (logs, certs, etc.)
-            const activities: RecentActivity[] = progressData.map((item: any) => ({
+            return progressData.map((item: any) => ({
                 id: item.id,
-                action: item.completed ? `Completed ${item.module?.title}` : `Started ${item.module?.title}`,
+                action: item.completed
+                    ? `Completed a module`
+                    : `Started a module`,
                 created_at: item.completed_at || new Date().toISOString(),
-                type: item.completed ? 'completion' : 'start'
+                type: item.completed ? 'completion' : 'start',
+                courseId: undefined, // Supabase progress doesn't directly store course_id
+                moduleId: item.module_id
             }));
-
-            return activities;
         } catch (error) {
             console.error('Get recent activity error:', error);
-            return []; // Return empty array on error to prevent crash
+            return [];
         }
     }
 
     async getActiveOperation(userId: string): Promise<ActiveOperation | null> {
         try {
+            // Try backend first for MongoDB active course
+            try {
+                const session = (await supabase.auth.getSession()).data.session;
+                const token = session?.access_token;
 
-            // Get the most recently accessed uncompleted course
+                const response = await fetch('/api/student/overview', {
+                    headers: token ? { Authorization: `Bearer ${token}` } : {}
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.stats.activeCourse) {
+                        const active = data.stats.activeCourse;
+                        return {
+                            courseId: active.courseId,
+                            title: active.title,
+                            description: active.description,
+                            currentModuleId: active.currentModuleId,
+                            currentModuleTitle: active.currentModuleTitle,
+                            progress: active.progress,
+                            lastAccessed: new Date().toISOString()
+                        };
+                    }
+                }
+            } catch (e) {
+                console.warn('Backend active course fetch failed, falling back to Supabase:', e);
+            }
+
+            // Fallback to Supabase (mostly for manually added UUID courses)
             const { data: progressData, error: progressError } = await supabase
                 .from('module_progress')
                 .select(`
@@ -125,20 +202,14 @@ class StudentService {
                 .limit(1)
                 .maybeSingle() as any;
 
-            if (progressError) {
-                if (progressError.code === 'PGRST116') return null; // No active operation found
-                // Don't throw here if we want to degrade gracefully, or if VU might be primary
-                console.warn(`Failed to fetch active operation from Supabase: ${progressError.message}`);
-                return null;
-            }
-
-            if (!progressData || !progressData.course) return null;
+            if (progressError || !progressData) return null;
 
             return {
                 courseId: '',
-                title: 'Continuing Session',
+                title: 'Continuing Course',
                 description: 'Pick up where you left off',
-                currentModule: 'In Progress',
+                currentModuleId: progressData.module_id,
+                currentModuleTitle: 'Next Module',
                 progress: 0,
                 lastAccessed: progressData?.completed_at || new Date().toISOString()
             };

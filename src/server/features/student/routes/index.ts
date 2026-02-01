@@ -22,8 +22,13 @@ router.use('/assessment', assessmentRoutes);
 router.use('/support', supportRoutes);
 router.use('/community', communityRoutes);
 
-router.get('/overview', authenticateUser, (_req: Request, res: Response): void => {
-  const summary = getStudentDashboardSummary();
+router.get('/overview', authenticateUser, async (req: AuthenticatedRequest, res: Response) => {
+  const studentId = req.user?.id;
+  const studentEmail = req.user?.email;
+  if (!studentId || !studentEmail) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  const summary = await getStudentDashboardSummary(studentId, studentEmail);
   res.json(summary);
 });
 

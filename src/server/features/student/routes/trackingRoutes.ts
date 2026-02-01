@@ -8,9 +8,6 @@ import { logger } from '../../../shared/lib/logger.js';
 
 const router = Router();
 
-// Ingest proctoring logs (used with sendBeacon or fetch)
-// Note: authenticateUser removed for sendBeacon compatibility (cannot send headers)
-// studentId is passed in the body instead
 router.post('/proctor/ingest',
     proctoringRateLimiter,
     validateProctoringEvent,
@@ -89,7 +86,8 @@ router.post('/experience/sync',
                     {
                         $inc: {
                             "moduleStats.$.timeSpent": timeSpent,
-                            "moduleStats.$.interactions": interactions
+                            "moduleStats.$.interactions": interactions,
+                            totalTimeSpent: timeSpent
                         },
                         $max: { "moduleStats.$.scrollDepth": scrollDepth },
                         $set: {
@@ -118,8 +116,8 @@ router.post('/experience/sync',
                                 moduleStats: newModuleStat,
                                 ...(sanitizedInteraction ? { aiInteractions: sanitizedInteraction } : {})
                             },
-                            $set: { updatedAt: now },
-                            $setOnInsert: { totalTimeSpent: 0 } // Only set on creation
+                            $inc: { totalTimeSpent: timeSpent },
+                            $set: { updatedAt: now }
                         },
                         { upsert: true }
                     );

@@ -231,7 +231,7 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ courseId, onBack }) 
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-start gap-4 flex-1">
                     {/* Module Number/Status */}
-                    <div className="flex-shrink-0 mt-1">
+                    <div className="shrink-0 mt-1">
                       {module.completed ? (
                         <div className="h-8 w-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
                           <CheckCircle className="h-5 w-5 text-primary" />

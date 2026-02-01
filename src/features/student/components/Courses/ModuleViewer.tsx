@@ -448,7 +448,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
             <div className="p-4 rounded-full bg-primary/10 border border-primary/20 w-24 h-24 mx-auto mb-6 flex items-center justify-center">
               <Shield className="h-12 w-12 text-primary" />
             </div>
-            <CardTitle className="text-4xl font-black tracking-tight bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
+            <CardTitle className="text-4xl font-black tracking-tight bg-linear-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
               {module.type === 'initial_assessment' ? 'Diagnostic Assessment' : 'Final Examination'}
             </CardTitle>
             <CardDescription className="text-lg max-w-lg mx-auto mt-4 leading-relaxed">
@@ -598,7 +598,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
             <div className="flex flex-col md:flex-row gap-6">
               {/* Topics Sidebar (Mobile-friendly list) */}
               {module.topics && module.topics.length > 0 && (
-                <div className="w-full md:w-64 flex-shrink-0 border-r border-border/50 pr-6 space-y-2">
+                <div className="w-full md:w-64 shrink-0 border-r border-border/50 pr-6 space-y-2">
                   <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-2">
                     Topics
                   </h4>
@@ -808,7 +808,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
 
       {/* Certificate Section */}
       {course && isAllModulesCompleted(course) && (
-        <Card className="border-primary/30 bg-gradient-to-r from-primary/5 to-primary/10">
+        <Card className="border-primary/30 bg-linear-to-r from-primary/5 to-primary/10">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">

@@ -165,18 +165,20 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
               <>
                 <div>
                   <h3 className="text-xl font-bold mb-1">{activeOperation.title}</h3>
-                  <p className="text-sm text-muted-foreground">{activeOperation.description}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Currently on: <span className="font-semibold text-foreground">{activeOperation.currentModuleTitle}</span>
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Progress: {activeOperation.currentModule}</span>
+                    <span className="text-muted-foreground">Course Completion</span>
                     <span className="font-bold text-primary">{activeOperation.progress}%</span>
                   </div>
                   <Progress value={activeOperation.progress} className="h-2" />
                 </div>
                 <div className="flex gap-4">
-                  <Button className="flex-1" onClick={() => onTabChange?.('courses')}>
-                    <Play className="mr-2 h-4 w-4" /> Resume Learning
+                  <Button className="flex-1" onClick={() => onTabChange?.(`courses/${activeOperation.courseId}`)}>
+                    <Play className="mr-2 h-4 w-4" /> Resume {activeOperation.title}
                   </Button>
                   <Button variant="outline" size="icon" onClick={() => onTabChange?.('labs')}>
                     <Terminal className="h-4 w-4" />
@@ -213,7 +215,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
                 </div>
               ) : activities.length > 0 ? (
                 activities.slice(0, 5).map((activity, index) => (
-                  <div key={index} className="flex items-start gap-4 group">
+                  <div
+                    key={index}
+                    className="flex items-start gap-4 group cursor-pointer hover:bg-muted/30 p-2 -m-2 rounded-lg transition-colors"
+                    onClick={() => activity.courseId && onTabChange?.(`courses/${activity.courseId}`)}
+                  >
                     <div className={cn(
                       "mt-1 h-2 w-2 rounded-full transition-transform group-hover:scale-125",
                       activity.type === 'completion' ? 'bg-primary' : 'bg-muted-foreground/30'
@@ -237,12 +243,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
         </Card>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4">
         <Card className="shadow-sm hover:shadow-md transition-all duration-200 border-border/50 hover:border-border">
           <CardHeader>
             <CardTitle>Quick Links</CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-2">
+          <CardContent className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
+            <Button variant="outline" className="justify-between hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-all" onClick={() => onTabChange?.('courses')}>
+              <div className="flex items-center gap-2">
+                <BookOpen className="h-4 w-4" />
+                <span>Explore Courses</span>
+              </div>
+              <ChevronRight className="h-4 w-4 opacity-50" />
+            </Button>
 
             <Button variant="outline" className="justify-between hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-all" onClick={() => onTabChange?.('certificates')}>
               <div className="flex items-center gap-2">
@@ -251,26 +264,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
               </div>
               <ChevronRight className="h-4 w-4 opacity-50" />
             </Button>
-          </CardContent>
-        </Card>
 
-        <Card className="shadow-sm hover:shadow-md transition-all duration-200 border-border/50 hover:border-border">
-          <CardHeader>
-            <CardTitle>Status</CardTitle>
-            <CardDescription>Security clearance and system access</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between border-b border-border/50 pb-4">
-              <span className="text-sm font-medium">Clearance Level</span>
-              <span className="text-sm font-bold text-primary uppercase">AUTHORIZED</span>
-            </div>
-            <div className="flex items-center justify-between">
+            <Button variant="outline" className="justify-between hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-all" onClick={() => onTabChange?.('labs')}>
               <div className="flex items-center gap-2">
-                <Shield className="h-4 w-4 text-primary" />
-                <span className="text-sm">Account Status</span>
+                <Terminal className="h-4 w-4" />
+                <span>Cyber Range Labs</span>
               </div>
-              <span className="text-xs font-medium px-2 py-0.5 bg-primary/10 text-primary rounded-full animate-pulse">ACTIVE</span>
-            </div>
+              <ChevronRight className="h-4 w-4 opacity-50" />
+            </Button>
           </CardContent>
         </Card>
       </div>
