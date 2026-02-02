@@ -21,11 +21,13 @@ export const VerifyCertificate = () => {
 
             try {
                 // Fetch user profile and certificates
-                const { data, error } = await supabase
+                const { data: resultData, error } = await supabase
                     .from('users')
                     .select('name, certificates, xp, level')
                     .eq('id', userId)
-                    .single();
+                    .limit(1);
+
+                const data = resultData?.[0];
 
                 if (error) throw error;
                 if (!data) throw new Error("Student not found");
@@ -66,7 +68,7 @@ export const VerifyCertificate = () => {
             <header className="border-b border-gray-800 p-6 flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                     <ShieldCheck className="text-brand-400 h-8 w-8" />
-                    <span className="font-display font-black text-xl tracking-tighter uppercase italic">Grade<span className="text-brand-400">U</span></span>
+                    <span className="font-sans font-black text-xl tracking-tighter uppercase">Grade<span className="text-brand-400">U</span></span>
                 </div>
                 <div className="text-sm text-zinc-400 font-medium">Official Credential Validation</div>
             </header>

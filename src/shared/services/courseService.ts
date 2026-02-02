@@ -112,8 +112,7 @@ class CourseService {
           contentJsonUrl = publicUrl;
         }
       }
-
-      const { data, error } = await supabase
+      const { data: resultData, error } = await supabase
         .from('courses')
         .insert([{
           title: courseData.title,
@@ -127,7 +126,9 @@ class CourseService {
           content_json_url: contentJsonUrl
         }])
         .select()
-        .single();
+        .limit(1);
+
+      const data = resultData?.[0];
 
       if (error) {
         console.error('Supabase error:', error);
@@ -177,12 +178,14 @@ class CourseService {
         }
       }
 
-      const { data, error } = await supabase
+      const { data: resultData, error } = await supabase
         .from('courses')
         .update(updates)
         .eq('id', id)
         .select()
-        .single();
+        .limit(1);
+
+      const data = resultData?.[0];
 
       if (error) throw new Error(`Failed to update course: ${error.message}`);
 
@@ -324,7 +327,7 @@ class CourseService {
         throw new Error('Maximum module limit (10) reached for this course');
       }
 
-      const { data, error } = await supabase
+      const { data: resultData, error } = await supabase
         .from('modules')
         .insert([{
           ...moduleData,
@@ -332,7 +335,9 @@ class CourseService {
           // is_published: false // Removed
         }])
         .select()
-        .single();
+        .limit(1);
+
+      const data = resultData?.[0];
 
       if (error) throw new Error(`Failed to create module: ${error.message}`);
       return data;
@@ -344,12 +349,14 @@ class CourseService {
 
   async updateModule(id: string, updates: Partial<Module>) {
     try {
-      const { data, error } = await supabase
+      const { data: resultData, error } = await supabase
         .from('modules')
         .update(updates)
         .eq('id', id)
         .select()
-        .single();
+        .limit(1);
+
+      const data = resultData?.[0];
 
       if (error) throw new Error(`Failed to update module: ${error.message}`);
       return data;
@@ -528,23 +535,27 @@ class CourseService {
       // Handle static VU courses - store in Supabase instead of localStorage
       if (courseId === 'vu-web-security') {
         // Check if already enrolled in Supabase
-        const { data: existing } = await supabase
+        const { data: existingData } = await supabase
           .from('enrollments')
           .select('*')
           .eq('student_id', userId)
           .eq('course_id', courseId)
-          .maybeSingle();
+          .limit(1);
+
+        const existing = existingData?.[0];
 
         if (existing) {
           return existing;
         }
 
         // Create enrollment in Supabase
-        const { data: enrollment, error } = await supabase
+        const { data: insertedData, error } = await supabase
           .from('enrollments')
           .insert([{ student_id: userId, course_id: courseId }])
           .select()
-          .single();
+          .limit(1);
+
+        const enrollment = insertedData?.[0];
 
         if (error) {
           console.error('Error enrolling in VU course:', error);
@@ -556,12 +567,14 @@ class CourseService {
       }
 
       // Avoid double-enrollments
-      const { data: existing, error: existingErr } = await supabase
+      const { data: existingData, error: existingErr } = await supabase
         .from('enrollments')
         .select('*')
         .eq('student_id', userId)
         .eq('course_id', courseId)
-        .maybeSingle();
+        .limit(1);
+
+      const existing = existingData?.[0];
 
       if (existingErr) {
         console.warn('Error checking existing enrollment:', existingErr.message);
@@ -569,15 +582,13 @@ class CourseService {
 
       if (existing) return existing;
 
-      const { data: inserted, error: insertErr } = await supabase
+      const { data: insertedData, error: insertErr } = await supabase
         .from('enrollments')
         .insert([{ student_id: userId, course_id: courseId }])
         .select()
-        .single();
+        .limit(1);
 
-      if (insertErr) throw new Error(`Failed to enroll in course: ${insertErr.message}`);
-
-      return inserted;
+      return insertedData?.[0];
     } catch (error) {
       console.error('Enroll in course error:', error);
       throw error;

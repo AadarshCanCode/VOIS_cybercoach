@@ -79,7 +79,7 @@ export const LandingPage: React.FC = () => {
         <Navbar>
           {/* Desktop Navigation */}
           <NavBody>
-            <NavbarLogo onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} />
+            <NavbarLogo onClickAction={() => window.scrollTo({ top: 0, behavior: 'smooth' })} />
             <NavItems
               items={[
                 {
@@ -103,7 +103,7 @@ export const LandingPage: React.FC = () => {
             <div className="flex items-center gap-3">
               <NavbarButton
                 variant="secondary"
-                onClick={() => window.open("https://t.me/GradeU_Bot", "_blank")}
+                onClickAction={() => window.open("https://t.me/GradeU_Bot", "_blank")}
                 className="hidden md:flex items-center justify-center px-3"
               >
                 <svg viewBox="0 0 32 32" className="h-8 w-8" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -117,7 +117,7 @@ export const LandingPage: React.FC = () => {
                   </defs>
                 </svg>
               </NavbarButton>
-              <NavbarButton variant="primary" onClick={() => handleGetStarted()}>
+              <NavbarButton variant="primary" onClickAction={() => handleGetStarted()}>
                 {user ? 'Go to Dashboard' : 'Get Started'}
               </NavbarButton>
             </div>
@@ -126,10 +126,10 @@ export const LandingPage: React.FC = () => {
           {/* Mobile Navigation */}
           <MobileNav>
             <MobileNavHeader>
-              <NavbarLogo onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} />
+              <NavbarLogo onClickAction={() => window.scrollTo({ top: 0, behavior: 'smooth' })} />
               <MobileNavToggle
                 isOpen={mobileOpen}
-                onClick={() => setMobileOpen(!mobileOpen)}
+                onClickAction={() => setMobileOpen(!mobileOpen)}
               />
             </MobileNavHeader>
 
@@ -178,7 +178,7 @@ export const LandingPage: React.FC = () => {
               </button>
               <div className="flex w-full flex-col gap-3 pt-4 border-t border-zinc-800">
                 <NavbarButton
-                  onClick={() => { setMobileOpen(false); handleGetStarted(); }}
+                  onClickAction={() => { setMobileOpen(false); handleGetStarted(); }}
                   variant="primary"
                   className="w-full"
                 >

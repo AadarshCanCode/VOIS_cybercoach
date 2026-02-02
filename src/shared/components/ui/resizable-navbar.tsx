@@ -214,22 +214,22 @@ export const MobileNavMenu = ({
 
 export const MobileNavToggle = ({
     isOpen,
-    onClick,
+    onClickAction,
 }: {
     isOpen: boolean;
-    onClick: () => void;
+    onClickAction: () => void;
 }) => {
     return isOpen ? (
-        <IconX className="h-6 w-6 text-brand-400 cursor-pointer" onClick={onClick} />
+        <IconX className="h-6 w-6 text-brand-400 cursor-pointer" onClick={onClickAction} />
     ) : (
-        <IconMenu2 className="h-6 w-6 text-brand-400 cursor-pointer" onClick={onClick} />
+        <IconMenu2 className="h-6 w-6 text-brand-400 cursor-pointer" onClick={onClickAction} />
     );
 };
 
-export const NavbarLogo = ({ onClick }: { onClick?: () => void }) => {
+export const NavbarLogo = ({ onClickAction }: { onClickAction?: () => void }) => {
     return (
         <button
-            onClick={onClick}
+            onClick={onClickAction}
             className="relative z-20 flex items-center gap-3 cursor-pointer group"
         >
             <div className="relative">
@@ -239,7 +239,7 @@ export const NavbarLogo = ({ onClick }: { onClick?: () => void }) => {
                     className="relative h-12 w-12 group-hover:scale-110 transition-transform duration-300"
                 />
             </div>
-            <span className="font-black text-white text-2xl tracking-tighter uppercase hidden sm:block font-display italic">
+            <span className="font-black text-white text-2xl tracking-tighter uppercase hidden sm:block font-sans">
                 Grade<span className="text-brand-400">U</span>
             </span>
         </button>
@@ -251,13 +251,13 @@ export const NavbarButton = ({
     children,
     className,
     variant = "primary",
-    onClick,
+    onClickAction,
 }: {
     href?: string;
     children: React.ReactNode;
     className?: string;
     variant?: "primary" | "secondary" | "outline";
-    onClick?: () => void;
+    onClickAction?: () => void;
 }) => {
     const baseStyles =
         "px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider cursor-pointer transition-all duration-200";
@@ -283,7 +283,7 @@ export const NavbarButton = ({
     return (
         <button
             type="button"
-            onClick={onClick}
+            onClick={onClickAction}
             className={cn(baseStyles, variantStyles[variant], className)}
         >
             {children}

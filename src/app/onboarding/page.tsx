@@ -4,7 +4,17 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@context/AuthContext';
 import { supabase } from '@lib/supabase';
 import { useRouter } from 'next/navigation';
-import { Shield } from 'lucide-react';
+import { Shield, User, Phone, Mail, GraduationCap, Building2, Loader2 } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@shared/components/ui/card';
+import { Input } from '@shared/components/ui/input';
+import { Button } from '@shared/components/ui/button';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@shared/components/ui/select";
 
 export default function OnboardingPage() {
     const { user, updateUser } = useAuth();
@@ -27,23 +37,26 @@ export default function OnboardingPage() {
                 ...prev,
                 name: user.name || '',
                 contact_email: user.email || '',
-                // If they partially filled it before, pre-fill here
                 phone_number: user.phone_number || '',
                 faculty: user.faculty || '',
                 department: user.department || '',
                 email_type: user.email_type || 'personal',
             }));
 
-            // If already completed, redirect to dashboard
             if (user.onboarding_completed) {
                 router.replace('/dashboard');
             }
         }
     }, [user, router]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+        setError(null);
+    };
+
+    const handleSelectChange = (value: string) => {
+        setFormData(prev => ({ ...prev, email_type: value as 'vu' | 'personal' }));
         setError(null);
     };
 
@@ -84,18 +97,18 @@ export default function OnboardingPage() {
                 onboarding_completed: true,
             };
 
-            const { data, error: updateError } = await supabase
+            const { data: results, error: updateError } = await supabase
                 .from('profiles')
                 .update(updates)
                 .eq('id', user.id)
                 .select()
-                .single();
+                .limit(1);
+
+            const data = results?.[0];
 
             if (updateError) throw updateError;
 
-            // Verify persistence
             if (!data || !data.onboarding_completed) {
-                console.error("Update verification failed:", data);
                 throw new Error("Database refused update. Please check RLS policies or internet connection.");
             }
 
@@ -109,7 +122,6 @@ export default function OnboardingPage() {
                 onboarding_completed: true
             });
 
-            // Redirect to dashboard after success
             router.push('/dashboard');
 
         } catch (err: any) {
@@ -121,152 +133,129 @@ export default function OnboardingPage() {
     };
 
     if (!user) {
-        return <div className="min-h-screen flex items-center justify-center bg-[#0F1115] text-white">Loading...</div>;
+        return <div className="min-h-screen flex items-center justify-center bg-[#0a0a0b] text-white">
+            <div className="flex flex-col items-center gap-4">
+                <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+                <p className="text-zinc-400 font-mono animate-pulse">AUTHENTICATING...</p>
+            </div>
+        </div>;
     }
 
     return (
-        <div className="min-h-screen bg-[#0F1115] flex flex-col items-center justify-center p-4">
-            {/* Logo / Header */}
-            <div className="mb-8 text-center animate-in fade-in slide-in-from-top-4 duration-500">
-                <div className="bg-emerald-500/10 p-4 rounded-full w-fit mx-auto mb-4 border border-emerald-500/20">
-                    <Shield className="w-8 h-8 text-emerald-500" />
-                </div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-green-400 bg-clip-text text-transparent">
-                    One Last Step
-                </h1>
-                <p className="text-gray-400 mt-2">
-                    Complete your profile to access all CyberCoach features
-                </p>
+        <div className="min-h-screen bg-[#0a0a0b] flex flex-col items-center justify-center p-6 relative overflow-hidden">
+            {/* Subtle mesh background */}
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none opacity-20">
+                <div className="absolute -top-[30%] -left-[10%] w-[50%] h-[70%] bg-emerald-500/10 blur-[120px] rounded-full" />
+                <div className="absolute -bottom-[20%] -right-[10%] w-[40%] h-[60%] bg-zinc-500/10 blur-[120px] rounded-full" />
             </div>
 
-            <div className="w-full max-w-xl bg-[#1A1D24]/50 border border-white/5 rounded-2xl shadow-xl backdrop-blur-sm p-6 md:p-10 animate-in fade-in zoom-in duration-300">
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    {error && (
-                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
-                            {error}
-                        </div>
-                    )}
+            <div className="w-full max-w-lg relative z-10 space-y-10">
+                {/* Minimal Header */}
+                <div className="text-center space-y-1 animate-in fade-in slide-in-from-top-4 duration-700">
+                    <h1 className="text-3xl font-semibold tracking-tight text-white/90">
+                        Complete your profile
+                    </h1>
+                    <p className="text-zinc-500 text-sm">
+                        Just a few details to get you started with <span className="text-emerald-500/80 font-medium">CyberCoach</span>
+                    </p>
+                </div>
 
-                    <div className="space-y-5">
-                        {/* Name */}
-                        <div>
-                            <label className="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">
-                                Full Name
-                            </label>
-                            <input
-                                name="name"
-                                value={formData.name}
-                                onChange={handleChange}
-                                className="w-full bg-[#0F1115] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all font-medium"
-                                placeholder="John Doe"
-                            />
-                        </div>
+                <div className="bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-3xl p-8 md:p-10 shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <form onSubmit={handleSubmit} className="space-y-8">
+                        {error && (
+                            <div className="bg-red-500/5 border border-red-500/10 text-red-400/90 px-4 py-3 rounded-xl text-xs font-medium text-center">
+                                {error}
+                            </div>
+                        )}
 
-                        {/* Phone */}
-                        <div>
-                            <label className="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">
-                                Phone Number
-                            </label>
-                            <input
-                                name="phone_number"
-                                type="tel"
-                                value={formData.phone_number}
-                                onChange={handleChange}
-                                className="w-full bg-[#0F1115] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all font-medium"
-                                placeholder="+91 9876543210"
-                            />
-                        </div>
+                        <div className="space-y-6">
+                            <div className="grid grid-cols-1 gap-6">
+                                <Input
+                                    label="Full Name"
+                                    name="name"
+                                    value={formData.name}
+                                    onChange={handleInputChange}
+                                    placeholder="e.g. John Doe"
+                                    autoComplete="name"
+                                    className="bg-zinc-950/50 border-white/5 focus:border-emerald-500/30 transition-colors"
+                                />
+                                <Input
+                                    label="Phone Number"
+                                    name="phone_number"
+                                    type="tel"
+                                    value={formData.phone_number}
+                                    onChange={handleInputChange}
+                                    placeholder="+1 (555) 000-0000"
+                                    className="bg-zinc-950/50 border-white/5 focus:border-emerald-500/30 transition-colors"
+                                />
+                            </div>
 
-                        {/* Email Logic */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">
-                                    Email Type
-                                </label>
-                                <div className="relative">
-                                    <select
-                                        name="email_type"
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div className="space-y-1.5 sm:col-span-1">
+                                    <label className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider ml-1">
+                                        Email Type
+                                    </label>
+                                    <Select
                                         value={formData.email_type}
-                                        onChange={handleChange}
-                                        className="w-full bg-[#0F1115] border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all appearance-none cursor-pointer"
+                                        onValueChange={handleSelectChange}
                                     >
-                                        <option value="personal">Personal Mail</option>
-                                        <option value="vu">VU Mail</option>
-                                    </select>
-                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                                        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-                                    </div>
+                                        <SelectTrigger className="bg-zinc-950/50 border-white/5 focus:ring-emerald-500/20 text-white rounded-xl h-10 transition-colors">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-zinc-900 border-white/10 text-zinc-300">
+                                            <SelectItem value="personal">Personal</SelectItem>
+                                            <SelectItem value="vu">University</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="sm:col-span-2">
+                                    <Input
+                                        label="Email Address"
+                                        name="contact_email"
+                                        type="email"
+                                        value={formData.contact_email}
+                                        onChange={handleInputChange}
+                                        placeholder={formData.email_type === 'vu' ? "user@vupune.ac.in" : "user@example.com"}
+                                        className="bg-zinc-950/50 border-white/5 focus:border-emerald-500/30 transition-colors"
+                                    />
                                 </div>
                             </div>
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">
-                                    Email Address
-                                </label>
-                                <input
-                                    name="contact_email"
-                                    type="email"
-                                    value={formData.contact_email}
-                                    onChange={handleChange}
-                                    className="w-full bg-[#0F1115] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all font-medium"
-                                    placeholder={formData.email_type === 'vu' ? "student@vupune.ac.in" : "student@gmail.com"}
-                                />
-                            </div>
-                        </div>
 
-                        {/* Faculty & Department */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">
-                                    Faculty
-                                </label>
-                                <input
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <Input
+                                    label="Faculty"
                                     name="faculty"
                                     value={formData.faculty}
-                                    onChange={handleChange}
-                                    className="w-full bg-[#0F1115] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all font-medium"
-                                    placeholder="Engineering"
+                                    onChange={handleInputChange}
+                                    placeholder="Your faculty"
+                                    className="bg-zinc-950/50 border-white/5 focus:border-emerald-500/30 transition-colors"
                                 />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">
-                                    Department
-                                </label>
-                                <input
+                                <Input
+                                    label="Department"
                                     name="department"
                                     value={formData.department}
-                                    onChange={handleChange}
-                                    className="w-full bg-[#0F1115] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all font-medium"
-                                    placeholder="Computer Science"
+                                    onChange={handleInputChange}
+                                    placeholder="Your department"
+                                    className="bg-zinc-950/50 border-white/5 focus:border-emerald-500/30 transition-colors"
                                 />
                             </div>
                         </div>
-                    </div>
 
-                    <div className="pt-6">
-                        <button
+                        <Button
                             type="submit"
                             disabled={loading}
-                            className="w-full bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-[0.98] text-lg tracking-wide"
+                            className="w-full h-12 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-xl shadow-lg shadow-emerald-500/10 transition-all active:scale-[0.98]"
+                            isLoading={loading}
                         >
-                            {loading ? (
-                                <span className="flex items-center justify-center gap-2">
-                                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                    </svg>
-                                    Securing Profile...
-                                </span>
-                            ) : (
-                                "Complete Registration"
-                            )}
-                        </button>
-                    </div>
-                </form>
-            </div>
+                            {loading ? "Initializing..." : "Get Started"}
+                        </Button>
+                    </form>
+                </div>
 
-            <p className="text-gray-600 text-xs mt-8">
-                &copy; {new Date().getFullYear()} CyberCoach. All operations secured.
-            </p>
+                <p className="text-zinc-700 text-[10px] text-center tracking-widest uppercase font-medium">
+                    &copy; {new Date().getFullYear()} CYBERCOACH
+                </p>
+            </div>
         </div>
     );
 }

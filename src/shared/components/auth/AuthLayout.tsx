@@ -17,7 +17,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, subtitl
           <Link href="/" className="inline-flex flex-col items-center gap-4 mb-8 group transition-all hover:opacity-90">
             <img src="/logo.svg" alt="GradeU" className="h-24 w-24 transition-transform duration-500 group-hover:scale-105" />
             <div className="text-center">
-              <div className="text-5xl font-black tracking-tighter text-white uppercase font-display leading-none italic">
+              <div className="text-5xl font-black tracking-tighter text-white uppercase font-sans leading-none">
                 Grade<span className="text-brand-400">U</span>
               </div>
               <div className="text-xs font-bold text-brand-400 tracking-[0.3em] uppercase mt-2 opacity-80">Empowering Excellence</div>

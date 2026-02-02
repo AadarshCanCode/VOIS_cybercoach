@@ -34,11 +34,13 @@ router.get('/overview', authenticateUser, async (req: AuthenticatedRequest, res:
 
   // Trigger Welcome Email logic using Supabase Profiles Table Tracking
   try {
-    const { data: profile, error: profileError } = await supabaseClient
+    const { data: profiles, error: profileError } = await supabaseClient
       .from('profiles')
       .select('welcome_email_sent, full_name')
       .eq('id', studentId)
-      .single();
+      .limit(1);
+
+    const profile = profiles?.[0];
 
     if (profileError) {
       logger.error(`Failed to fetch profile for ${studentEmail} from Supabase:`, profileError);

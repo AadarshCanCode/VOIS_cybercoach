@@ -32,6 +32,8 @@ app.use(cors({
     'http://localhost:3000',     // Next.js dev
     'http://localhost:5173',     // Legacy Vite dev (optional cleanup later)
     'https://sparkstudio.co.in', // Main app prod
+    'https://gradeu.in',         // Production domain
+    /\.vercel\.app$/,            // All Vercel preview deployments
   ],
   credentials: true
 }));

@@ -60,7 +60,7 @@ export function DashboardHeader({ activeTab, onTabChange }: DashboardHeaderProps
                             >
                                 <div className="flex items-center gap-2">
                                     <img src="/logo.svg" alt="GradeU" className="h-10 w-10 object-contain" />
-                                    <span className="font-black text-2xl tracking-tighter text-foreground uppercase font-display italic">Grade<span className="text-brand-400">U</span></span>
+                                    <span className="font-extrabold text-2xl tracking-tighter text-foreground uppercase font-sans">Grade<span className="text-brand-400">U</span></span>
                                 </div>
                             </BreadcrumbLink>
                         </BreadcrumbItem>

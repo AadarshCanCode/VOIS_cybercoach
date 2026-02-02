@@ -154,14 +154,14 @@ class AuthService {
             .from('profiles')
             .select('*')
             .eq('id', user.id)
-            .maybeSingle() as unknown as Promise<any>,
+            .limit(1) as unknown as Promise<any>,
           5000,
           `Profile fetch attempt ${attempts + 1}`
         ) as any;
 
-        if (result.data) {
-          profile = result.data;
-          console.log('[AuthService] Fetched profile:', profile); // DEBUG LOG
+        if (result.data && result.data.length > 0) {
+          profile = result.data[0];
+          // console.log('[AuthService] Fetched profile:', profile);
           profileError = null;
           break;
         }
@@ -194,7 +194,6 @@ class AuthService {
 
       if (profile.full_name === 'User' || !profile.full_name || profile.full_name === user.email?.split('@')[0]) {
         if (actualName && actualName !== 'User' && actualName !== profile.full_name) {
-          console.log(`Improving profile name: ${profile.full_name} -> ${actualName}`);
           try {
             await supabase
               .from('profiles')
@@ -232,7 +231,6 @@ class AuthService {
       const role = pendingRole || metadata.role || cachedRole || 'student';
 
       const resolvedName = resolveName(metadata, user.email);
-      console.log(`Profile sync: Constructing placeholder for ${user.email} (name: ${resolvedName}, role: ${role})`);
 
       const placeholderUser: any = {
         id: user.id,

@@ -48,11 +48,13 @@ export const authenticateUser = async (
         req.supabase = authClient;
 
         // Use the authorized client for profile lookup (respects RLS)
-        const { data: profile, error: profileError } = await authClient
+        const { data: profiles, error: profileError } = await authClient
             .from('profiles')
             .select('*')
             .eq('id', user.id)
-            .single();
+            .limit(1);
+
+        const profile = profiles?.[0];
 
         if (profileError) {
             logger.warn('Profile fetch failed or RLS prevented access', {

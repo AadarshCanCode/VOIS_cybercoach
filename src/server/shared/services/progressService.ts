@@ -56,12 +56,14 @@ export class ProgressService {
         // For UUID modules, check Supabase
         if (isUUID) {
             try {
-                const { data, error } = await supabase
+                const { data: results, error } = await supabase
                     .from('module_progress')
                     .select('*')
                     .eq('student_id', studentId)
                     .eq('module_id', moduleId)
-                    .maybeSingle();
+                    .limit(1);
+
+                const data = results?.[0];
 
                 if (error && error.code !== 'PGRST116') { // PGRST116 is "not found", which is OK
                     logger.error('Error fetching Supabase progress', error);
@@ -183,12 +185,14 @@ export class ProgressService {
         // Also update Supabase for UUID modules
         if (isUUID) {
             try {
-                const { data: existingProgress } = await supabase
+                const { data: results } = await supabase
                     .from('module_progress')
                     .select('id')
                     .eq('student_id', studentId)
                     .eq('module_id', moduleId)
-                    .maybeSingle();
+                    .limit(1);
+
+                const existingProgress = results?.[0];
 
                 const progressData: any = {
                     student_id: studentId,

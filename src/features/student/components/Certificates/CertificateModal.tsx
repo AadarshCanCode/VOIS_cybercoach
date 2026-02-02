@@ -67,21 +67,13 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
     console.log("Certificate Public URL:", publicUrl);
 
     // Update certificates table
-    // First ensure the course exists in our DB to get an ID. 
-    // If it's a dynamic course or hardcoded, we might need to insert it or use a known ID.
-    // For now, checks if it exists.
-    let { data: courseRow } = await supabase.from('courses').select('id').ilike('title', courseName).maybeSingle();
-
-    // Fallback: if course doesn't exist (e.g. client-side only course), insert it to get an ID? 
-    // Or assume it must exist. The modal is called with 'courseName' from dashboard.
-    // For 'Introduction to python', it should be in the DB.
-
-    let courseId = courseRow?.id;
+    const { data: courseRows } = await supabase.from('courses').select('id').ilike('title', courseName).limit(1);
+    let courseId = courseRows?.[0]?.id;
 
     if (!courseId) {
       // Optional: Auto-create course record if missing (for legacy compatibility)
-      const { data: newCourse } = await supabase.from('courses').insert({ title: courseName }).select().single();
-      courseId = newCourse?.id;
+      const { data: newCourseRows } = await supabase.from('courses').insert({ title: courseName }).select().limit(1);
+      courseId = newCourseRows?.[0]?.id;
     }
 
     if (courseId) {
@@ -257,12 +249,20 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
               </p>
 
               <div style={{ marginTop: 'auto' }}>
-                <div style={{ marginBottom: '16px' }}>
-                  <p style={{ fontFamily: 'cursive', fontSize: '30px', marginBottom: '4px' }}>{facultyName || 'GradeU Faculty'}</p>
-                  <div style={{ width: '192px', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderColor: '#000000' }}></div>
-                  <p style={{ fontSize: '12px', marginTop: '4px', fontWeight: 'bold', fontFamily: 'Arial, sans-serif', textTransform: 'uppercase', color: '#374151' }}>{facultyName || 'Course Instructor'}</p>
-                  <p style={{ fontSize: '10px', fontFamily: 'Arial, sans-serif', color: '#6b7280' }}>Faculty Guide, GradeU</p>
-                </div>
+                {isVU && facultyName ? (
+                  <div style={{ marginBottom: '16px' }}>
+                    <p style={{ fontFamily: 'Arial, sans-serif', fontWeight: 'bold', fontSize: '24px', marginBottom: '4px' }}>{facultyName}</p>
+                    <div style={{ width: '192px', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderColor: '#000000' }}></div>
+                    <p style={{ fontSize: '12px', marginTop: '4px', fontWeight: 'bold', fontFamily: 'Arial, sans-serif', textTransform: 'uppercase', color: '#374151' }}>Prof. {facultyName}</p>
+                    <p style={{ fontSize: '10px', fontFamily: 'Arial, sans-serif', color: '#6b7280' }}>Faculty Guide, Vishwakarma University</p>
+                  </div>
+                ) : (
+                  <div>
+                    <p style={{ fontFamily: 'Arial, sans-serif', fontWeight: 'bold', fontSize: '24px', marginBottom: '4px' }}>{facultyName || 'GradeU'}</p>
+                    <div style={{ width: '192px', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderColor: '#000000' }}></div>
+                    <p style={{ fontSize: '12px', marginTop: '4px', fontWeight: 'bold', fontFamily: 'Arial, sans-serif', textTransform: 'uppercase', color: '#374151' }}>Chief Academic Officer</p>
+                  </div>
+                )}
               </div>
             </div>
 

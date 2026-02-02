@@ -11,12 +11,14 @@ export async function markLabAsCompleted(
 ): Promise<LabCompletion> {
   try {
     // Check if already completed
-    const { data: existing } = await supabase
+    const { data: existingData } = await supabase
       .from('lab_completions')
       .select('*')
       .eq('student_id', studentId)
       .eq('lab_id', labId)
-      .maybeSingle();
+      .limit(1);
+
+    const existing = existingData?.[0];
 
     if (existing) {
       return {
@@ -29,7 +31,7 @@ export async function markLabAsCompleted(
     }
 
     // Insert new completion
-    const { data: completion, error } = await supabase
+    const { data: completions, error } = await supabase
       .from('lab_completions')
       .insert({
         student_id: studentId,
@@ -37,14 +39,16 @@ export async function markLabAsCompleted(
         completed_at: new Date().toISOString(),
       })
       .select()
-      .single();
+      .limit(1);
 
-    if (error) {
+    const completion = completions?.[0];
+
+    if (error || !completion) {
       logger.error('Failed to mark lab as completed', error as any, {
         studentId,
         labId
       });
-      throw error;
+      throw error || new Error('Failed to create completion record');
     }
 
     return {
@@ -104,12 +108,12 @@ export async function getLabStats(supabase: SupabaseClient, studentId: string): 
 
 export async function isLabCompleted(supabase: SupabaseClient, studentId: string, labId: string): Promise<boolean> {
   try {
-    const { data, error } = await supabase
+    const { data: resultData, error } = await supabase
       .from('lab_completions')
       .select('id')
       .eq('student_id', studentId)
       .eq('lab_id', labId)
-      .maybeSingle();
+      .limit(1);
 
     if (error) {
       logger.error('Failed to check lab completion status', error as any, {
@@ -119,7 +123,7 @@ export async function isLabCompleted(supabase: SupabaseClient, studentId: string
       return false;
     }
 
-    return !!data;
+    return !!resultData?.[0];
   } catch (error) {
     logger.error('Error in isLabCompleted', error instanceof Error ? error : new Error(String(error)), { studentId, labId });
     return false;

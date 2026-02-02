@@ -190,12 +190,14 @@ router.post('/submit', authenticateUser, async (req: AuthenticatedRequest, res: 
         // 5. Update Progress in Supabase (Secondary storage for UUID modules only)
         if ((passed || isInitialAssessment) && isUUID) {
             try {
-                const { data: existingProgress } = await authClient
+                const { data: results } = await authClient
                     .from('module_progress')
                     .select('id')
                     .eq('student_id', studentId)
                     .eq('module_id', moduleId)
-                    .maybeSingle();
+                    .limit(1);
+
+                const existingProgress = results?.[0];
 
                 if (existingProgress) {
                     await authClient

@@ -14,28 +14,41 @@ const nextConfig: NextConfig = {
             {
                 protocol: 'https',
                 hostname: 'plus.unsplash.com',
+            },
+            {
+                protocol: 'https',
+                hostname: 'ik.imagekit.io',
             }
         ],
     },
     // Proxies for backend
     async rewrites() {
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+
+        const target = backendUrl || 'http://localhost:4000';
+
+
+        if (process.env.NODE_ENV === 'production' && !backendUrl) {
+            return [];
+        }
+
         return [
             {
                 source: '/api/:path*',
-                destination: `${backendUrl}/api/:path*`,
+                destination: `${target}/api/:path*`,
             },
             {
                 source: '/proxy/:path*',
-                destination: `${backendUrl}/proxy/:path*`,
+                destination: `${target}/proxy/:path*`,
             },
             {
                 source: '/proctor-logs/:path*',
-                destination: `${backendUrl}/proctor-logs/:path*`,
+                destination: `${target}/proctor-logs/:path*`,
             },
             {
                 source: '/test-models/:path*',
-                destination: `${backendUrl}/test-models/:path*`,
+                destination: `${target}/test-models/:path*`,
             },
         ];
     },

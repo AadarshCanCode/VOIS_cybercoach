@@ -190,7 +190,7 @@ class StudentService {
             }
 
             // Fallback to Supabase (mostly for manually added UUID courses)
-            const { data: progressData, error: progressError } = await supabase
+            const { data: results, error: progressError } = await supabase
                 .from('module_progress')
                 .select(`
                     completed_at,
@@ -199,8 +199,9 @@ class StudentService {
                 .eq('student_id', userId)
                 .eq('completed', false)
                 .order('completed_at', { ascending: false })
-                .limit(1)
-                .maybeSingle() as any;
+                .limit(1);
+
+            const progressData = results?.[0];
 
             if (progressError || !progressData) return null;
 

@@ -54,7 +54,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = () => {
               <img src="/logo.svg" alt="GradeU" className="size-20" />
             </div>
             <div className="text-center">
-              <div className="text-4xl font-black tracking-tighter text-white uppercase font-display italic">Grade<span className="text-brand-400">U</span></div>
+              <div className="text-4xl font-black tracking-tighter text-white uppercase font-sans">Grade<span className="text-brand-400">U</span></div>
             </div>
           </Link>
 
