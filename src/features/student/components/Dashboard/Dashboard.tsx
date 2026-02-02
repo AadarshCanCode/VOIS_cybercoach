@@ -301,7 +301,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
           studentName={user?.name || 'Student'}
           completionDate={viewCertificate.date}
           isVU={user?.email?.endsWith('vupune.ac.in')}
-          facultyName="Kiran Deshpande"
+          facultyName={user?.faculty}
         />
       )}
     </div>
