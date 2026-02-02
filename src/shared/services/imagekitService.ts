@@ -44,14 +44,14 @@ interface ImageKitFile {
 function parseVideoFilename(filename: string): { title: string; category: string; difficulty: 'beginner' | 'intermediate' | 'advanced' } {
   const nameWithoutExt = filename.replace(/\.[^/.]+$/, '');
   const parts = nameWithoutExt.split('_');
-  
+
   if (parts.length >= 3) {
     const category = parts[0].replace(/-/g, ' ');
     const difficulty = (parts[1].toLowerCase() as 'beginner' | 'intermediate' | 'advanced') || 'beginner';
     const title = parts.slice(2).join(' ').replace(/-/g, ' ');
     return { title, category, difficulty };
   }
-  
+
   // Fallback: use filename as title
   return {
     title: nameWithoutExt.replace(/-/g, ' ').replace(/_/g, ' '),
@@ -61,31 +61,31 @@ function parseVideoFilename(filename: string): { title: string; category: string
 }
 
 // Fetch videos from ImageKit via backend proxy (works both locally and on Vercel)
-export async function fetchVideosFromImageKit(folderPath: string = '/cybercoach'): Promise<ImageKitVideo[]> {
+export async function fetchVideosFromImageKit(folderPath: string = '/gradeu'): Promise<ImageKitVideo[]> {
   try {
     const response = await fetch(`/api/imagekit/videos?folder=${encodeURIComponent(folderPath)}`);
-    
+
     if (!response.ok) {
       throw new Error(`Failed to fetch videos: ${response.status}`);
     }
-    
+
     const files: ImageKitFile[] = await response.json();
-    
+
     // Filter only video files
-    const videoFiles = files.filter(file => 
-      file.fileType === 'video' || 
+    const videoFiles = files.filter(file =>
+      file.fileType === 'video' ||
       file.name.match(/\.(mp4|webm|mov|avi|mkv)$/i)
     );
-    
+
     return videoFiles.map((file) => {
       const parsed = parseVideoFilename(file.name);
       const customMeta = file.customMetadata || {};
-      
+
       return {
         id: file.fileId,
         title: customMeta.title || parsed.title,
-        description: customMeta.description || `Learn about ${parsed.title} in this cybersecurity training video.`,
-        instructor: customMeta.instructor || 'CyberCoach Academy',
+        description: customMeta.description || `Learn about ${parsed.title} in this GradeU training video.`,
+        instructor: customMeta.instructor || 'GradeU Academy',
         duration: customMeta.duration || 'N/A',
         thumbnail: `${file.url}/tr:w-640,h-360,fo-auto`, // ImageKit thumbnail transformation
         category: customMeta.category || parsed.category,
@@ -108,20 +108,20 @@ export function getVideoUrl(fileUrl: string, options?: {
   format?: 'mp4' | 'webm';
 }): string {
   if (!options) return fileUrl;
-  
+
   const transforms: string[] = [];
-  
+
   if (options.quality) {
     const qualityMap = { low: 50, medium: 70, high: 90, auto: 80 };
     transforms.push(`q-${qualityMap[options.quality]}`);
   }
-  
+
   if (options.format) {
     transforms.push(`f-${options.format}`);
   }
-  
+
   if (transforms.length === 0) return fileUrl;
-  
+
   return `${fileUrl}/tr:${transforms.join(',')}`;
 }
 

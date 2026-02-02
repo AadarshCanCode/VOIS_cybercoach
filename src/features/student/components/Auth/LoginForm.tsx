@@ -53,16 +53,16 @@ export const LoginForm: React.FC<LoginFormProps> = () => {
     <>
       <SEO
         title="Login"
-        description="Access your Cybercoach terminal. Sign in to continue your cybersecurity training and operations."
+        description="Access your GradeU Dashboard. Sign in to continue your training and academic operations."
       />
       <div className="dark bg-zinc-950 flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
         <div className="flex w-full max-w-sm flex-col gap-6">
-          <Link href="/" className="flex items-center gap-2 self-center font-medium group transition-all hover:scale-105 mb-2">
-            <div className="bg-primary text-primary-foreground flex size-10 items-center justify-center rounded-md group-hover:scale-110 transition-transform">
-              <img src="/cybercoach-logo.png" alt="Cybercoach" className="size-8" />
+          <Link href="/" className="flex flex-col items-center gap-4 self-center font-medium group transition-all hover:opacity-90 mb-4 focus:outline-none">
+            <div className="flex size-20 items-center justify-center rounded-xl transition-transform duration-500 group-hover:scale-105">
+              <img src="/logo.svg" alt="GradeU" className="size-20" />
             </div>
-            <div className="text-left">
-              <div className="text-xl font-black tracking-tighter text-white uppercase">Cyber <span className="text-[#00FF88]">Coach</span></div>
+            <div className="text-center">
+              <div className="text-4xl font-black tracking-tighter text-white uppercase font-display italic">Grade<span className="text-brand-400">U</span></div>
             </div>
           </Link>
 
@@ -85,7 +85,7 @@ export const LoginForm: React.FC<LoginFormProps> = () => {
                   <Button
                     variant="outline"
                     type="button"
-                    className="w-full bg-zinc-950 border-zinc-800 text-white hover:bg-[#00FF88] hover:text-black hover:border-[#00FF88] h-12 text-md font-bold transition-all duration-300"
+                    className="w-full bg-zinc-950 border-zinc-800 text-white hover:bg-brand-400 hover:text-black hover:border-brand-400 h-12 text-md font-bold transition-all duration-300"
                     onClick={handleGoogleLogin}
                     disabled={isLoading}
                   >

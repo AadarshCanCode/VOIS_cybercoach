@@ -162,7 +162,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
       <div className="bg-white rounded-lg shadow-2xl max-w-5xl w-full overflow-hidden flex flex-col">
 
         {/* Certificate Area */}
-        <div className="flex-grow flex flex-col md:flex-row relative">
+        <div className="grow flex flex-col md:flex-row relative">
 
           {/* Main Certificate Content - Left Side */}
           <div
@@ -208,7 +208,6 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
               }}
             >
 
-              {/* Header Logos */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '24px', marginBottom: '48px' }}>
                 {isVU ? (
                   <img src="/vu-logo.png" alt="VU" style={{ height: '64px', objectFit: 'contain', maxWidth: '120px' }} />
@@ -217,7 +216,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
                     SOVAP
                   </div>
                 )}
-                <img src="/cybercoach-logo.png" alt="CyberCoach" style={{ height: '40px', objectFit: 'contain', marginLeft: '16px', maxWidth: '150px' }} />
+                <img src="/logo.svg" alt="GradeU" style={{ height: '48px', objectFit: 'contain', marginLeft: '16px', maxWidth: '150px' }} />
               </div>
 
               <p style={{ marginBottom: '8px', fontFamily: 'Arial, sans-serif', fontSize: '14px', color: '#6b7280' }}>
@@ -237,7 +236,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
               </h2>
 
               <p style={{ fontSize: '14px', marginBottom: '48px', fontFamily: 'Arial, sans-serif', maxWidth: '28rem', lineHeight: '1.625', color: '#6b7280' }}>
-                an online non-credit course authorized by SOVAP and offered through the Cyber Defense Initiative.
+                an online non-credit course authorized by SOVAP and offered through the GradeU Academic Initiative.
               </p>
 
               <div style={{ marginTop: 'auto' }}>
@@ -250,9 +249,9 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
                   </div>
                 ) : (
                   <div>
-                    <p style={{ fontFamily: 'cursive', fontSize: '30px', marginBottom: '4px' }}>CyberCoach</p>
+                    <p style={{ fontFamily: 'cursive', fontSize: '30px', marginBottom: '4px' }}>GradeU</p>
                     <div style={{ width: '192px', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderColor: '#000000' }}></div>
-                    <p style={{ fontSize: '12px', marginTop: '4px', fontWeight: 'bold', fontFamily: 'Arial, sans-serif', textTransform: 'uppercase', color: '#374151' }}>Chief Security Officer</p>
+                    <p style={{ fontSize: '12px', marginTop: '4px', fontWeight: 'bold', fontFamily: 'Arial, sans-serif', textTransform: 'uppercase', color: '#374151' }}>Chief Academic Officer</p>
                   </div>
                 )}
               </div>
@@ -348,6 +347,6 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
           </Button>
         </div>
       </div>
-    </div>
+    </div >
   );
 };

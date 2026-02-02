@@ -47,31 +47,31 @@ router.get('/overview', authenticateUser, async (req: AuthenticatedRequest, res:
 
       const studentName = profile.full_name || studentEmail.split('@')[0] || 'Student';
 
-      const welcomeSubject = 'Welcome to CyberCoach! 🛡️';
+      const welcomeSubject = 'Welcome to GradeU! 🛡️';
       const welcomeText = `
         Hello ${studentName},
         
-        Welcome to CyberCoach! We're thrilled to have you on board.
+        Welcome to GradeU! We're thrilled to have you on board.
         
-        Your journey into cybersecurity excellence starts here. Explore your dashboard, dive into interactive labs, and master new skills at your own pace.
+        Your journey into academic excellence starts here. Explore your dashboard, dive into interactive labs, and master new skills at your own pace.
         
         Happy Learning!
-        The CyberCoach Team
+        The GradeU Team
       `;
       const welcomeHtml = `
         <div style="font-family: sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
-          <h2 style="color: #00FF88; text-transform: uppercase; letter-spacing: 2px;">Welcome to <span style="color: #333;">Cyber</span>Coach! 🛡️</h2>
+          <h2 style="color: #6EDB80; text-transform: uppercase; letter-spacing: 2px;">Welcome to Grade<span style="color: #333;">U</span>! 🛡️</h2>
           <p>Hello <strong>${studentName}</strong>,</p>
-          <p>We're thrilled to have you on board! Your journey into cybersecurity excellence starts right now.</p>
+          <p>We're thrilled to have you on board! Your journey into excellence starts right now.</p>
           <div style="background: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
             <p style="margin: 0;">🚀 <strong>What's Next?</strong></p>
             <ul style="margin-top: 10px;">
               <li>Explore your customized learning paths.</li>
-              <li>Get hands-on with realistic security labs.</li>
+              <li>Get hands-on with realistic labs.</li>
               <li>Track your progress and earn achievements.</li>
             </ul>
           </div>
-          <p>Happy Learning!<br><strong>The CyberCoach Team</strong></p>
+          <p>Happy Learning!<br><strong>The GradeU Team</strong></p>
           <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
           <p style="font-size: 0.8em; color: #777;">If you have any questions, just reply to this email or use the support feature in the app.</p>
         </div>

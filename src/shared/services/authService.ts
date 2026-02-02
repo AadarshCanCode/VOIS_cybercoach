@@ -60,7 +60,7 @@ class AuthService {
 
 
   async logout() {
-    localStorage.removeItem('cyberSecUser');
+    localStorage.removeItem('gradeUUser');
     localStorage.removeItem('auth_pending_role');
     localStorage.removeItem('auth_pending_role_ts');
     try {
@@ -71,7 +71,7 @@ class AuthService {
   }
 
   getCurrentUser() {
-    const userStr = localStorage.getItem('cyberSecUser');
+    const userStr = localStorage.getItem('gradeUUser');
     if (!userStr) return null;
     try {
       const user = JSON.parse(userStr);
@@ -195,7 +195,7 @@ class AuthService {
       }
 
       const userCopy = sanitizeUser(profile as DBUser, user.email);
-      localStorage.setItem('cyberSecUser', JSON.stringify(userCopy));
+      localStorage.setItem('gradeUUser', JSON.stringify(userCopy));
       return userCopy;
     }
 
@@ -204,7 +204,7 @@ class AuthService {
       const pendingRole = localStorage.getItem('auth_pending_role');
 
       // Fallback: Check if we have a valid cached user in localStorage to preserve role
-      const cachedUserStr = localStorage.getItem('cyberSecUser');
+      const cachedUserStr = localStorage.getItem('gradeUUser');
       let cachedRole = null;
       if (cachedUserStr) {
         try {
@@ -248,7 +248,7 @@ class AuthService {
         createProfile();
       }
 
-      localStorage.setItem('cyberSecUser', JSON.stringify(placeholderUser));
+      localStorage.setItem('gradeUUser', JSON.stringify(placeholderUser));
       return placeholderUser as User;
     }
 

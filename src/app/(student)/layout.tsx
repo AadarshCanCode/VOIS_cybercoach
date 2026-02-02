@@ -23,7 +23,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00FF88] mx-auto"></div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-400 mx-auto"></div>
                     <p className="mt-4 text-muted-foreground">Loading...</p>
                 </div>
             </div>
@@ -34,7 +34,6 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
         return null;
     }
 
-    // Get active tab from pathname
     const getActiveTab = () => {
         if (pathname?.startsWith("/courses")) return "courses";
         if (pathname?.startsWith("/labs")) return "labs";
@@ -63,39 +62,48 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
         router.push(route);
     };
 
-    const isFullPage = pathname === "/community";
-
-    if (isFullPage) {
+    if (pathname === "/community") {
         return <main className="min-h-screen">{children}</main>;
     }
 
     return (
-        <div className="flex flex-col min-h-screen">
-            <div className="sticky top-0 z-50">
-                <StickyBanner className="bg-blue-600 border-none shrink-0 pointer-events-auto">
-                    <p className="text-xs font-medium text-white tracking-wide text-center px-4">
-                        Announcing the Cybercoach Community. Connect with elite operatives and share tactical intel.{" "}
+        <div className="flex flex-col min-h-screen bg-background">
+            {/* 1. Header Banner - Fixed Height 44px (11) */}
+            <div className="fixed top-0 left-0 right-0 z-100 h-11 border-b border-white/10 bg-blue-600 overflow-hidden">
+                <StickyBanner className="h-full border-none flex items-center justify-center p-0">
+                    <p className="text-[11px] font-bold text-white tracking-widest uppercase font-display px-4">
+                        Announcing the GradeU Community. Connect with fellow students and share knowledge.{" "}
                         <button
                             onClick={() => router.push("/community")}
-                            className="text-white font-black hover:underline ml-2 uppercase tracking-tighter"
+                            className="bg-white/10 hover:bg-white/20 px-2 py-0.5 rounded ml-2 font-black transition-colors"
                         >
-                            Join Community &rarr;
+                            JOIN COMMUNITY &rarr;
                         </button>
                     </p>
                 </StickyBanner>
             </div>
-            <SidebarProvider className="dark w-full bg-background text-foreground">
-                <AppSidebar activeTab={activeTab} onTabChange={handleTabChange} />
-                <SidebarInset>
-                    <div className="sticky top-0 z-40">
-                        <DashboardHeader activeTab={activeTab} onTabChange={handleTabChange} />
-                    </div>
-                    <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-                        {children}
-                    </div>
-                </SidebarInset>
-            </SidebarProvider>
+
+            {/* 2. Main Layout Container - Shifted down by Banner (44px) */}
+            <div className="flex flex-1 pt-11">
+                <SidebarProvider className="dark w-full bg-background text-foreground">
+                    <AppSidebar
+                        activeTab={activeTab}
+                        onTabChange={handleTabChange}
+                        className="top-11! h-[calc(100vh-2.75rem)]! z-50!"
+                    />
+                    <SidebarInset className="flex flex-col flex-1 relative min-h-0">
+                        {/* Dashboard Header - Sticky within its container, sitting below banner */}
+                        <div className="sticky top-11 z-40 bg-background/95 backdrop-blur-sm">
+                            <DashboardHeader activeTab={activeTab} onTabChange={handleTabChange} />
+                        </div>
+
+                        {/* Page Content */}
+                        <div className="flex-1 p-4 md:p-8 overflow-x-hidden">
+                            {children}
+                        </div>
+                    </SidebarInset>
+                </SidebarProvider>
+            </div>
         </div>
     );
 }
-

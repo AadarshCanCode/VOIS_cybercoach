@@ -44,13 +44,13 @@ export function DashboardHeader({ activeTab, onTabChange }: DashboardHeaderProps
     }
 
     return (
-        <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b border-sidebar-border bg-background px-4">
+        <header className="flex h-20 shrink-0 items-center justify-between gap-2 border-b border-sidebar-border bg-background px-6">
             <div className="flex items-center gap-2">
                 <SidebarTrigger className="-ml-1" />
                 <Separator orientation="vertical" className="mr-2 h-4" />
                 <Breadcrumb>
                     <BreadcrumbList>
-                        <BreadcrumbItem className="hidden md:block">
+                        <BreadcrumbItem>
                             <BreadcrumbLink
                                 href="/dashboard"
                                 onClick={(e) => {
@@ -59,8 +59,8 @@ export function DashboardHeader({ activeTab, onTabChange }: DashboardHeaderProps
                                 }}
                             >
                                 <div className="flex items-center gap-2">
-                                    <img src="/cybercoach-logo.png" alt="Logo" className="h-5 w-5 object-contain" />
-                                    <span>Cybercoach</span>
+                                    <img src="/logo.svg" alt="GradeU" className="h-10 w-10 object-contain" />
+                                    <span className="font-black text-2xl tracking-tighter text-foreground uppercase font-display italic">Grade<span className="text-brand-400">U</span></span>
                                 </div>
                             </BreadcrumbLink>
                         </BreadcrumbItem>

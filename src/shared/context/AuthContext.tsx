@@ -101,7 +101,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = async () => {
     setUser(null);
-    localStorage.removeItem('cyberSecUser');
+    localStorage.removeItem('gradeUUser');
     try {
       await authService.logout();
     } catch (error) {
@@ -113,7 +113,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (user) {
       const updatedUser = { ...user, ...updates };
       setUser(updatedUser);
-      localStorage.setItem('cyberSecUser', JSON.stringify(updatedUser));
+      localStorage.setItem('gradeUUser', JSON.stringify(updatedUser));
     }
   };
 

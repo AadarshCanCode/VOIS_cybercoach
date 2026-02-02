@@ -40,7 +40,7 @@ router.post('/report-bug', async (req: Request, res: Response) => {
     }
 
     try {
-        const subject = `CyberCoach Bug Report: ${studentName || 'Anonymous'}`;
+        const subject = `GradeU Bug Report: ${studentName || 'Anonymous'}`;
         const text = `
         Student: ${studentName || 'Anonymous'}
         Email: ${studentEmail || 'N/A'}

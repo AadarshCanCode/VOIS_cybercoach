@@ -35,7 +35,7 @@ export const VideoLibrary: React.FC = () => {
     try {
       const [vuFetched, othersFetched] = await Promise.all([
         fetchVideosFromImageKit('/VU'),
-        fetchVideosFromImageKit('/cybercoach')
+        fetchVideosFromImageKit('/gradeu')
       ]);
 
       const merged: ExtendedVideo[] = [
@@ -84,7 +84,7 @@ export const VideoLibrary: React.FC = () => {
   const tabs = [
     { id: 'all', label: 'All Lessons', icon: Database },
     { id: 'vu', label: 'University', icon: Shield },
-    { id: 'external', label: 'External', icon: Globe },
+    { id: 'external', label: 'GradeU', icon: Globe },
   ];
 
   // Video Grid/List Renderer

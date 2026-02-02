@@ -23,16 +23,16 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
     };
 
     return (
-        <header className={`sticky top-0 z-50 w-full border-b border-[#00FF88]/30 bg-black backdrop-blur-xl shadow-lg shadow-[#00FF88]/10 ${className}`}>
-            <div className="flex h-16 items-center px-6 gap-4">
+        <header className={`sticky top-0 z-50 w-full border-b border-brand-400/10 bg-black/90 backdrop-blur-xl ${className}`}>
+            <div className="flex h-20 items-center px-8 gap-4">
                 {/* Logo */}
                 <button
                     onClick={handleLogoClick}
-                    className="flex items-center gap-3 mr-6 hover:opacity-80 transition-opacity cursor-pointer"
+                    className="flex items-center gap-4 mr-8 hover:opacity-90 transition-opacity cursor-pointer"
                 >
-                    <img src="/cybercoach-logo.png" alt="Cybercoach" className="h-10 w-10" />
-                    <span className="text-xl font-bold bg-linear-to-r from-white to-[#00FF88] bg-clip-text text-transparent hidden sm:inline-block">
-                        Cybercoach
+                    <img src="/logo.svg" alt="GradeU" className="h-14 w-14" />
+                    <span className="text-3xl font-black tracking-tight text-white hidden sm:inline-block font-display uppercase">
+                        Grade<span className="text-brand-400">U</span>
                     </span>
                 </button>
 
@@ -40,13 +40,12 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
                 <div className="flex-1 flex items-center">
                     <div className="w-full max-w-2xl">
                         <div className="relative group">
-                            <div className="absolute inset-0 bg-[#00FF88]/10 blur-md rounded-lg opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
-                            <div className="relative flex items-center bg-black/80 rounded-xl border border-[#00FF88]/20 focus-within:border-[#00FF88]/40 focus-within:bg-black/90 transition-all duration-300">
-                                <Search className="h-5 w-5 text-[#00FF88] ml-4" />
+                            <div className="relative flex items-center bg-zinc-900/50 rounded-2xl border border-white/5 focus-within:border-brand-400/30 transition-all duration-300">
+                                <Search className="h-5 w-5 text-zinc-500 ml-4 group-focus-within:text-brand-400 transition-colors" />
                                 <input
                                     type="text"
                                     placeholder="Search courses, labs, or students..."
-                                    className="w-full bg-transparent border-none focus:ring-0 text-base px-4 py-3 text-[#00FF88] placeholder:text-[#00FF88]/60"
+                                    className="w-full bg-transparent border-none focus:ring-0 text-base px-4 py-4 text-white placeholder:text-zinc-600"
                                 />
                             </div>
                         </div>
@@ -55,13 +54,13 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
 
                 {/* User Info & Logout */}
                 {user && (
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-6">
                         <div className="flex flex-col items-end mr-2">
-                            <span className="text-base font-semibold text-[#00FF88]">{user.name}</span>
-                            <span className="text-xs text-[#00FF88]/70 capitalize">{user.role}</span>
+                            <span className="text-base font-bold text-white">{user.name}</span>
+                            <span className="text-[10px] text-brand-400 uppercase tracking-widest font-bold">{user.role}</span>
                         </div>
-                        <div className="h-9 w-9 rounded-full border-2 border-[#00FF88]/40 flex items-center justify-center bg-black/80">
-                            <User className="h-5 w-5 text-[#00FF88]" />
+                        <div className="h-11 w-11 rounded-full border border-white/10 flex items-center justify-center bg-zinc-900 group relative cursor-pointer overflow-hidden transition-all hover:border-brand-400/40">
+                            <User className="h-6 w-6 text-zinc-400 group-hover:text-brand-400 transition-colors" />
                         </div>
                         <Button
                             variant="ghost"

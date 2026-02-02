@@ -22,11 +22,10 @@ export const LandingHero: React.FC = () => {
     };
 
     return (
-        <section className="relative min-h-[85vh] lg:h-[90vh] flex flex-col items-center justify-center overflow-hidden pt-12 pb-12 px-6">
-            {/* Background elements */}
-            <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-[#00FF88]/10 rounded-full blur-[100px] filter" />
-                <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-blue-500/10 rounded-full blur-[100px] filter" />
+        <section className="relative min-h-[85vh] lg:h-[90vh] flex flex-col items-center justify-center overflow-hidden pt-12 pb-12 px-6 bg-black">
+            {/* Background elements - Cleaned up glows */}
+            <div className="absolute inset-0 pointer-events-none opacity-20">
+                <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_0%,#18181b_0%,transparent_70%)]" />
             </div>
 
             {/* Left Illustration */}
@@ -79,7 +78,7 @@ export const LandingHero: React.FC = () => {
                     transition={{ duration: 0.5 }}
                     className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-zinc-400 text-xs font-medium mb-6"
                 >
-                    <Sparkles className="h-3.5 w-3.5 text-[#00FF88]" />
+                    <Sparkles className="h-3.5 w-3.5 text-brand-400" />
                     <span>Better than Coursera</span>
                 </motion.div>
 
@@ -90,7 +89,7 @@ export const LandingHero: React.FC = () => {
                         transition={{ duration: 0.5, delay: 0.1 }}
                         className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter text-white leading-[0.95]"
                     >
-                        Master Computer Science <br />
+                        Master Any Subject <br />
                         <span className="flex flex-wrap justify-center items-center gap-x-3">
                             With
                             <FlipWords
@@ -106,8 +105,8 @@ export const LandingHero: React.FC = () => {
                         transition={{ duration: 0.5, delay: 0.2 }}
                         className="text-base md:text-lg text-zinc-400 max-w-xl mx-auto leading-tight font-medium"
                     >
-                        The complete platform to learn, practice, and retrieve your dream job in cybersecurity. <br className="hidden md:block" />
-                        No fluff, just skills.
+                        The complete platform to learn, practice, and achieve your academic goals. <br className="hidden md:block" />
+                        No fluff, just results.
                     </motion.p>
                 </div>
 
@@ -119,7 +118,7 @@ export const LandingHero: React.FC = () => {
                 >
                     <button
                         onClick={handleGetStarted}
-                        className="group relative flex items-center gap-3 px-8 py-4 bg-[#00FF88] hover:bg-[#00CC66] text-black rounded-full font-bold text-lg transition-all hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(0,255,136,0.4)]"
+                        className="group relative flex items-center gap-3 px-8 py-4 bg-brand-400 hover:bg-brand-500 text-black rounded-full font-bold text-lg transition-all hover:scale-105 active:scale-95 shadow-lg"
                     >
                         <span>{user ? 'Access Dashboard' : 'Start Learning Free'}</span>
                         <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />

@@ -69,7 +69,7 @@ export const Navbar = ({ children, className }: NavbarProps) => {
     return (
         <motion.div
             ref={ref}
-            className={cn("sticky inset-x-0 top-0 z-50 w-full font-[system-ui]", className)}
+            className={cn("sticky top-0 z-110 w-full transition-all duration-300", className)}
         >
             {React.Children.map(children, (child) =>
                 React.isValidElement(child)
@@ -89,7 +89,7 @@ export const NavBody = ({ children, className, visible }: NavBodyProps) => {
             animate={{
                 backdropFilter: visible ? "blur(16px)" : "blur(0px)",
                 backgroundColor: visible ? "rgba(0, 0, 0, 0.85)" : "transparent",
-                borderColor: visible ? "rgba(0, 255, 136, 0.2)" : "transparent",
+                borderColor: visible ? "rgba(110, 219, 128, 0.2)" : "transparent",
                 width: visible ? "90%" : "100%",
                 y: visible ? 12 : 0,
             }}
@@ -99,7 +99,7 @@ export const NavBody = ({ children, className, visible }: NavBodyProps) => {
                 damping: 50,
             }}
             className={cn(
-                "relative z-[60] mx-auto hidden w-full max-w-7xl flex-row items-center justify-between rounded-2xl border px-6 py-3 lg:flex",
+                "relative z-120 mx-auto hidden w-full max-w-7xl flex-row items-center justify-between rounded-2xl border px-6 py-3 lg:flex",
                 className,
             )}
         >
@@ -115,7 +115,7 @@ export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
         <motion.div
             onMouseLeave={() => setHovered(null)}
             className={cn(
-                "absolute inset-0 hidden flex-1 flex-row items-center justify-center space-x-1 text-sm font-medium lg:flex pointer-events-none",
+                "relative hidden flex-1 flex-row items-center justify-center space-x-1 text-sm font-medium lg:flex",
                 className,
             )}
         >
@@ -125,14 +125,17 @@ export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
                     onClick={() => {
                         item.onClick?.();
                         onItemClick?.();
+                        const targetId = item.link.startsWith("#") ? item.link.slice(1) : item.link;
+                        const el = document.getElementById(targetId);
+                        if (el) el.scrollIntoView({ behavior: 'smooth' });
                     }}
-                    className="relative px-4 py-2 text-[#EAEAEA]/70 hover:text-[#00FF88] transition-colors cursor-pointer pointer-events-auto"
+                    className="relative px-4 py-2 text-zinc-400 hover:text-brand-400 transition-colors cursor-pointer pointer-events-auto"
                     key={`link-${idx}`}
                 >
                     {hovered === idx && (
                         <motion.div
                             layoutId="hovered"
-                            className="absolute inset-0 h-full w-full rounded-lg bg-[#00FF88]/10"
+                            className="absolute inset-0 h-full w-full rounded-lg bg-brand-400/10"
                         />
                     )}
                     <span className="relative z-20 text-xs font-bold uppercase tracking-[0.15em]">{item.name}</span>
@@ -159,7 +162,7 @@ export const MobileNav = ({ children, className, visible }: MobileNavProps) => {
             }}
             className={cn(
                 "relative z-50 mx-auto flex w-full flex-col items-center justify-between border border-transparent px-4 py-3 lg:hidden",
-                visible && "border-[#00FF88]/20",
+                visible && "border-brand-400/20",
                 className,
             )}
         >
@@ -198,7 +201,7 @@ export const MobileNavMenu = ({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     className={cn(
-                        "absolute inset-x-0 top-full z-50 mt-2 flex w-full flex-col items-start justify-start gap-4 rounded-2xl bg-black/95 backdrop-blur-xl border border-[#00FF88]/20 px-6 py-8 shadow-[0_0_30px_rgba(0,255,136,0.1)]",
+                        "absolute inset-x-0 top-full z-50 mt-2 flex w-full flex-col items-start justify-start gap-4 rounded-2xl bg-black/95 backdrop-blur-xl border border-brand-400/20 px-6 py-8",
                         className,
                     )}
                 >
@@ -217,9 +220,9 @@ export const MobileNavToggle = ({
     onClick: () => void;
 }) => {
     return isOpen ? (
-        <IconX className="h-6 w-6 text-[#00FF88] cursor-pointer" onClick={onClick} />
+        <IconX className="h-6 w-6 text-brand-400 cursor-pointer" onClick={onClick} />
     ) : (
-        <IconMenu2 className="h-6 w-6 text-[#00FF88] cursor-pointer" onClick={onClick} />
+        <IconMenu2 className="h-6 w-6 text-brand-400 cursor-pointer" onClick={onClick} />
     );
 };
 
@@ -230,15 +233,14 @@ export const NavbarLogo = ({ onClick }: { onClick?: () => void }) => {
             className="relative z-20 flex items-center gap-3 cursor-pointer group"
         >
             <div className="relative">
-                <div className="absolute -inset-2 bg-[#00FF88]/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition duration-500" />
                 <img
-                    src="/cybercoach-logo.png"
-                    alt="Cybercoach"
-                    className="relative h-10 w-10 group-hover:scale-110 transition-transform duration-300"
+                    src="/logo.svg"
+                    alt="GradeU"
+                    className="relative h-12 w-12 group-hover:scale-110 transition-transform duration-300"
                 />
             </div>
-            <span className="font-black text-white text-lg tracking-tight uppercase hidden sm:block">
-                Cyber<span className="text-[#00FF88]">coach</span>
+            <span className="font-black text-white text-2xl tracking-tighter uppercase hidden sm:block font-display italic">
+                Grade<span className="text-brand-400">U</span>
             </span>
         </button>
     );
@@ -262,9 +264,9 @@ export const NavbarButton = ({
 
     const variantStyles = {
         primary:
-            "bg-[#00FF88] text-black hover:bg-[#00CC66] hover:scale-105 shadow-[0_0_20px_rgba(0,255,136,0.3)]",
-        secondary: "bg-transparent text-[#EAEAEA] hover:text-[#00FF88]",
-        outline: "bg-transparent border border-[#00FF88]/30 text-[#00FF88] hover:bg-[#00FF88]/10 hover:border-[#00FF88]",
+            "bg-brand-400 text-black hover:bg-brand-500 hover:scale-105",
+        secondary: "bg-transparent text-zinc-400 hover:text-brand-400",
+        outline: "bg-transparent border border-brand-400/30 text-brand-400 hover:bg-brand-400/10 hover:border-brand-400",
     };
 
     if (href) {

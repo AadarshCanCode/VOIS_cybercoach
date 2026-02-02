@@ -114,7 +114,7 @@ export const StudentAppContent: React.FC<StudentAppContentProps> = ({ initialTab
       <div className="sticky top-0 z-50">
         <StickyBanner className="bg-blue-600 border-none shrink-0 pointer-events-auto">
           <p className="text-xs font-medium text-white tracking-wide text-center px-4">
-            Announcing the Cybercoach Community. Connect with elite operatives and share tactical intel.{" "}
+            Announcing the GradeU Community. Connect with fellow students and share knowledge.{" "}
             <button
               onClick={() => setActiveTab('community')}
               className="text-white font-black hover:underline ml-2 uppercase tracking-tighter"

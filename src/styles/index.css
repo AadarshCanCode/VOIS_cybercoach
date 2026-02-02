@@ -17,7 +17,7 @@
   --color-popover: hsl(120 20% 4%);
   --color-popover-foreground: hsl(0 0% 92%);
 
-  --color-primary: hsl(152 100% 50%);
+  --color-primary: var(--color-brand-400);
   --color-primary-foreground: hsl(0 0% 0%);
 
   --color-secondary: hsl(150 100% 40%);
@@ -26,44 +26,45 @@
   --color-muted: hsl(150 20% 10%);
   --color-muted-foreground: hsl(152 40% 60%);
 
-  --color-accent: hsl(152 100% 35%);
-  --color-accent-foreground: hsl(0 0% 92%);
+  --color-accent: var(--color-brand-400);
+  --color-accent-foreground: hsl(0 0% 0%);
 
   --color-destructive: hsl(0 62.8% 30.6%);
   --color-destructive-foreground: hsl(0 0% 92%);
 
-  --color-border: hsl(152 100% 35%);
-  --color-input: hsl(152 40% 20%);
-  --color-ring: hsl(152 100% 50%);
+  --color-border: color-mix(in srgb, var(--color-brand-400) 20%, transparent);
+  --color-input: hsl(152 40% 10%);
+  --color-ring: var(--color-brand-400);
 
   --radius: 0.5rem;
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
 
-  /* Cyber colors */
-  --color-cyber-50: #f0f9ff;
-  --color-cyber-100: #e0f2fe;
-  --color-cyber-200: #bae6fd;
-  --color-cyber-300: #7dd3fc;
-  --color-cyber-400: #38bdf8;
-  --color-cyber-500: #0ea5e9;
-  --color-cyber-600: #0284c7;
-  --color-cyber-700: #0369a1;
-  --color-cyber-800: #075985;
-  --color-cyber-900: #0c4a6e;
-  --color-cyber-950: #082f49;
+  /* Brand colors */
+  --color-brand-50: #f0fdf4;
+  --color-brand-100: #dcfce7;
+  --color-brand-200: #bbf7d0;
+  --color-brand-300: #86efac;
+  --color-brand-400: #6EDB80;
+  /* Logo Green */
+  --color-brand-500: #22c55e;
+  --color-brand-600: #16a34a;
+  --color-brand-700: #15803d;
+  --color-brand-800: #166534;
+  --color-brand-900: #14532d;
+  --color-brand-950: #052e16;
 
-  /* Font families - Using Sans-serif everywhere as requested */
+  /* Font families */
   --font-sans: var(--font-inter), 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-serif: var(--font-inter), 'Inter', sans-serif;
   --font-mono: 'SF Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
-  --font-display: var(--font-inter), 'Inter', sans-serif;
+  --font-display: var(--font-space), 'Space Grotesk', sans-serif;
 
-  /* Box shadows */
-  --shadow-glow: 0 0 20px rgba(14, 165, 233, 0.3);
-  --shadow-glow-lg: 0 0 40px rgba(14, 165, 233, 0.2);
-  --shadow-neon: 0 0 10px rgba(14, 165, 233, 0.5), 0 0 20px rgba(14, 165, 233, 0.3);
+  /* Box shadows - Cleaned up glows */
+  --shadow-glow: none;
+  --shadow-glow-lg: none;
+  --shadow-neon: none;
 
   /* Animations */
   --animate-fade-in: fade-in 0.5s ease-out;
@@ -298,13 +299,13 @@
     }
   }
 
-  /* Cyber gradients */
-  .cyber-gradient {
-    @apply bg-linear-to-br from-gray-900 via-gray-800 to-gray-900;
+  /* Brand gradients */
+  .brand-gradient {
+    @apply bg-linear-to-br from-zinc-900 via-zinc-800 to-zinc-900;
   }
 
-  .cyber-gradient-blue {
-    @apply bg-linear-to-br from-blue-900 via-blue-800 to-blue-900;
+  .brand-gradient-green {
+    @apply bg-linear-to-br from-green-900 via-green-800 to-green-900;
   }
 
   /* Focus states */

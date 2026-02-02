@@ -45,16 +45,16 @@ export const RegisterForm: React.FC<RegisterFormProps> = () => {
     <>
       <SEO
         title="Sign Up"
-        description="Join the elite cybersecurity training platform. Create your account to start hands-on labs and assessments."
+        description="Join GradeU, the elite training platform. Create your account to start hands-on labs and assessments."
       />
       <div className="dark bg-zinc-950 flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
         <div className="flex w-full max-w-md flex-col gap-6">
-          <Link href="/" className="flex items-center gap-2 self-center font-medium group transition-all hover:scale-105 mb-2">
-            <div className="bg-primary text-primary-foreground flex size-10 items-center justify-center rounded-md group-hover:scale-110 transition-transform">
-              <img src="/cybercoach-logo.png" alt="Cybercoach" className="size-8" />
+          <Link href="/" className="flex flex-col items-center gap-4 self-center font-medium group transition-all hover:opacity-90 mb-4 focus:outline-none">
+            <div className="flex size-20 items-center justify-center rounded-xl transition-transform duration-500 group-hover:scale-105">
+              <img src="/logo.svg" alt="GradeU" className="size-20" />
             </div>
-            <div className="text-left">
-              <div className="text-xl font-black tracking-tighter text-white uppercase">Cyber <span className="text-[#00FF88]">Coach</span></div>
+            <div className="text-center">
+              <div className="text-4xl font-black tracking-tighter text-white uppercase font-display italic">Grade<span className="text-brand-400">U</span></div>
             </div>
           </Link>
 
@@ -77,7 +77,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = () => {
                   <Button
                     variant="outline"
                     type="button"
-                    className="w-full bg-zinc-950 border-zinc-800 text-white hover:bg-[#00FF88] hover:text-black hover:border-[#00FF88] h-12 text-md font-bold transition-all duration-300"
+                    className="w-full bg-zinc-950 border-zinc-800 text-white hover:bg-brand-400 hover:text-black hover:border-brand-400 h-12 text-md font-bold transition-all duration-300"
                     onClick={handleGoogleSignup}
                     disabled={isLoading}
                   >
@@ -111,7 +111,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = () => {
                     </Link>.
                     <div className="mt-4">
                       Already have an account?{" "}
-                      <Link href="/login" className="text-[#00FF88] hover:underline font-bold">
+                      <Link href="/login" className="text-brand-400 hover:underline font-bold">
                         Login
                       </Link>
                     </div>

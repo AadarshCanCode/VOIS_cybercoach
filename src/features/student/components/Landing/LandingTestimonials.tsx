@@ -84,11 +84,11 @@ export default function LandingTestimonials() {
                         What our community says
                     </h2>
                     <p className="text-center mt-5 text-zinc-400 text-lg">
-                        See how CyberCoach is transforming cybersecurity education.
+                        See how GradeU is transforming the learning experience.
                     </p>
                 </motion.div>
 
-                <div className="flex justify-center gap-6 mt-10 [mask-image:linear-gradient(to_bottom,transparent,black_25%,black_75%,transparent)] max-h-[740px] overflow-hidden">
+                <div className="flex justify-center gap-6 mt-10 mask-[linear-gradient(to_bottom,transparent,black_25%,black_75%,transparent)] max-h-[740px] overflow-hidden">
                     <TestimonialsColumn testimonials={firstColumn} duration={15} />
                     <TestimonialsColumn testimonials={secondColumn} className="hidden md:block" duration={19} />
                     <TestimonialsColumn testimonials={thirdColumn} className="hidden lg:block" duration={17} />

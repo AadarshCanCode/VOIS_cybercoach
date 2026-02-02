@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Space_Grotesk } from "next/font/google";
 import { AuthProvider } from "@context/AuthContext";
 import "./globals.css";
 
@@ -9,29 +9,62 @@ const inter = Inter({
     variable: "--font-inter",
 });
 
+const spaceGrotesk = Space_Grotesk({
+    subsets: ["latin"],
+    display: "swap",
+    variable: "--font-space",
+});
+
 export const viewport = {
-    themeColor: "#00FF88",
+    themeColor: "#6EDB80",
 };
 
+import { siteConfig } from "@lib/metaConfig";
+
 export const metadata: Metadata = {
-    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
-    title: "Cybercoach - Learn Cybersecurity by Doing",
-    description: "AI-powered cybersecurity education platform with hands-on labs, proctored assessments, and career tools.",
-    keywords: ["cybersecurity", "education", "training", "labs", "assessment", "career", "AI tutor"],
-    authors: [{ name: "Cybercoach Team" }],
+    metadataBase: new URL(siteConfig.url),
+    title: {
+        default: siteConfig.title,
+        template: `%s | ${siteConfig.name}`,
+    },
+    description: siteConfig.description,
+    keywords: siteConfig.keywords,
+    authors: [siteConfig.author],
+    creator: siteConfig.creator,
     icons: {
         icon: [
             { url: "/favicon.ico" },
-            { url: "/cybercoach-logo.png", sizes: "192x192", type: "image/png" },
+            { url: "/logo.png", sizes: "192x192", type: "image/png" },
         ],
-        apple: "/cybercoach-logo.png",
+        apple: "/logo.png",
     },
     openGraph: {
-        title: "Cybercoach - Learn Cybersecurity by Doing",
-        description: "AI-powered cybersecurity education with hands-on labs, proctored assessments, and career tools.",
-        images: ["/cybercoach-logo.png"],
-        type: "website",
+        title: siteConfig.title,
+        description: siteConfig.description,
+        url: siteConfig.url,
+        siteName: siteConfig.name,
+        images: [
+            {
+                url: siteConfig.ogImage,
+                width: 1200,
+                height: 630,
+                alt: siteConfig.name,
+            },
+        ],
+        locale: 'en_US',
+        type: 'website',
     },
+    twitter: {
+        card: 'summary_large_image',
+        title: siteConfig.title,
+        description: siteConfig.description,
+        images: [siteConfig.ogImage],
+        creator: '@gradeu',
+    },
+    robots: {
+        index: true,
+        follow: true,
+    }
 };
 
 export default function RootLayout({
@@ -40,8 +73,8 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en" className={`dark ${inter.variable}`}>
-            <body className={`${inter.className} antialiased bg-black text-white`}>
+        <html lang="en" className={`dark ${inter.variable} ${spaceGrotesk.variable}`}>
+            <body className={`${inter.className} antialiased`}>
                 <AuthProvider>
                     {children}
                 </AuthProvider>

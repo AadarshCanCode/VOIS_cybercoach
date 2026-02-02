@@ -87,22 +87,6 @@ export function AppSidebar({ activeTab, onTabChange, ...props }: AppSidebarProps
 
     return (
         <Sidebar collapsible="icon" {...props} className="border-r border-sidebar-border/50">
-            <SidebarHeader>
-                <SidebarMenu>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" className="hover:bg-transparent active:bg-transparent group-data-[collapsible=icon]:!p-0 transition-all duration-200">
-                            <div className="flex aspect-square size-8 items-center justify-center rounded-lg text-primary-foreground transition-all duration-200">
-                                <img src="/cybercoach-logo.png" alt="Cybercoach Logo" className="size-8 object-contain" />
-                            </div>
-                            <div className="grid flex-1 text-left text-sm leading-tight group-data-[state=collapsed]:hidden">
-                                <span className="truncate font-bold text-lg tracking-tight uppercase">
-                                    Cyber<span className="text-[#00FF88]">coach</span>
-                                </span>
-                            </div>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                </SidebarMenu>
-            </SidebarHeader>
             <SidebarContent>
                 {navMain.map((group) => (
                     <SidebarGroup key={group.title}>

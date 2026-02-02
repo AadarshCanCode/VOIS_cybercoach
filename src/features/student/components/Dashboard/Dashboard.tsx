@@ -87,7 +87,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
     <div className="flex flex-col gap-6 p-4 md:p-8 animate-in fade-in duration-500">
       <SEO
         title="Learner Dashboard"
-        description="Monitor your cybersecurity training progress, labs, and achievements."
+        description="Monitor your academic progress, labs, and achievements."
       />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -268,7 +268,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
             <Button variant="outline" className="justify-between hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-all" onClick={() => onTabChange?.('labs')}>
               <div className="flex items-center gap-2">
                 <Terminal className="h-4 w-4" />
-                <span>Cyber Range Labs</span>
+                <span>Academic Labs</span>
               </div>
               <ChevronRight className="h-4 w-4 opacity-50" />
             </Button>

@@ -59,16 +59,16 @@ export const LandingPage: React.FC = () => {
   return (
     <>
       <SEO
-        description="Master cybersecurity with comprehensive training, virtual labs, and career support. Join CyberCoach today."
+        description="Empowering excellence with GradeU. Elevate your learning journey with our advanced education platform."
       />
 
-      <div className="min-h-screen bg-black text-zinc-100 font-sans selection:bg-[#00FF88]/30">
+      <div className="min-h-screen bg-black text-zinc-100 font-sans selection:bg-brand-400/30">
         <StickyBanner className="bg-zinc-900 border-b border-zinc-800">
           <p className="text-sm font-medium text-zinc-300 tracking-wide text-center px-4">
-            Join the CyberCoach Community. Connect with students and mentors.{" "}
+            Join the GradeU Community. Connect with students and mentors.{" "}
             <button
               onClick={() => router.push('/community')}
-              className="text-[#00FF88] font-bold hover:underline ml-2"
+              className="text-brand-400 font-bold hover:underline ml-2"
             >
               Join Community &rarr;
             </button>
@@ -103,7 +103,7 @@ export const LandingPage: React.FC = () => {
             <div className="flex items-center gap-3">
               <NavbarButton
                 variant="secondary"
-                onClick={() => window.open("https://t.me/CyberCoach_Bot", "_blank")}
+                onClick={() => window.open("https://t.me/GradeU_Bot", "_blank")}
                 className="hidden md:flex items-center justify-center px-3"
               >
                 <svg viewBox="0 0 32 32" className="h-8 w-8" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -143,7 +143,7 @@ export const LandingPage: React.FC = () => {
                   const el = document.getElementById('features');
                   if (el) el.scrollIntoView({ behavior: 'smooth' });
                 }}
-                className="text-zinc-300 hover:text-[#00FF88] transition-colors text-sm font-medium"
+                className="text-zinc-300 hover:text-brand-400 transition-colors text-sm font-medium"
               >
                 Features
               </button>
@@ -153,16 +153,16 @@ export const LandingPage: React.FC = () => {
                   const el = document.getElementById('testimonials');
                   if (el) el.scrollIntoView({ behavior: 'smooth' });
                 }}
-                className="text-zinc-300 hover:text-[#00FF88] transition-colors text-sm font-medium"
+                className="text-zinc-300 hover:text-brand-400 transition-colors text-sm font-medium"
               >
                 Reviews
               </button>
               <button
                 onClick={() => {
                   setMobileOpen(false);
-                  window.open("https://t.me/CyberCoach_Bot", "_blank");
+                  window.open("https://t.me/GradeU_Bot", "_blank");
                 }}
-                className="text-zinc-300 hover:text-[#00FF88] transition-colors text-sm font-medium flex items-center gap-2"
+                className="text-zinc-300 hover:text-brand-400 transition-colors text-sm font-medium flex items-center gap-2"
               >
                 <span>Telegram Bot</span>
                 <svg viewBox="0 0 32 32" className="h-6 w-6" fill="none" xmlns="http://www.w3.org/2000/svg">
