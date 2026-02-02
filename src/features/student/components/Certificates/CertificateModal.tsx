@@ -233,14 +233,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
             >
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '24px', marginBottom: '48px' }}>
-                {isVU ? (
-                  <img src="/vu-logo.png" alt="VU" style={{ height: '64px', objectFit: 'contain', maxWidth: '120px' }} />
-                ) : (
-                  <div style={{ padding: '8px 16px', fontFamily: 'Arial, sans-serif', fontWeight: 'bold', letterSpacing: '0.1em', backgroundColor: '#111827', color: '#ffffff' }}>
-                    SOVAP
-                  </div>
-                )}
-                <img src="/logo.svg" alt="GradeU" style={{ height: '48px', objectFit: 'contain', marginLeft: '16px', maxWidth: '150px' }} />
+                <img src="/logo.svg" alt="GradeU" style={{ height: '64px', objectFit: 'contain', maxWidth: '200px' }} />
               </div>
 
               <p style={{ marginBottom: '8px', fontFamily: 'Arial, sans-serif', fontSize: '14px', color: '#6b7280' }}>
@@ -260,24 +253,16 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
               </h2>
 
               <p style={{ fontSize: '14px', marginBottom: '48px', fontFamily: 'Arial, sans-serif', maxWidth: '28rem', lineHeight: '1.625', color: '#6b7280' }}>
-                an online non-credit course authorized by SOVAP and offered through the GradeU Academic Initiative.
+                an online non-credit course authorized by GradeU and offered through the GradeU Academic Initiative.
               </p>
 
               <div style={{ marginTop: 'auto' }}>
-                {isVU && facultyName ? (
-                  <div style={{ marginBottom: '16px' }}>
-                    <p style={{ fontFamily: 'cursive', fontSize: '30px', marginBottom: '4px' }}>{facultyName}</p>
-                    <div style={{ width: '192px', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderColor: '#000000' }}></div>
-                    <p style={{ fontSize: '12px', marginTop: '4px', fontWeight: 'bold', fontFamily: 'Arial, sans-serif', textTransform: 'uppercase', color: '#374151' }}>Prof. {facultyName}</p>
-                    <p style={{ fontSize: '10px', fontFamily: 'Arial, sans-serif', color: '#6b7280' }}>Faculty Guide, Vishwakarma University</p>
-                  </div>
-                ) : (
-                  <div>
-                    <p style={{ fontFamily: 'cursive', fontSize: '30px', marginBottom: '4px' }}>GradeU</p>
-                    <div style={{ width: '192px', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderColor: '#000000' }}></div>
-                    <p style={{ fontSize: '12px', marginTop: '4px', fontWeight: 'bold', fontFamily: 'Arial, sans-serif', textTransform: 'uppercase', color: '#374151' }}>Chief Academic Officer</p>
-                  </div>
-                )}
+                <div style={{ marginBottom: '16px' }}>
+                  <p style={{ fontFamily: 'cursive', fontSize: '30px', marginBottom: '4px' }}>{facultyName || 'GradeU Faculty'}</p>
+                  <div style={{ width: '192px', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderColor: '#000000' }}></div>
+                  <p style={{ fontSize: '12px', marginTop: '4px', fontWeight: 'bold', fontFamily: 'Arial, sans-serif', textTransform: 'uppercase', color: '#374151' }}>{facultyName || 'Course Instructor'}</p>
+                  <p style={{ fontSize: '10px', fontFamily: 'Arial, sans-serif', color: '#6b7280' }}>Faculty Guide, GradeU</p>
+                </div>
               </div>
             </div>
 
@@ -332,7 +317,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
                     boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
                   }}>
                     <Award style={{ width: '40px', height: '40px', marginBottom: '8px', color: '#ffffff' }} />
-                    <span style={{ fontSize: '10px', textTransform: 'uppercase', fontWeight: 'bold', letterSpacing: '0.1em', lineHeight: '1.25' }}>SOVAP<br />Cyber Certified</span>
+                    <span style={{ fontSize: '10px', textTransform: 'uppercase', fontWeight: 'bold', letterSpacing: '0.1em', lineHeight: '1.25' }}>{courseName}<br />Certified</span>
                   </div>
                 </div>
               </div>
@@ -340,7 +325,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
               <div style={{ paddingLeft: '24px', paddingRight: '24px', textAlign: 'center' }}>
                 <p style={{ fontSize: '10px', lineHeight: '1.625', fontFamily: 'Arial, sans-serif', color: '#d1d5db' }}>
                   Verify at sovap.security/verify/T4TNDR<br />
-                  SOVAP has confirmed the identity of this individual.
+                  GradeU has confirmed the identity of this individual.
                 </p>
               </div>
             </div>

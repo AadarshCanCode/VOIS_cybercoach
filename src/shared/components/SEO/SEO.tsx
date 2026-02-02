@@ -62,7 +62,7 @@ export const SEO: React.FC<SEOProps> = ({
         // Standard Meta Tags
         updateMetaTag('description', metaDescription);
         updateMetaTag('keywords', metaKeywords);
-        updateMetaTag('author', siteConfig.author);
+        updateMetaTag('author', siteConfig.author.name);
 
         // Open Graph Tags
         updateMetaTag('og:title', fullTitle, true);
