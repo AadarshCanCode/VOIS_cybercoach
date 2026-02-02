@@ -87,6 +87,7 @@ export function AppSidebar({ activeTab, onTabChange, ...props }: AppSidebarProps
 
     return (
         <Sidebar collapsible="icon" {...props} className="border-r border-sidebar-border/50">
+            <SidebarHeader className="h-20 border-b border-sidebar-border/50" />
             <SidebarContent>
                 {navMain.map((group) => (
                     <SidebarGroup key={group.title}>
