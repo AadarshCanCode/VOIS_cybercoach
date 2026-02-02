@@ -61,17 +61,41 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+      console.log(`[AuthContext] Auth event: ${event}`, session?.user?.id);
+
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
         if (session) {
           try {
             const syncedUser = await authService.handleAuthStateChange(session) as AuthContextValue['user'];
             if (syncedUser && syncedUser.role !== 'admin' as any) {
-              setUser(syncedUser);
+              setUser(prevUser => {
+                // PROTECT AGAINST DOWNGRADES
+                // If we already have a fully onboarded user state, and the new state claims we aren't onboarded,
+                // it's likely a partial fetch/timeout issue. Ignore the downgrade.
+                // Ensure we don't accidentally ignore legitimate re-logins for different users.
+                const isSameUser = prevUser?.id === syncedUser.id;
+                const wasOnboarded = prevUser?.onboarding_completed;
+                const nowOnboarded = syncedUser.onboarding_completed;
+
+                if (isSameUser && wasOnboarded && !nowOnboarded) {
+                  console.warn('[AuthContext] Preventing state downgrade: Ignoring incomplete profile sync during session update.', { event });
+                  // We return the previous user, effectively ignoring the "bad" update
+                  return prevUser;
+                }
+                return syncedUser;
+              });
             }
           } catch (error: any) {
             console.error('Auth sync error:', error);
-            await authService.logout();
-            setUser(null);
+            // If it's a background refresh or update, DO NOT LOG OUT. Just warn.
+            if (event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+              console.warn('[AuthContext] Ignoring auth error on background update to prevent session loss', { event });
+            } else {
+              // For SIGNED_IN failures, we might fail hard, OR we could be lenient too?
+              // Choosing to be strict for initial SIGNED_IN but lenient for everything else.
+              await authService.logout();
+              setUser(null);
+            }
           }
         }
       } else if (event === 'SIGNED_OUT') {
