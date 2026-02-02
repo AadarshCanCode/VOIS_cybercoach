@@ -1,8 +1,8 @@
 import { Router, type Request, type Response } from 'express';
-import nodemailer from 'nodemailer';
 import { logger } from '../../../shared/lib/logger.js';
 import { StudentExperience } from '../models/StudentExperience.js';
 import { authenticateUser, AuthenticatedRequest } from '../../../shared/middleware/auth.js';
+import { sendEmail } from '../../../shared/lib/email.js';
 
 const router = Router();
 
@@ -40,42 +40,16 @@ router.post('/report-bug', async (req: Request, res: Response) => {
     }
 
     try {
-        // Basic validation of environment variables
-        const user = process.env.GMAIL_USER;
-        const pass = process.env.GMAIL_PASS;
-
-        if (!user || !pass) {
-            logger.warn('SMTP credentials not configured. Bug report will be logged but not emailed.');
-            logger.info(`BUG REPORT from ${studentName || 'Anonymous'} (${studentEmail || 'N/A'}): ${description}`);
-            return res.json({
-                success: true,
-                message: 'Bug report received (Logged). Note: SMTP not configured for email sending.'
-            });
-        }
-
-        // Create transporter
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: user,
-                pass: pass,
-            },
-        });
-
-        const mailOptions = {
-            from: user,
-            to: 'smartgaurd123@gmail.com',
-            subject: `CyberCoach Bug Report: ${studentName || 'Anonymous'}`,
-            text: `
+        const subject = `CyberCoach Bug Report: ${studentName || 'Anonymous'}`;
+        const text = `
         Student: ${studentName || 'Anonymous'}
         Email: ${studentEmail || 'N/A'}
         
         Problem Description:
         ${description}
-      `,
-        };
+      `;
 
-        await transporter.sendMail(mailOptions);
+        await sendEmail('smartgaurd123@gmail.com', subject, text);
         logger.info(`Bug report sent to smartgaurd123@gmail.com from ${studentEmail || 'Anonymous'}`);
 
         res.json({ success: true, message: 'Bug report sent successfully' });

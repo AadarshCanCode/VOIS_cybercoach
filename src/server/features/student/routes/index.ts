@@ -13,6 +13,8 @@ import { Course } from '../../../shared/models/Course.js';
 import { logger } from '../../../shared/lib/logger.js';
 import { ProgressService } from '../../../shared/services/progressService.js';
 import { cache, CacheKeys } from '../../../shared/lib/cache.js';
+import VUStudent from '../../../shared/models/VUStudent.js';
+import { sendEmail } from '../../../shared/lib/email.js';
 
 const router = Router();
 
@@ -25,9 +27,76 @@ router.use('/community', communityRoutes);
 router.get('/overview', authenticateUser, async (req: AuthenticatedRequest, res: Response) => {
   const studentId = req.user?.id;
   const studentEmail = req.user?.email;
-  if (!studentId || !studentEmail) {
+  const supabaseClient = req.supabase;
+  if (!studentId || !studentEmail || !supabaseClient) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
+
+  // Trigger Welcome Email logic using Supabase Profiles Table Tracking
+  try {
+    const { data: profile, error: profileError } = await supabaseClient
+      .from('profiles')
+      .select('welcome_email_sent, full_name')
+      .eq('id', studentId)
+      .single();
+
+    if (profileError) {
+      logger.error(`Failed to fetch profile for ${studentEmail} from Supabase:`, profileError);
+    } else if (profile && !profile.welcome_email_sent) {
+      logger.info(`Welcome email not yet sent for ${studentEmail}. Attempting to send...`);
+
+      const studentName = profile.full_name || studentEmail.split('@')[0] || 'Student';
+
+      const welcomeSubject = 'Welcome to CyberCoach! 🛡️';
+      const welcomeText = `
+        Hello ${studentName},
+        
+        Welcome to CyberCoach! We're thrilled to have you on board.
+        
+        Your journey into cybersecurity excellence starts here. Explore your dashboard, dive into interactive labs, and master new skills at your own pace.
+        
+        Happy Learning!
+        The CyberCoach Team
+      `;
+      const welcomeHtml = `
+        <div style="font-family: sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
+          <h2 style="color: #00FF88; text-transform: uppercase; letter-spacing: 2px;">Welcome to <span style="color: #333;">Cyber</span>Coach! 🛡️</h2>
+          <p>Hello <strong>${studentName}</strong>,</p>
+          <p>We're thrilled to have you on board! Your journey into cybersecurity excellence starts right now.</p>
+          <div style="background: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+            <p style="margin: 0;">🚀 <strong>What's Next?</strong></p>
+            <ul style="margin-top: 10px;">
+              <li>Explore your customized learning paths.</li>
+              <li>Get hands-on with realistic security labs.</li>
+              <li>Track your progress and earn achievements.</li>
+            </ul>
+          </div>
+          <p>Happy Learning!<br><strong>The CyberCoach Team</strong></p>
+          <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+          <p style="font-size: 0.8em; color: #777;">If you have any questions, just reply to this email or use the support feature in the app.</p>
+        </div>
+      `;
+
+      await sendEmail(studentEmail, welcomeSubject, welcomeText, welcomeHtml);
+
+      // Update the profiles table in Supabase
+      const { error: updateError } = await supabaseClient
+        .from('profiles')
+        .update({ welcome_email_sent: true })
+        .eq('id', studentId);
+
+      if (updateError) {
+        logger.error(`Failed to update welcome_email_sent for ${studentEmail} in Supabase:`, updateError);
+      } else {
+        logger.info(`Welcome email sent and Supabase profile updated for ${studentEmail}`);
+      }
+    } else {
+      logger.info(`Welcome email already sent or profile not found for ${studentEmail}`);
+    }
+  } catch (error) {
+    logger.error('Error in welcome email trigger logic (Supabase Schema tracking)', error instanceof Error ? error : new Error(String(error)));
+  }
+
   const summary = await getStudentDashboardSummary(studentId, studentEmail);
   res.json(summary);
 });
