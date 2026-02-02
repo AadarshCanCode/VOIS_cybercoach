@@ -7,6 +7,12 @@ type DBUser = {
   role?: string;
   created_at?: string;
   is_active?: boolean;
+  phone_number?: string;
+  faculty?: string;
+  department?: string;
+  contact_email?: string;
+  email_type?: 'vu' | 'personal';
+  onboarding_completed?: boolean;
   [key: string]: unknown;
 };
 
@@ -51,6 +57,12 @@ function sanitizeUser(dbUser: DBUser, email?: string): User {
     role: dbUser.role as 'student' | 'admin' | 'teacher',
     created_at: dbUser.created_at,
     avatar_url: (dbUser as any).avatar_url,
+    phone_number: dbUser.phone_number,
+    faculty: dbUser.faculty,
+    department: dbUser.department,
+    contact_email: dbUser.contact_email,
+    email_type: dbUser.email_type,
+    onboarding_completed: dbUser.onboarding_completed || false,
   };
 }
 
@@ -149,6 +161,7 @@ class AuthService {
 
         if (result.data) {
           profile = result.data;
+          console.log('[AuthService] Fetched profile:', profile); // DEBUG LOG
           profileError = null;
           break;
         }

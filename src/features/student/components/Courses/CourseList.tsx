@@ -41,7 +41,7 @@ const courseCategories: CourseCategory[] = [
 
 const DYNAMIC_CATEGORY: CourseCategory = {
   id: 'cyber-ops',
-  title: 'Cyber Operations',
+  title: 'Courses',
   description: 'AI-generated specialized training missions',
   icon: '⚡',
   color: 'from-emerald-500/20 to-teal-500/20'

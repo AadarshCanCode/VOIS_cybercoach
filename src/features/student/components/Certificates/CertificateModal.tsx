@@ -61,18 +61,42 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
       return;
     }
 
-    // const { data: publicData } = supabase.storage.from('certificates').getPublicUrl(filePath);
-    // const publicUrl = publicData?.publicUrl ?? '';
+    const { data: publicData } = supabase.storage.from('certificates').getPublicUrl(filePath);
+    const publicUrl = publicData?.publicUrl ?? '';
+
+    console.log("Certificate Public URL:", publicUrl);
 
     // Update certificates table
-    const { data: courseRow } = await supabase.from('courses').select('id').ilike('title', courseName).maybeSingle();
-    const courseId = courseRow?.id;
+    // First ensure the course exists in our DB to get an ID. 
+    // If it's a dynamic course or hardcoded, we might need to insert it or use a known ID.
+    // For now, checks if it exists.
+    let { data: courseRow } = await supabase.from('courses').select('id').ilike('title', courseName).maybeSingle();
+
+    // Fallback: if course doesn't exist (e.g. client-side only course), insert it to get an ID? 
+    // Or assume it must exist. The modal is called with 'courseName' from dashboard.
+    // For 'Introduction to python', it should be in the DB.
+
+    let courseId = courseRow?.id;
+
+    if (!courseId) {
+      // Optional: Auto-create course record if missing (for legacy compatibility)
+      const { data: newCourse } = await supabase.from('courses').insert({ title: courseName }).select().single();
+      courseId = newCourse?.id;
+    }
 
     if (courseId) {
-      await supabase.from('certificates').upsert([{
+      const { error: dbError } = await supabase.from('certificates').upsert([{
         student_id: userId,
-        course_id: courseId
-      }]);
+        course_id: courseId,
+        certificate_url: publicUrl,
+        issued_at: new Date().toISOString()
+      }], { onConflict: 'student_id, course_id' });
+
+      if (dbError) {
+        console.error("Failed to save certificate record to DB:", dbError);
+      } else {
+        console.log("Certificate record saved successfully.");
+      }
     }
   };
 

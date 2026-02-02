@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import { AuthProvider } from "@context/AuthContext";
+import { OnboardingGuard } from "@components/auth/OnboardingGuard";
 import "./globals.css";
 
 const inter = Inter({
@@ -74,8 +75,9 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en" className={`dark ${inter.variable} ${spaceGrotesk.variable}`}>
-            <body className={`${inter.className} antialiased`}>
+            <body className={`${inter.className} antialiased bg-[#0F1115] text-white`}>
                 <AuthProvider>
+                    <OnboardingGuard />
                     {children}
                 </AuthProvider>
             </body>

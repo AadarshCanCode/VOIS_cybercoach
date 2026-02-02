@@ -121,6 +121,28 @@ export const Profile: React.FC = () => {
                   <span className="font-mono">ID: {user.id ? user.id.slice(0, 8).toUpperCase() : 'UNKNOWN'}</span>
                 </div>
               </div>
+
+              {/* Extended Details */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 mt-4 pt-4 border-t border-white/5 text-sm text-muted-foreground">
+                {user.faculty && (
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="w-4 h-4 text-primary/70" />
+                    <span>{user.faculty} &bull; {user.department}</span>
+                  </div>
+                )}
+                {user.phone_number && (
+                  <div className="flex items-center gap-2">
+                    <User className="w-4 h-4 text-primary/70" />
+                    <span className="font-mono">{user.phone_number}</span>
+                  </div>
+                )}
+                {user.contact_email && user.contact_email !== user.email && (
+                  <div className="flex items-center gap-2">
+                    <Terminal className="w-4 h-4 text-primary/70" />
+                    <span>{user.contact_email} <span className="text-xs opacity-50">({user.email_type === 'vu' ? 'VU Mail' : 'Alt Email'})</span></span>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="flex gap-3 w-full md:w-auto">

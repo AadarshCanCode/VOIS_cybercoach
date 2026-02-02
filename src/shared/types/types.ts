@@ -6,6 +6,12 @@ export interface User {
   avatar_url?: string;
   created_at?: string;
   certificates?: string[];
+  phone_number?: string;
+  faculty?: string;
+  department?: string;
+  contact_email?: string;
+  email_type?: 'vu' | 'personal';
+  onboarding_completed?: boolean;
 }
 
 export interface Course {

@@ -12,6 +12,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { Progress } from '@shared/components/ui/progress';
 import { cn } from '@lib/utils';
 import { Skeleton } from '@components/ui/skeleton';
+import { CertificateModal } from '../Certificates/CertificateModal';
 
 interface DashboardProps {
   onTabChange?: (tab: string) => void;
@@ -29,6 +30,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
   const [labStats, setLabStats] = useState<LabStats | null>(null);
   const [activities, setActivities] = useState<RecentActivity[]>([]);
   const [activeOperation, setActiveOperation] = useState<ActiveOperation | null>(null);
+
+  const [viewCertificate, setViewCertificate] = useState<{
+    isOpen: boolean;
+    courseName: string;
+    date: Date;
+  } | null>(null);
 
   const loadData = async () => {
     if (!user?.id) return;
@@ -177,9 +184,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
                   <Progress value={activeOperation.progress} className="h-2" />
                 </div>
                 <div className="flex gap-4">
-                  <Button className="flex-1" onClick={() => onTabChange?.(`courses/${activeOperation.courseId}`)}>
-                    <Play className="mr-2 h-4 w-4" /> Resume {activeOperation.title}
-                  </Button>
+                  {activeOperation.progress >= 100 ? (
+                    <Button className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white" onClick={() => setViewCertificate({
+                      isOpen: true,
+                      courseName: activeOperation.title,
+                      date: new Date()
+                    })}>
+                      <Award className="mr-2 h-4 w-4" /> Download Certificate
+                    </Button>
+                  ) : (
+                    <Button className="flex-1" onClick={() => onTabChange?.(`courses/${activeOperation.courseId}`)}>
+                      <Play className="mr-2 h-4 w-4" /> Resume {activeOperation.title}
+                    </Button>
+                  )}
                   <Button variant="outline" size="icon" onClick={() => onTabChange?.('labs')}>
                     <Terminal className="h-4 w-4" />
                   </Button>
@@ -275,6 +292,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
           </CardContent>
         </Card>
       </div>
+
+      {viewCertificate && (
+        <CertificateModal
+          isOpen={viewCertificate.isOpen}
+          onClose={() => setViewCertificate(null)}
+          courseName={viewCertificate.courseName}
+          studentName={user?.name || 'Student'}
+          completionDate={viewCertificate.date}
+          isVU={user?.email?.endsWith('vupune.ac.in')}
+          facultyName="Kiran Deshpande"
+        />
+      )}
     </div>
   );
 };
