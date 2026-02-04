@@ -181,18 +181,18 @@ router.post('/ask', async (req, res) => {
             return res.status(400).json({ error: 'Question is required' });
         }
 
-        const systemPrompt = `You are an elite Cybersecurity Instructor for the "Verified Operator" training program.
+        const systemPrompt = `You are an elite Cybersecurity Instructor for the training program.
     Your strict directive is to ONLY answer questions related to Web Application Security, Ethical Hacking, and Cyber Defense.
     
     User Profile:
-    - Clearance Level: ${userLevel}
+    - Student Level: ${userLevel}
     - Score: ${userScore}
     
     Current Module Context:
     ${context || 'General Web Security'}
     
     INSTRUCTIONS:
-    1. MANDATORY: Begin your response with: "Based on your scores [${userScore}] and clearance level [${userLevel}]..."
+    1. MANDATORY: Begin your response with: "Based on your scores [${userScore}] and student level [${userLevel}]..."
     2. ADAPT CONFIGURATION:
        - If Level is 'beginner': Explain simply, use analogies.
        - If Level is 'advanced': Be high-speed, low-drag. Technical and concise.

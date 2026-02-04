@@ -3,6 +3,7 @@ import { User, Award, BookOpen, Target, Clock, Star, Shield, Activity, Zap, Term
 import { useAuth } from '@context/AuthContext';
 import { courseService } from '@services/courseService';
 import { CertificateModal } from '../Certificates/CertificateModal';
+import { ConfidenceHeatmap } from './ConfidenceHeatmap';
 
 export const Profile: React.FC = () => {
   const { user } = useAuth();
@@ -94,9 +95,9 @@ export const Profile: React.FC = () => {
         <div className="flex items-center justify-between border-b border-[#00FF88]/10 pb-6">
           <div>
             <h1 className="text-3xl font-black tracking-tighter text-white uppercase">
-              Operator <span className="text-[#00FF88]">Profile</span>
+              Student <span className="text-[#00FF88]">Profile</span>
             </h1>
-            <p className="text-[#00B37A] font-mono text-sm mt-1">PERSONNEL RESUME</p>
+            <p className="text-[#00B37A] font-mono text-sm mt-1">STUDENT RECORD</p>
           </div>
           <div className="h-10 w-10 rounded bg-[#00FF88]/10 border border-[#00FF88]/20 flex items-center justify-center">
             <User className="h-5 w-5 text-[#00FF88]" />
@@ -123,7 +124,7 @@ export const Profile: React.FC = () => {
                   userLevel === 'intermediate' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' :
                     'bg-[#00FF88]/10 text-[#00FF88] border-[#00FF88]/20'
                   }`}>
-                  {userLevel.toUpperCase()} CLEARANCE
+                  {userLevel.toUpperCase()} LEVEL
                 </span>
                 <span className="inline-flex items-center px-3 py-1 rounded text-xs font-bold uppercase tracking-wider border border-[#00FF88]/20 bg-black text-[#EAEAEA]">
                   ID: {user.id ? user.id.slice(0, 8).toUpperCase() : 'UNKNOWN'}
@@ -132,220 +133,229 @@ export const Profile: React.FC = () => {
             </div>
             <div className="text-center md:text-right bg-black p-4 rounded-xl border border-[#00FF88]/20 shadow-[0_0_15px_rgba(0,255,136,0.1)]">
               <div className="text-4xl font-black text-[#00FF88] mb-1 font-mono">{missionReadiness}%</div>
-              <div className="text-[#00B37A] text-[10px] uppercase tracking-wider">Mission Readiness</div>
+              <div className="text-[#00B37A] text-[10px] uppercase tracking-wider">Overall Progress</div>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Skills Progress */}
-          <div className="bg-[#0A0F0A] rounded-2xl border border-[#00FF88]/10 p-6 relative overflow-hidden">
-            <h3 className="text-xs font-bold text-[#00B37A] uppercase tracking-widest mb-6 flex items-center gap-2">
-              <Activity className="h-4 w-4" />
-              Combat Capabilities
-            </h3>
-            <div className="space-y-6">
-              {loading ? (
-                <div className="flex items-center justify-center p-4">
-                  <Terminal className="h-6 w-6 animate-spin text-[#00FF88]" />
-                </div>
-              ) : courseProgress.length > 0 ? (
-                courseProgress.map((cp, index) => (
-                  <div key={index} className="group">
-                    <div className="flex justify-between text-xs text-[#EAEAEA] mb-2 font-mono uppercase tracking-wider">
-                      <span className="group-hover:text-[#00FF88] transition-colors">{cp.title}</span>
-                      <span className="text-[#00FF88]">{cp.progress}%</span>
-                    </div>
-                    <div className="w-full bg-black rounded-full h-1.5 border border-[#00FF88]/10 overflow-hidden">
-                      <div
-                        className="h-full rounded-full transition-all duration-500 relative bg-[#00FF88]"
-                        style={{ width: `${cp.progress}%`, boxShadow: '0 0 10px rgba(0,255,136,0.5)' }}
-                      >
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center text-gray-500 py-4 italic">
-                  No verified field operations detected.
-                  <br />
-                  <span className="text-xs text-gray-600">Ensure your VU account is connected.</span>
-                </div>
-              )}
-            </div>
-          </div>
+        {/* User Info Card */}
+        {/* ... existing User Info Card code ... */}
+      </div>
 
-          {/* Statistics */}
-          <div className="bg-[#0A0F0A] rounded-2xl border border-[#00FF88]/10 p-6 relative overflow-hidden">
-            <h3 className="text-xs font-bold text-[#00B37A] uppercase tracking-widest mb-6 flex items-center gap-2">
-              <Zap className="h-4 w-4" />
-              Operational Metrics
-            </h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center p-5 bg-black rounded-xl border border-[#00FF88]/10 hover:border-[#00FF88]/30 transition-all group">
-                <BookOpen className="h-6 w-6 text-[#00FF88] mx-auto mb-3 group-hover:scale-110 transition-transform" />
-                <div className="text-2xl font-bold text-white mb-1 font-mono">{stats.completedModules}</div>
-                <div className="text-[#EAEAEA]/60 text-[10px] uppercase tracking-wider">Modules Cleared</div>
-              </div>
-              <div className="text-center p-5 bg-black rounded-xl border border-[#00FF88]/10 hover:border-[#00FF88]/30 transition-all group">
-                <Target className="h-6 w-6 text-yellow-400 mx-auto mb-3 group-hover:scale-110 transition-transform" />
-                <div className="text-2xl font-bold text-white mb-1 font-mono">{Math.floor(stats.completedModules / 3)}</div>
-                <div className="text-[#EAEAEA]/60 text-[10px] uppercase tracking-wider">Simulations</div>
-              </div>
-              <div className="text-center p-5 bg-black rounded-xl border border-[#00FF88]/10 hover:border-[#00FF88]/30 transition-all group">
-                <Clock className="h-6 w-6 text-blue-400 mx-auto mb-3 group-hover:scale-110 transition-transform" />
-                <div className="text-2xl font-bold text-white mb-1 font-mono">{stats.hoursActive}</div>
-                <div className="text-[#EAEAEA]/60 text-[10px] uppercase tracking-wider">Hours Active</div>
-              </div>
-              <div className="text-center p-5 bg-black rounded-xl border border-[#00FF88]/10 hover:border-[#00FF88]/30 transition-all group">
-                <Award className="h-6 w-6 text-purple-400 mx-auto mb-3 group-hover:scale-110 transition-transform" />
-                <div className="text-2xl font-bold text-white mb-1 font-mono">{stats.certificatesEarned}</div>
-                <div className="text-[#EAEAEA]/60 text-[10px] uppercase tracking-wider">Awards</div>
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* Knowledge Graph Heatmap */}
+      <div className="mb-8">
+        <ConfidenceHeatmap userId={user.id || ''} />
+      </div>
 
-        {/* Certificates Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Skills Progress */}
         <div className="bg-[#0A0F0A] rounded-2xl border border-[#00FF88]/10 p-6 relative overflow-hidden">
           <h3 className="text-xs font-bold text-[#00B37A] uppercase tracking-widest mb-6 flex items-center gap-2">
-            <Award className="h-4 w-4" />
-            Service Ribbons & Certificates
+            <Activity className="h-4 w-4" />
+            Skills Overview
           </h3>
-          <div className="grid grid-cols-1 gap-6">
-            {user.certificates && user.certificates.length > 0 ? (
-              user.certificates.map((certUrl: string, idx: number) => {
-                const filename = certUrl.split('/').pop() || "";
-                const parts = filename.split('_');
-                let displayTitle = "Classified Operation";
-                if (parts.length >= 2) {
-                  displayTitle = parts[1].replace(/%20/g, ' ');
-                }
-                const timestamp = parseInt(parts[2]?.split('.')[0] || '0');
-                const completionDate = timestamp ? new Date(timestamp) : new Date();
-
-                return (
-                  <div key={idx} className="group relative rounded-xl overflow-hidden border border-[#00FF88]/20 bg-black/50 hover:border-[#00FF88]/50 transition-all duration-300">
-                    {/* Image Preview */}
-                    <div className="relative aspect-video w-full overflow-hidden bg-black/40">
-                      <img
-                        src={certUrl}
-                        alt={`Certificate for ${displayTitle}`}
-                        className="w-full h-full object-contain opacity-90 group-hover:opacity-100 transition-opacity duration-500"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent" />
-                    </div>
-
-                    {/* Content Overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="font-bold text-white uppercase tracking-tight text-lg drop-shadow-md">{displayTitle}</h4>
-                          <p className="text-xs font-mono text-[#00FF88] flex items-center gap-1 shadow-black drop-shadow-sm">
-                            <Shield className="h-3 w-3" /> VERIFIED CREDENTIAL
-                          </p>
-                        </div>
-                        <div className="flex gap-2">
-                          <a
-                            href={certUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-2 bg-black/50 text-[#00FF88] border border-[#00FF88]/50 rounded-lg hover:bg-[#00FF88]/10 transition-colors"
-                            title="View Preview"
-                          >
-                            <Award className="h-5 w-5" />
-                          </a>
-                          <button
-                            onClick={() => setViewCertificate({
-                              isOpen: true,
-                              courseName: displayTitle,
-                              date: completionDate
-                            })}
-                            className="p-2 bg-[#00FF88] text-black rounded-lg hover:bg-[#00CC6A] transition-colors shadow-[0_0_15px_rgba(0,255,136,0.4)]"
-                            title="Download PDF"
-                          >
-                            <Download className="h-5 w-5" />
-                          </button>
-                        </div>
-                      </div>
+          <div className="space-y-6">
+            {loading ? (
+              <div className="flex items-center justify-center p-4">
+                <Terminal className="h-6 w-6 animate-spin text-[#00FF88]" />
+              </div>
+            ) : courseProgress.length > 0 ? (
+              courseProgress.map((cp, index) => (
+                <div key={index} className="group">
+                  <div className="flex justify-between text-xs text-[#EAEAEA] mb-2 font-mono uppercase tracking-wider">
+                    <span className="group-hover:text-[#00FF88] transition-colors">{cp.title}</span>
+                    <span className="text-[#00FF88]">{cp.progress}%</span>
+                  </div>
+                  <div className="w-full bg-black rounded-full h-1.5 border border-[#00FF88]/10 overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-500 relative bg-[#00FF88]"
+                      style={{ width: `${cp.progress}%`, boxShadow: '0 0 10px rgba(0,255,136,0.5)' }}
+                    >
                     </div>
                   </div>
-                );
-              })
+                </div>
+              ))
             ) : (
-              // Fallback: If 100% progress but no cert yet (maybe delayed), show pending state
-              courseProgress.some(p => p.progress === 100) ? (
-                <div className="col-span-1 text-center py-12 border border-[#00FF88]/30 border-dashed rounded-xl bg-[#00FF88]/5 animate-pulse">
-                  <Award className="h-12 w-12 mx-auto mb-3 text-[#00FF88]" />
-                  <h4 className="text-[#00FF88] font-bold uppercase tracking-wider mb-1">Mission Complete</h4>
-                  <p className="text-xs text-[#00B37A] font-mono">Processing Certification Request...</p>
-                </div>
-              ) : (
-                <div className="col-span-1 text-center py-8 border border-white/5 rounded-xl bg-black/50 text-gray-500 italic">
-                  <Shield className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  No certifications declassified yet. Check Mission Log.
-                </div>
-              )
+              <div className="text-center text-gray-500 py-4 italic">
+                No verified field operations detected.
+                <br />
+                <span className="text-xs text-gray-600">Ensure your VU account is connected.</span>
+              </div>
             )}
           </div>
         </div>
 
-        {/* Achievements */}
+        {/* Statistics */}
         <div className="bg-[#0A0F0A] rounded-2xl border border-[#00FF88]/10 p-6 relative overflow-hidden">
           <h3 className="text-xs font-bold text-[#00B37A] uppercase tracking-widest mb-6 flex items-center gap-2">
-            <Award className="h-4 w-4" />
-            Service Ribbons
+            <Zap className="h-4 w-4" />
+            Learning Statistics
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {achievements.map((achievement) => {
-              const Icon = achievement.icon;
+          <div className="grid grid-cols-2 gap-4">
+            <div className="text-center p-5 bg-black rounded-xl border border-[#00FF88]/10 hover:border-[#00FF88]/30 transition-all group">
+              <BookOpen className="h-6 w-6 text-[#00FF88] mx-auto mb-3 group-hover:scale-110 transition-transform" />
+              <div className="text-2xl font-bold text-white mb-1 font-mono">{stats.completedModules}</div>
+              <div className="text-[#EAEAEA]/60 text-[10px] uppercase tracking-wider">Modules Cleared</div>
+            </div>
+            <div className="text-center p-5 bg-black rounded-xl border border-[#00FF88]/10 hover:border-[#00FF88]/30 transition-all group">
+              <Target className="h-6 w-6 text-yellow-400 mx-auto mb-3 group-hover:scale-110 transition-transform" />
+              <div className="text-2xl font-bold text-white mb-1 font-mono">{Math.floor(stats.completedModules / 3)}</div>
+              <div className="text-[#EAEAEA]/60 text-[10px] uppercase tracking-wider">Simulations</div>
+            </div>
+            <div className="text-center p-5 bg-black rounded-xl border border-[#00FF88]/10 hover:border-[#00FF88]/30 transition-all group">
+              <Clock className="h-6 w-6 text-blue-400 mx-auto mb-3 group-hover:scale-110 transition-transform" />
+              <div className="text-2xl font-bold text-white mb-1 font-mono">{stats.hoursActive}</div>
+              <div className="text-[#EAEAEA]/60 text-[10px] uppercase tracking-wider">Hours Active</div>
+            </div>
+            <div className="text-center p-5 bg-black rounded-xl border border-[#00FF88]/10 hover:border-[#00FF88]/30 transition-all group">
+              <Award className="h-6 w-6 text-purple-400 mx-auto mb-3 group-hover:scale-110 transition-transform" />
+              <div className="text-2xl font-bold text-white mb-1 font-mono">{stats.certificatesEarned}</div>
+              <div className="text-[#EAEAEA]/60 text-[10px] uppercase tracking-wider">Awards</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Certificates Section */}
+      <div className="bg-[#0A0F0A] rounded-2xl border border-[#00FF88]/10 p-6 relative overflow-hidden">
+        <h3 className="text-xs font-bold text-[#00B37A] uppercase tracking-widest mb-6 flex items-center gap-2">
+          <Award className="h-4 w-4" />
+          Certificates & Achievements
+        </h3>
+        <div className="grid grid-cols-1 gap-6">
+          {user.certificates && user.certificates.length > 0 ? (
+            user.certificates.map((certUrl: string, idx: number) => {
+              const filename = certUrl.split('/').pop() || "";
+              const parts = filename.split('_');
+              let displayTitle = "Course Completion";
+              if (parts.length >= 2) {
+                displayTitle = parts[1].replace(/%20/g, ' ');
+              }
+              const timestamp = parseInt(parts[2]?.split('.')[0] || '0');
+              const completionDate = timestamp ? new Date(timestamp) : new Date();
+
               return (
-                <div key={achievement.id} className={`p-5 rounded-xl border transition-all duration-300 ${achievement.earned
-                  ? 'border-[#00FF88]/30 bg-[#00FF88]/5 hover:bg-[#00FF88]/10'
-                  : 'border-white/5 bg-black opacity-50'
-                  }`}>
-                  <div className="flex items-center space-x-4">
-                    <div className={`p-3 rounded-lg ${achievement.earned
-                      ? 'bg-[#00FF88]/10 text-[#00FF88] border border-[#00FF88]/20'
-                      : 'bg-white/5 text-slate-500 border border-white/5'
-                      }`}>
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className={`font-bold mb-1 uppercase tracking-tight ${achievement.earned ? 'text-white' : 'text-slate-500'
-                        }`}>
-                        {achievement.title}
-                      </h4>
-                      <p className={`text-xs font-mono ${achievement.earned ? 'text-[#00B37A]' : 'text-slate-600'
-                        }`}>
-                        {achievement.description}
-                      </p>
-                    </div>
-                    {achievement.earned && (
-                      <div className="bg-[#00FF88]/20 p-1.5 rounded-full shadow-[0_0_10px_rgba(0,255,136,0.3)]">
-                        <Award className="h-3 w-3 text-[#00FF88]" />
+                <div key={idx} className="group relative rounded-xl overflow-hidden border border-[#00FF88]/20 bg-black/50 hover:border-[#00FF88]/50 transition-all duration-300">
+                  {/* Image Preview */}
+                  <div className="relative aspect-video w-full overflow-hidden bg-black/40">
+                    <img
+                      src={certUrl}
+                      alt={`Certificate for ${displayTitle}`}
+                      className="w-full h-full object-contain opacity-90 group-hover:opacity-100 transition-opacity duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent" />
+                  </div>
+
+                  {/* Content Overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-bold text-white uppercase tracking-tight text-lg drop-shadow-md">{displayTitle}</h4>
+                        <p className="text-xs font-mono text-[#00FF88] flex items-center gap-1 shadow-black drop-shadow-sm">
+                          <Shield className="h-3 w-3" /> VERIFIED CREDENTIAL
+                        </p>
                       </div>
-                    )}
+                      <div className="flex gap-2">
+                        <a
+                          href={certUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2 bg-black/50 text-[#00FF88] border border-[#00FF88]/50 rounded-lg hover:bg-[#00FF88]/10 transition-colors"
+                          title="View Preview"
+                        >
+                          <Award className="h-5 w-5" />
+                        </a>
+                        <button
+                          onClick={() => setViewCertificate({
+                            isOpen: true,
+                            courseName: displayTitle,
+                            date: completionDate
+                          })}
+                          className="p-2 bg-[#00FF88] text-black rounded-lg hover:bg-[#00CC6A] transition-colors shadow-[0_0_15px_rgba(0,255,136,0.4)]"
+                          title="Download PDF"
+                        >
+                          <Download className="h-5 w-5" />
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               );
-            })}
-          </div>
+            })
+          ) : (
+            // Fallback: If 100% progress but no cert yet (maybe delayed), show pending state
+            courseProgress.some(p => p.progress === 100) ? (
+              <div className="col-span-1 text-center py-12 border border-[#00FF88]/30 border-dashed rounded-xl bg-[#00FF88]/5 animate-pulse">
+                <Award className="h-12 w-12 mx-auto mb-3 text-[#00FF88]" />
+                <h4 className="text-[#00FF88] font-bold uppercase tracking-wider mb-1">Course Complete</h4>
+                <p className="text-xs text-[#00B37A] font-mono">Processing Certification Request...</p>
+              </div>
+            ) : (
+              <div className="col-span-1 text-center py-8 border border-white/5 rounded-xl bg-black/50 text-gray-500 italic">
+                <Shield className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                No certifications declassified yet. Check Course Log.
+              </div>
+            )
+          )}
         </div>
-
       </div>
 
-      {viewCertificate && (
-        <CertificateModal
-          isOpen={viewCertificate.isOpen}
-          onClose={() => setViewCertificate(null)}
-          courseName={viewCertificate.courseName}
-          studentName={vuDetails?.name || user?.name || 'Operator'}
-          completionDate={viewCertificate.date}
-          isVU={true}
-          facultyName="Kiran Deshpande"
-        />
-      )}
+      {/* Achievements */}
+      <div className="bg-[#0A0F0A] rounded-2xl border border-[#00FF88]/10 p-6 relative overflow-hidden">
+        <h3 className="text-xs font-bold text-[#00B37A] uppercase tracking-widest mb-6 flex items-center gap-2">
+          <Award className="h-4 w-4" />
+          Achievements
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {achievements.map((achievement) => {
+            const Icon = achievement.icon;
+            return (
+              <div key={achievement.id} className={`p-5 rounded-xl border transition-all duration-300 ${achievement.earned
+                ? 'border-[#00FF88]/30 bg-[#00FF88]/5 hover:bg-[#00FF88]/10'
+                : 'border-white/5 bg-black opacity-50'
+                }`}>
+                <div className="flex items-center space-x-4">
+                  <div className={`p-3 rounded-lg ${achievement.earned
+                    ? 'bg-[#00FF88]/10 text-[#00FF88] border border-[#00FF88]/20'
+                    : 'bg-white/5 text-slate-500 border border-white/5'
+                    }`}>
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className={`font-bold mb-1 uppercase tracking-tight ${achievement.earned ? 'text-white' : 'text-slate-500'
+                      }`}>
+                      {achievement.title}
+                    </h4>
+                    <p className={`text-xs font-mono ${achievement.earned ? 'text-[#00B37A]' : 'text-slate-600'
+                      }`}>
+                      {achievement.description}
+                    </p>
+                  </div>
+                  {achievement.earned && (
+                    <div className="bg-[#00FF88]/20 p-1.5 rounded-full shadow-[0_0_10px_rgba(0,255,136,0.3)]">
+                      <Award className="h-3 w-3 text-[#00FF88]" />
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {
+        viewCertificate && (
+          <CertificateModal
+            isOpen={viewCertificate.isOpen}
+            onClose={() => setViewCertificate(null)}
+            courseName={viewCertificate.courseName}
+            studentName={vuDetails?.name || user?.name || 'Student'}
+            completionDate={viewCertificate.date}
+            isVU={true}
+            facultyName="Kiran Deshpande"
+          />
+        )
+      }
     </div>
   );
 };

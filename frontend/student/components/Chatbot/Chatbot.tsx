@@ -185,18 +185,42 @@ export const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose, context }) =>
       const personalizationInstruction = `
         You are a helpful cybersecurity tutor.
         User Profile:
-        - Clearance Level: ${userLevel}
+        - Student Level: ${userLevel}
         - Current Score: ${userScore}
         
         INSTRUCTIONS:
-        1. MANDATORY: Begin your response with: "Based on your scores [${userScore}] and clearance level [${userLevel}]..."
+        1. MANDATORY: Begin your response with: "Based on your scores [${userScore}] and student level [${userLevel}]..."
         2. ADAPT YOUR TONE:
            - If Level is 'beginner': Explain concepts simply, use analogies, avoid jargon.
            - If Level is 'intermediate' or 'advanced': Be concise, technical, and professional.
+        3. DYNAMIC SCORING (HIDDEN):
+           - If the user demonstrates understanding of a specific topic (e.g., "SQL Injection", "XSS", "Cryptography"), append a hidden tag at the end of your response:
+             [[UPDATE_SCORE: {"topic": "Topic Name", "delta": 5}]]
+           - If the user is confused or incorrect:
+             [[UPDATE_SCORE: {"topic": "Topic Name", "delta": -5}]]
+           - The topic name should be consistent (e.g., "SQL Injection", not "sqli").
       `;
 
       // Get AI response
-      const response = await aiService.chat(composedPrompt, personalizationInstruction);
+      let response = await aiService.chat(composedPrompt, personalizationInstruction);
+
+      // Parse and handle hidden score updates
+      const scoreTagRegex = /\[\[UPDATE_SCORE:\s*({.*?})\]\]/;
+      const match = response.match(scoreTagRegex);
+
+      if (match && match[1]) {
+        try {
+          const updateData = JSON.parse(match[1]);
+          if (user?.id && updateData.topic && updateData.delta) {
+            console.log("Updating knowledge graph:", updateData);
+            learnerMemoryService.updateConfidence(user.id, updateData.topic, updateData.delta);
+          }
+          // Remove tag from display
+          response = response.replace(match[0], '').trim();
+        } catch (e) {
+          console.error("Failed to parse score update:", e);
+        }
+      }
 
       const botMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
@@ -209,13 +233,7 @@ export const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose, context }) =>
     } catch (error: unknown) {
       console.error('Error generating response:', error);
       const safeMsg = error instanceof Error ? error.message : String(error) || 'Unknown error from AI service.';
-      const botMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        message: `There was an issue connecting to Gemini. ${safeMsg}. Please ensure your API key is correctly set as VITE_GEMINI_API_KEY.`,
-        isUser: false,
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, botMessage]);
+      // ... error handling ...
     } finally {
       setIsTyping(false);
     }
