@@ -49,6 +49,7 @@ An AI-powered cybersecurity education platform that transforms passive learning 
 - **Student Analytics** - Track progress and identify struggling learners
 - **Assessment Builder** - Create custom quizzes and exams
 
+
 ### 🔧 Admin Portal
 
 - **Platform Monitoring** - System health and usage statistics
