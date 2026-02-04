@@ -1,3 +1,4 @@
+
 # Cybercoach
 
 An AI-powered cybersecurity education platform that transforms passive learning into hands-on, job-ready skills. Featuring adaptive learning paths, proctored assessments, vulnerability labs, and career tools—all in one unified platform.
@@ -9,7 +10,6 @@ An AI-powered cybersecurity education platform that transforms passive learning 
 
 
 ## Features
-
 ### 🎓 Learning & Education
 
 - **Adaptive Learning Paths** - AI-personalized curriculum that evolves based on performance
