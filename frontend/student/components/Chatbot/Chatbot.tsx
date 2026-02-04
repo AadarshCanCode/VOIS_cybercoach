@@ -18,12 +18,17 @@ export interface ChatMessage {
 interface ChatbotProps {
   isOpen: boolean;
   onClose: () => void;
+  context?: {
+    courseTitle?: string;
+    moduleTitle?: string;
+    moduleContent?: string;
+  } | null;
 }
 
 type ChatMode = 'chat' | 'interview';
 type InterviewCategory = 'technical' | 'hr' | 'aptitude';
 
-export const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose }) => {
+export const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose, context }) => {
   const { user } = useAuth();
 
   // State
@@ -170,11 +175,28 @@ export const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose }) => {
       }
 
       // Compose AI prompt
-      const composedPrompt = `${memory ? `User context:\n${memory}\n\n` : ''}${docs ? `Relevant docs:\n${docs}\n\n` : ''
+      const composedPrompt = `${memory ? `User context:\n${memory}\n\n` : ''}${context ? `Current Course Context:\nCourse: ${context.courseTitle}\nModule: ${context.moduleTitle}\nContent Snippet: ${context.moduleContent?.substring(0, 500)}...\n\n` : ''}${docs ? `Relevant docs:\n${docs}\n\n` : ''
         }Question: ${messageText}`;
 
+      // Calculate personalized context
+      const userLevel = user?.level || 'beginner';
+      const userScore = user?.certificates ? user.certificates.length * 100 : 0;
+
+      const personalizationInstruction = `
+        You are a helpful cybersecurity tutor.
+        User Profile:
+        - Clearance Level: ${userLevel}
+        - Current Score: ${userScore}
+        
+        INSTRUCTIONS:
+        1. MANDATORY: Begin your response with: "Based on your scores [${userScore}] and clearance level [${userLevel}]..."
+        2. ADAPT YOUR TONE:
+           - If Level is 'beginner': Explain concepts simply, use analogies, avoid jargon.
+           - If Level is 'intermediate' or 'advanced': Be concise, technical, and professional.
+      `;
+
       // Get AI response
-      const response = await aiService.chat(composedPrompt, 'You are a helpful cybersecurity tutor.');
+      const response = await aiService.chat(composedPrompt, personalizationInstruction);
 
       const botMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),

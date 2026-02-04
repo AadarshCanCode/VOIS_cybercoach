@@ -9,6 +9,7 @@ import { ModuleTest } from './ModuleTest';
 import { ProctoringComponent } from '../Proctoring/ProctoringComponent';
 import { learningPathService } from '@services/learningPathService';
 import { useAuth } from '@context/AuthContext';
+import { useLearningContext } from '@context/LearningContext';
 
 mermaid.initialize({
   startOnLoad: false,
@@ -39,6 +40,9 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
   const [showTest, setShowTest] = useState(false);
   const { user } = useAuth();
   const [showCertificate, setShowCertificate] = useState(false);
+  const { setContext } = useLearningContext();
+
+
 
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(false);
@@ -128,7 +132,9 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
           context: `Course: ${course?.title || 'Cybersecurity'}
 Module: ${module?.title}
 Description: ${module?.description}
-Current Topic Content: ${module?.content?.substring(0, 500)}...`
+Current Topic Content: ${module?.content?.substring(0, 500)}...`,
+          userLevel: user?.level || 'beginner',
+          userScore: user?.certificates ? user.certificates.length * 100 : 0
         })
       });
 
@@ -212,6 +218,17 @@ Current Topic Content: ${module?.content?.substring(0, 500)}...`
   }, [courseId, user?.id]);
 
   const module: Module | undefined = (course?.course_modules ?? course?.modules ?? []).find((m: Module) => m.id === moduleId);
+
+  useEffect(() => {
+    if (course && module) {
+      setContext({
+        courseTitle: course.title,
+        moduleTitle: module.title,
+        moduleContent: module.content
+      });
+    }
+    return () => setContext(null);
+  }, [course?.id, module?.id]);
 
   const isAllModulesCompleted = (course: Course) => {
     const modules = course.course_modules ?? course.modules ?? [];

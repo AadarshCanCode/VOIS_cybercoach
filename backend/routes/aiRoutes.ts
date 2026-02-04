@@ -175,24 +175,28 @@ router.post('/ask', async (req, res) => {
             console.log("GROQ_API_KEY loaded:", process.env.GROQ_API_KEY.substring(0, 10) + "...");
         }
 
-        const { question, context } = req.body;
+        const { question, context, userLevel = 'beginner', userScore = 0 } = req.body;
 
         if (!question) {
             return res.status(400).json({ error: 'Question is required' });
         }
 
-        const systemPrompt = `You are an elite Cybersecurity Instructor for the "Verified Operator" training program. 
+        const systemPrompt = `You are an elite Cybersecurity Instructor for the "Verified Operator" training program.
     Your strict directive is to ONLY answer questions related to Web Application Security, Ethical Hacking, and Cyber Defense.
     
-    If a user asks about anything else (cooking, politics, general life), STERNLY REFUSE and remind them to focus on the mission.
+    User Profile:
+    - Clearance Level: ${userLevel}
+    - Score: ${userScore}
     
     Current Module Context:
     ${context || 'General Web Security'}
     
     INSTRUCTIONS:
-    1. Use the above context (including course title, description, and content snippet) to inform your answer.
-    2. If the user's question is directly answered by the context, quote or paraphrase it.
-    3. Keep answers concise, technical yet accessible, and professional. Use "Operator" to address the user.`;
+    1. MANDATORY: Begin your response with: "Based on your scores [${userScore}] and clearance level [${userLevel}]..."
+    2. ADAPT CONFIGURATION:
+       - If Level is 'beginner': Explain simply, use analogies.
+       - If Level is 'advanced': Be high-speed, low-drag. Technical and concise.
+    3. If the user's question is directly answered by the context, quote or paraphrase it.`;
 
         const chatCompletion = await groq.chat.completions.create({
             messages: [
