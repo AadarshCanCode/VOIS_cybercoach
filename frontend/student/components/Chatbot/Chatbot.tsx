@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, X, Bot, Briefcase, Users, Brain, RefreshCw, ArrowLeft } from 'lucide-react';
+import { Send, X, Bot, Briefcase, Users, Brain, RefreshCw, ArrowLeft, Zap } from 'lucide-react';
 import { aiService } from '@services/aiService';
 import { learnerMemoryService } from '@services/learnerMemoryService';
 import { ragDocsService } from '@services/ragDocsService';
 import { interviewService, InterviewQuestion } from '@services/interviewService';
+import { langflowService } from '@services/langflowService';
 import { useAuth } from '@context/AuthContext';
 
 export interface ChatMessage {
@@ -27,12 +28,15 @@ interface ChatbotProps {
 
 type ChatMode = 'chat' | 'interview';
 type InterviewCategory = 'technical' | 'hr' | 'aptitude';
+type ChatProvider = 'gemini' | 'langflow';
 
 export const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose, context }) => {
   const { user } = useAuth();
 
   // State
   const [mode, setMode] = useState<ChatMode>('chat');
+  const [chatProvider, setChatProvider] = useState<ChatProvider>('gemini');
+  const [langflowSessionId, setLangflowSessionId] = useState<string | null>(null);
   const [interviewCategory, setInterviewCategory] = useState<InterviewCategory | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState<InterviewQuestion | null>(null);
   const [isWaitingForAnswer, setIsWaitingForAnswer] = useState(false);
@@ -163,26 +167,48 @@ export const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose, context }) =>
     setIsTyping(true);
 
     try {
-      // Retrieve user memory (if available)
-      const memory = user?.id ? await learnerMemoryService.getContext(user.id, 8) : '';
+      let response = '';
 
-      // Retrieve relevant docs via RAG
-      let docs = '';
-      try {
-        docs = await ragDocsService.retrieveContext(messageText, 4);
-      } catch (e) {
-        console.warn('RAG docs retrieval failed:', e);
-      }
+      // Route based on selected provider
+      if (chatProvider === 'langflow') {
+        // Use Langflow API
+        const lfResponse = await langflowService.sendMessageWithContext(
+          messageText,
+          {
+            courseTitle: context?.courseTitle,
+            moduleTitle: context?.moduleTitle,
+          },
+          langflowSessionId || undefined
+        );
 
-      // Compose AI prompt
-      const composedPrompt = `${memory ? `User context:\n${memory}\n\n` : ''}${context ? `Current Course Context:\nCourse: ${context.courseTitle}\nModule: ${context.moduleTitle}\nContent Snippet: ${context.moduleContent?.substring(0, 500)}...\n\n` : ''}${docs ? `Relevant docs:\n${docs}\n\n` : ''
-        }Question: ${messageText}`;
+        // Store session ID for conversation continuity
+        if (lfResponse.sessionId && !langflowSessionId) {
+          setLangflowSessionId(lfResponse.sessionId);
+        }
 
-      // Calculate personalized context
-      const userLevel = user?.level || 'beginner';
-      const userScore = user?.certificates ? user.certificates.length * 100 : 0;
+        response = lfResponse.message;
+      } else {
+        // Use Gemini API (existing logic)
+        // Retrieve user memory (if available)
+        const memory = user?.id ? await learnerMemoryService.getContext(user.id, 8) : '';
 
-      const personalizationInstruction = `
+        // Retrieve relevant docs via RAG
+        let docs = '';
+        try {
+          docs = await ragDocsService.retrieveContext(messageText, 4);
+        } catch (e) {
+          console.warn('RAG docs retrieval failed:', e);
+        }
+
+        // Compose AI prompt
+        const composedPrompt = `${memory ? `User context:\n${memory}\n\n` : ''}${context ? `Current Course Context:\nCourse: ${context.courseTitle}\nModule: ${context.moduleTitle}\nContent Snippet: ${context.moduleContent?.substring(0, 500)}...\n\n` : ''}${docs ? `Relevant docs:\n${docs}\n\n` : ''
+          }Question: ${messageText}`;
+
+        // Calculate personalized context
+        const userLevel = user?.level || 'beginner';
+        const userScore = user?.certificates ? user.certificates.length * 100 : 0;
+
+        const personalizationInstruction = `
         You are a helpful cybersecurity tutor.
         User Profile:
         - Student Level: ${userLevel}
@@ -201,26 +227,27 @@ export const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose, context }) =>
            - The topic name should be consistent (e.g., "SQL Injection", not "sqli").
       `;
 
-      // Get AI response
-      let response = await aiService.chat(composedPrompt, personalizationInstruction);
+        // Get AI response
+        response = await aiService.chat(composedPrompt, personalizationInstruction);
 
-      // Parse and handle hidden score updates
-      const scoreTagRegex = /\[\[UPDATE_SCORE:\s*({.*?})\]\]/;
-      const match = response.match(scoreTagRegex);
+        // Parse and handle hidden score updates
+        const scoreTagRegex = /\[\[UPDATE_SCORE:\s*({.*?})\]\]/;
+        const match = response.match(scoreTagRegex);
 
-      if (match && match[1]) {
-        try {
-          const updateData = JSON.parse(match[1]);
-          if (user?.id && updateData.topic && updateData.delta) {
-            console.log("Updating knowledge graph:", updateData);
-            learnerMemoryService.updateConfidence(user.id, updateData.topic, updateData.delta);
+        if (match && match[1]) {
+          try {
+            const updateData = JSON.parse(match[1]);
+            if (user?.id && updateData.topic && updateData.delta) {
+              console.log("Updating knowledge graph:", updateData);
+              learnerMemoryService.updateConfidence(user.id, updateData.topic, updateData.delta);
+            }
+            // Remove tag from display
+            response = response.replace(match[0], '').trim();
+          } catch (e) {
+            console.error("Failed to parse score update:", e);
           }
-          // Remove tag from display
-          response = response.replace(match[0], '').trim();
-        } catch (e) {
-          console.error("Failed to parse score update:", e);
         }
-      }
+      } // End of Gemini provider block
 
       const botMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
@@ -268,15 +295,36 @@ export const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose, context }) =>
   return (
     <div className="fixed bottom-4 right-4 w-96 h-[600px] bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col z-50 overflow-hidden font-sans">
       {/* Header */}
-      <div className={`p-4 flex items-center justify-between ${mode === 'interview' ? 'bg-purple-600' : 'bg-orange-600'} text-white transition-colors duration-300`}>
+      <div className={`p-4 flex items-center justify-between ${mode === 'interview' ? 'bg-purple-600' : chatProvider === 'langflow' ? 'bg-emerald-600' : 'bg-orange-600'} text-white transition-colors duration-300`}>
         <div className="flex items-center space-x-2">
-          {mode === 'interview' ? <Brain className="h-6 w-6" /> : <Bot className="h-6 w-6" />}
+          {mode === 'interview' ? <Brain className="h-6 w-6" /> : chatProvider === 'langflow' ? <Zap className="h-6 w-6" /> : <Bot className="h-6 w-6" />}
           <div>
-            <h3 className="font-bold text-sm">{mode === 'interview' ? 'Interview Simulator' : 'CyberSec AI Assistant'}</h3>
-            <p className="text-[10px] opacity-80">{mode === 'interview' ? 'Technical • HR • Aptitude' : 'Ask me anything'}</p>
+            <h3 className="font-bold text-sm">
+              {mode === 'interview' ? 'Interview Simulator' : chatProvider === 'langflow' ? 'Langflow AI' : 'CyberSec AI Assistant'}
+            </h3>
+            <p className="text-[10px] opacity-80">
+              {mode === 'interview' ? 'Technical • HR • Aptitude' : chatProvider === 'langflow' ? 'Powered by Langflow' : 'Ask me anything'}
+            </p>
           </div>
         </div>
         <div className="flex items-center space-x-2">
+          {mode === 'chat' && (
+            <button
+              onClick={() => {
+                const newProvider = chatProvider === 'gemini' ? 'langflow' : 'gemini';
+                setChatProvider(newProvider);
+                // Reset session when switching to Langflow
+                if (newProvider === 'langflow') {
+                  setLangflowSessionId(null);
+                }
+              }}
+              className={`text-xs px-2 py-1 rounded transition-colors ${chatProvider === 'langflow' ? 'bg-white/30' : 'bg-white/20 hover:bg-white/30'}`}
+              title={`Switch to ${chatProvider === 'gemini' ? 'Langflow' : 'Gemini'}`}
+            >
+              {chatProvider === 'langflow' ? <Bot className="h-4 w-4 inline mr-1" /> : <Zap className="h-4 w-4 inline mr-1" />}
+              {chatProvider === 'gemini' ? 'Langflow' : 'Gemini'}
+            </button>
+          )}
           <button onClick={toggleMode} className="text-xs bg-white/20 hover:bg-white/30 px-2 py-1 rounded transition-colors">
             {mode === 'interview' ? 'Exit Interview' : 'Start Interview'}
           </button>

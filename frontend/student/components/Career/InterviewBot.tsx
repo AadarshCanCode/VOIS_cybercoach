@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, RefreshCw, Mic, Volume2, Brain, Users, Terminal, Upload, X, FileText, CheckCircle, Shield } from 'lucide-react';
+import { Send, Bot, User, RefreshCw, Mic, Volume2, Brain, Users, Terminal, Upload, X, FileText, CheckCircle, Shield, Zap } from 'lucide-react';
 import { interviewService, InterviewQuestion } from '../../../services/interviewService';
 import { aiService } from '../../../services/aiService';
+import { langflowService } from '../../../services/langflowService';
 
 interface Message {
     id: string;
@@ -33,6 +34,8 @@ export const InterviewBot: React.FC = () => {
     const [resumeSummary, setResumeSummary] = useState<string | null>(null);
     const [isParsing, setIsParsing] = useState(false);
     const [showConfig, setShowConfig] = useState(true);
+    const [aiProvider, setAiProvider] = useState<'default' | 'langflow'>('default');
+    const [langflowSessionId, setLangflowSessionId] = useState<string | null>(null);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -172,7 +175,35 @@ export const InterviewBot: React.FC = () => {
             setIsWaitingForAnswer(false);
 
             try {
-                const validation = await interviewService.validateAnswer(currentQuestion, userMsg.text, position, resumeSummary || undefined);
+                let validation: { isCorrect: boolean; feedback: string };
+
+                if (aiProvider === 'langflow') {
+                    // Use Langflow for validation
+                    const prompt = `Interview Question: "${currentQuestion.question_text}"
+User's Answer: "${userMsg.text}"
+${position ? `Position: ${position}` : ''}
+
+Please evaluate this answer and provide feedback. Is it correct? What could be improved?`;
+
+                    const lfResponse = await langflowService.sendMessage(prompt, langflowSessionId || undefined);
+
+                    if (lfResponse.sessionId && !langflowSessionId) {
+                        setLangflowSessionId(lfResponse.sessionId);
+                    }
+
+                    // Parse Langflow response as feedback
+                    const isPositive = lfResponse.message.toLowerCase().includes('correct') ||
+                        lfResponse.message.toLowerCase().includes('good') ||
+                        lfResponse.message.toLowerCase().includes('well done');
+
+                    validation = {
+                        isCorrect: isPositive,
+                        feedback: lfResponse.message
+                    };
+                } else {
+                    // Use default interview service
+                    validation = await interviewService.validateAnswer(currentQuestion, userMsg.text, position, resumeSummary || undefined);
+                }
 
                 const botMsg: Message = {
                     id: (Date.now() + 1).toString(),
@@ -186,6 +217,12 @@ export const InterviewBot: React.FC = () => {
                 setMessages(prev => [...prev, botMsg]);
             } catch (error) {
                 console.error("Validation error", error);
+                setMessages(prev => [...prev, {
+                    id: (Date.now() + 1).toString(),
+                    sender: 'bot',
+                    text: "I encountered an error processing your answer. Please try again.",
+                    timestamp: new Date()
+                }]);
             } finally {
                 setIsTyping(false);
             }
@@ -213,9 +250,26 @@ export const InterviewBot: React.FC = () => {
             <div className="bg-[#0A0F0A] border-b border-[#00FF88]/10 p-4 flex items-center justify-between">
                 <div>
                     <h2 className="text-lg font-bold text-white tracking-wider">AI Interview Practice</h2>
-                    <p className="text-xs text-[#00B37A]">{category ? `${category.charAt(0).toUpperCase() + category.slice(1)} interview active` : 'Select a category to begin'}</p>
+                    <p className="text-xs text-[#00B37A]">
+                        {category ? `${category.charAt(0).toUpperCase() + category.slice(1)} interview active` : 'Select a category to begin'}
+                        {aiProvider === 'langflow' && ' • Langflow'}
+                    </p>
                 </div>
-                <div>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => {
+                            const newProvider = aiProvider === 'default' ? 'langflow' : 'default';
+                            setAiProvider(newProvider);
+                            if (newProvider === 'langflow') {
+                                setLangflowSessionId(null);
+                            }
+                        }}
+                        className={`p-2 rounded-lg transition-colors flex items-center gap-1 text-xs ${aiProvider === 'langflow' ? 'bg-[#00FF88]/20 text-[#00FF88]' : 'hover:bg-[#00FF88]/10 text-[#00B37A]'}`}
+                        title={`Switch to ${aiProvider === 'default' ? 'Langflow' : 'Default'} AI`}
+                    >
+                        {aiProvider === 'langflow' ? <Zap className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
+                        {aiProvider === 'langflow' ? 'Langflow' : 'Default'}
+                    </button>
                     <button
                         onClick={resetSimulation}
                         className="p-2 hover:bg-[#00FF88]/10 rounded-lg transition-colors text-[#00B37A]"
@@ -338,12 +392,12 @@ export const InterviewBot: React.FC = () => {
                     >
                         <div className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'} w-full`}>
                             <div className={`max-w-[80%] rounded-2xl p-4 ${msg.sender === 'user'
-                                    ? 'bg-[#00FF88]/10 border border-[#00FF88]/20 text-[#EAEAEA] rounded-tr-none'
-                                    : msg.type === 'feedback'
-                                        ? msg.feedback?.isCorrect
-                                            ? 'bg-[#00FF88]/5 border border-[#00FF88]/30 text-[#00FF88] rounded-tl-none'
-                                            : 'bg-[#FF0055]/5 border border-[#FF0055]/30 text-[#FF0055] rounded-tl-none'
-                                        : 'bg-[#0A0F0A] border border-[#00B37A]/30 text-[#00B37A] rounded-tl-none shadow-[0_0_15px_rgba(0,255,136,0.05)]'
+                                ? 'bg-[#00FF88]/10 border border-[#00FF88]/20 text-[#EAEAEA] rounded-tr-none'
+                                : msg.type === 'feedback'
+                                    ? msg.feedback?.isCorrect
+                                        ? 'bg-[#00FF88]/5 border border-[#00FF88]/30 text-[#00FF88] rounded-tl-none'
+                                        : 'bg-[#FF0055]/5 border border-[#FF0055]/30 text-[#FF0055] rounded-tl-none'
+                                    : 'bg-[#0A0F0A] border border-[#00B37A]/30 text-[#00B37A] rounded-tl-none shadow-[0_0_15px_rgba(0,255,136,0.05)]'
                                 }`}>
                                 <div className="flex items-center gap-2 mb-1 opacity-50 text-[10px] uppercase tracking-wider font-bold">
                                     {msg.sender === 'user' ? 'You' : 'AI'}
