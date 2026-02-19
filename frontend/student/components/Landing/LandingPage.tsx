@@ -276,8 +276,7 @@ export const LandingPage: React.FC = () => {
                 {[
                   { name: 'Piyush Dhoka', url: 'https://piyush.sparkstudio.co.in' },
                   { name: 'Aadarsh Pathre', url: 'https://aadarsh.sparkstudio.co.in' },
-                  { name: 'Varun Inamdar', url: 'https://varun.sparkstudio.co.in' },
-                  { name: 'Vedant Pandhare', url: 'https://www.linkedin.com/in/vedant-pandhare' }
+                  { name: 'Varun Inamdar', url: 'https://varun.sparkstudio.co.in' }
                 ].map((founder) => (
                   <a
                     key={founder.name}
