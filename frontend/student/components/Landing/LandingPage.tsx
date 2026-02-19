@@ -322,10 +322,10 @@ export const LandingPage: React.FC = () => {
               />
               <ActionCard
                 icon={<Shield className="h-10 w-10 text-[#00FF88]" />}
-                title="Verify Target"
+                title="Company Verification"
                 subtitle="SCAN DATABASE"
                 description="Validate company credentials and security clearance levels against the central registry."
-                onClick={() => navigate('/verify-target')}
+                onClick={() => navigate('/company-verification')}
               />
               <ActionCard
                 icon={<Activity className="h-10 w-10 text-[#00FF88]" />}

@@ -64,7 +64,7 @@ export const CompanyVerification: React.FC = () => {
     return (
         <div className="p-6 min-h-screen bg-black animate-fade-in text-[#EAEAEA]">
             <SEO
-                title="Verify Target"
+                title="Company Verification"
                 description="Scan and validate corporate entities against global security registries for risk assessment."
             />
             <div className="max-w-3xl mx-auto space-y-8">

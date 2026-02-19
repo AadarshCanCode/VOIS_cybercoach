@@ -51,7 +51,7 @@ export const AppContent = () => {
                 } />
 
                 {/* Public Tool Routes */}
-                <Route path="/verify-target" element={<CompanyVerification />} />
+                <Route path="/company-verification" element={<CompanyVerification />} />
                 <Route path="/verify/:userId" element={<VerifyCertificate />} />
                 <Route path="/community" element={<CommunityPage onBack={() => navigate('/')} />} />
                 <Route path="/analyze-target" element={<VulnerabilityAnalyzer />} />
