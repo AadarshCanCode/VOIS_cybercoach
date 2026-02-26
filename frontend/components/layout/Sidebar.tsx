@@ -61,7 +61,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
     return (
         <div
             className={cn(
-                'relative flex flex-col h-[calc(100vh-4rem)] sticky top-16 z-30 transition-all duration-300 ease-in-out',
+                '    flex flex-col h-[calc(100vh-4rem)] sticky top-16 z-30 transition-all duration-300 ease-in-out',
                 'bg-[#0a0d0a] border-r border-[#00ff88]/10',
                 isCollapsed ? 'w-[64px]' : 'w-60'
             )}
