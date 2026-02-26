@@ -8,7 +8,7 @@ import {
     useMotionValueEvent,
 } from "motion/react";
 
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 
 
 interface NavbarProps {
@@ -51,11 +51,7 @@ interface MobileNavMenuProps {
 }
 
 export const Navbar = ({ children, className }: NavbarProps) => {
-    const ref = useRef<HTMLDivElement>(null);
-    const { scrollY } = useScroll({
-        target: ref,
-        offset: ["start start", "end start"],
-    });
+    const { scrollY } = useScroll();
     const [visible, setVisible] = useState<boolean>(false);
 
     useMotionValueEvent(scrollY, "change", (latest) => {
@@ -68,7 +64,6 @@ export const Navbar = ({ children, className }: NavbarProps) => {
 
     return (
         <motion.div
-            ref={ref}
             className={cn("fixed inset-x-0 top-0 z-50 w-full font-[system-ui]", className)}
         >
             {React.Children.map(children, (child) =>
@@ -99,7 +94,7 @@ export const NavBody = ({ children, className, visible }: NavBodyProps) => {
                 damping: 50,
             }}
             className={cn(
-                "relative z-[60] mx-auto hidden w-full max-w-7xl flex-row items-center justify-between rounded-2xl border px-6 py-3 lg:flex",
+                "relative z-60 mx-auto hidden w-full max-w-7xl flex-row items-center justify-between rounded-2xl border px-6 py-3 lg:flex",
                 className,
             )}
         >
