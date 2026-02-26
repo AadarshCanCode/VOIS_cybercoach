@@ -493,7 +493,7 @@ export const LandingPage: React.FC = () => {
               </div>
 
               <div className="w-full lg:w-2/3">
-                <div className="relative bg-[#121212] border border-white/10 rounded-xl overflow-hidden shadow-2xl">
+                <div className="relative rounded-2xl overflow-hidden border border-gray-800 bg-black/50 aspect-16/10">
                   <div className="flex items-center gap-2 px-4 py-3 bg-[#181818] border-b border-white/5">
                     <div className="flex gap-1.5">
                       <div className="w-3 h-3 rounded-full bg-[#ff5f57]/80" />
@@ -561,7 +561,7 @@ export const LandingPage: React.FC = () => {
            ══════════════════════════════════════════════════ */}
         <section id="testimonials" className="py-24 px-6 relative">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl font-bold text-white tracking-tight mb-16">
+            <h2 className="text-3xl font-bold bg-linear-to-r from-white to-gray-400 bg-clip-text text-transparent">
               Trusted by Professionals
             </h2>
 
@@ -576,7 +576,7 @@ export const LandingPage: React.FC = () => {
               </p>
 
               <div className="flex flex-col items-center">
-                <div className="w-12 h-12 bg-[#121212] border border-[#10B981]/20 rounded-full flex items-center justify-center text-[#10B981] font-bold text-lg mb-3">
+                <div className="w-12 h-12 rounded-xl bg-orange-600/20 flex items-center justify-center shrink-0 text-left">
                   {testimonials[activeTestimonial].initials}
                 </div>
                 <h4 className="font-semibold text-white">{testimonials[activeTestimonial].name}</h4>

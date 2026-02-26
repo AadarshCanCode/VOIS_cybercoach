@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, X, Bot, Briefcase, Users, Brain, RefreshCw, ArrowLeft, Zap } from 'lucide-react';
+import { Send, X, Bot, Briefcase, Users, Brain, RefreshCw, ArrowLeft, Zap, Terminal, ChevronRight } from 'lucide-react';
 import { aiService } from '@services/aiService';
 import { learnerMemoryService } from '@services/learnerMemoryService';
 import { ragDocsService } from '@services/ragDocsService';
@@ -33,7 +33,6 @@ type ChatProvider = 'gemini' | 'langflow';
 export const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose, context }) => {
   const { user } = useAuth();
 
-  // State
   const [mode, setMode] = useState<ChatMode>('chat');
   const [chatProvider, setChatProvider] = useState<ChatProvider>('gemini');
   const [langflowSessionId, setLangflowSessionId] = useState<string | null>(null);
@@ -44,7 +43,7 @@ export const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose, context }) =>
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '1',
-      message: "Hello! I'm your advanced cybersecurity AI assistant. I can help you with detailed questions about security concepts, OWASP Top 10, penetration testing, and more. What would you like to explore?",
+      message: "Hello! I'm your cybersecurity AI assistant. Ask me anything about security concepts, OWASP Top 10, penetration testing, and more.",
       isUser: false,
       timestamp: new Date(),
     },
@@ -58,17 +57,9 @@ export const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose, context }) =>
   }, [messages, isTyping]);
 
   // --- Interview Logic ---
-
   const startInterview = async (category: InterviewCategory) => {
     setInterviewCategory(category);
-    setMessages([
-      {
-        id: Date.now().toString(),
-        message: `Initializing ${category.toUpperCase()} Interview Module... Stand by.`,
-        isUser: false,
-        timestamp: new Date(),
-      }
-    ]);
+    setMessages([{ id: Date.now().toString(), message: `Starting ${category.toUpperCase()} interview...`, isUser: false, timestamp: new Date() }]);
     await loadNextQuestion(category);
   };
 
@@ -79,28 +70,12 @@ export const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose, context }) =>
       if (question) {
         setCurrentQuestion(question);
         setIsWaitingForAnswer(true);
-        setMessages(prev => [
-          ...prev,
-          {
-            id: Date.now().toString(),
-            message: question.question_text,
-            isUser: false,
-            timestamp: new Date(),
-          }
-        ]);
+        setMessages(prev => [...prev, { id: Date.now().toString(), message: question.question_text, isUser: false, timestamp: new Date() }]);
       } else {
-        setMessages(prev => [
-          ...prev,
-          {
-            id: Date.now().toString(),
-            message: "Error loading question. Please try again.",
-            isUser: false,
-            timestamp: new Date(),
-          }
-        ]);
+        setMessages(prev => [...prev, { id: Date.now().toString(), message: 'Error loading question. Please try again.', isUser: false, timestamp: new Date() }]);
       }
     } catch (error) {
-      console.error("Failed to load question", error);
+      console.error('Failed to load question', error);
     } finally {
       setIsTyping(false);
     }
@@ -108,381 +83,272 @@ export const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose, context }) =>
 
   const handleInterviewAnswer = async (answer: string) => {
     if (!currentQuestion || !interviewCategory) return;
-
-    // 1. Add user answer
-    const userMsg: ChatMessage = {
-      id: Date.now().toString(),
-      message: answer,
-      isUser: true,
-      timestamp: new Date()
-    };
+    const userMsg: ChatMessage = { id: Date.now().toString(), message: answer, isUser: true, timestamp: new Date() };
     setMessages(prev => [...prev, userMsg]);
     setNewMessage('');
     setIsTyping(true);
     setIsWaitingForAnswer(false);
-
-    // 2. Validate
     try {
       const validation = await interviewService.validateAnswer(currentQuestion, answer);
-
-      // 3. Show Feedback
-      const feedbackMsg: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        message: validation.feedback,
-        isUser: false,
-        timestamp: new Date(),
-        type: 'feedback',
-        feedback: validation
-      };
+      const feedbackMsg: ChatMessage = { id: (Date.now() + 1).toString(), message: validation.feedback, isUser: false, timestamp: new Date(), type: 'feedback', feedback: validation };
       setMessages(prev => [...prev, feedbackMsg]);
-
     } catch (error) {
-      console.error("Validation error", error);
+      console.error('Validation error', error);
     } finally {
       setIsTyping(false);
     }
   };
 
   // --- General Chat Logic ---
-
   const handleSendMessage = async () => {
     const messageText = newMessage.trim();
     if (!messageText) return;
+    if (mode === 'interview' && isWaitingForAnswer) { handleInterviewAnswer(messageText); return; }
 
-    if (mode === 'interview' && isWaitingForAnswer) {
-      handleInterviewAnswer(messageText);
-      return;
-    }
-
-    // Normal Chat Flow
-    const userMessage: ChatMessage = {
-      id: Date.now().toString(),
-      message: messageText,
-      isUser: true,
-      timestamp: new Date(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
+    const userMessage: ChatMessage = { id: Date.now().toString(), message: messageText, isUser: true, timestamp: new Date() };
+    setMessages(prev => [...prev, userMessage]);
     setNewMessage('');
     setIsTyping(true);
 
     try {
       let response = '';
-
-      // Route based on selected provider
       if (chatProvider === 'langflow') {
-        // Use Langflow API
-        const lfResponse = await langflowService.sendMessageWithContext(
-          messageText,
-          {
-            courseTitle: context?.courseTitle,
-            moduleTitle: context?.moduleTitle,
-          },
-          langflowSessionId || undefined
-        );
-
-        // Store session ID for conversation continuity
-        if (lfResponse.sessionId && !langflowSessionId) {
-          setLangflowSessionId(lfResponse.sessionId);
-        }
-
+        const lfResponse = await langflowService.sendMessageWithContext(messageText, { courseTitle: context?.courseTitle, moduleTitle: context?.moduleTitle }, langflowSessionId || undefined);
+        if (lfResponse.sessionId && !langflowSessionId) setLangflowSessionId(lfResponse.sessionId);
         response = lfResponse.message;
       } else {
-        // Use Gemini API (existing logic)
-        // Retrieve user memory (if available)
         const memory = user?.id ? await learnerMemoryService.getContext(user.id, 8) : '';
-
-        // Retrieve relevant docs via RAG
         let docs = '';
-        try {
-          docs = await ragDocsService.retrieveContext(messageText, 4);
-        } catch (e) {
-          console.warn('RAG docs retrieval failed:', e);
-        }
-
-        // Compose AI prompt
-        const composedPrompt = `${memory ? `User context:\n${memory}\n\n` : ''}${context ? `Current Course Context:\nCourse: ${context.courseTitle}\nModule: ${context.moduleTitle}\nContent Snippet: ${context.moduleContent?.substring(0, 500)}...\n\n` : ''}${docs ? `Relevant docs:\n${docs}\n\n` : ''
-          }Question: ${messageText}`;
-
-        // Calculate personalized context
+        try { docs = await ragDocsService.retrieveContext(messageText, 4); } catch { }
+        const composedPrompt = `${memory ? `User context:\n${memory}\n\n` : ''}${context ? `Current Course Context:\nCourse: ${context.courseTitle}\nModule: ${context.moduleTitle}\nContent Snippet: ${context.moduleContent?.substring(0, 500)}...\n\n` : ''}${docs ? `Relevant docs:\n${docs}\n\n` : ''}Question: ${messageText}`;
         const userLevel = user?.level || 'beginner';
         const userScore = user?.certificates ? user.certificates.length * 100 : 0;
-
-        const personalizationInstruction = `
-        You are a helpful cybersecurity tutor.
-        User Profile:
-        - Student Level: ${userLevel}
-        - Current Score: ${userScore}
-        
-        INSTRUCTIONS:
-        1. MANDATORY: Begin your response with: "Based on your scores [${userScore}] and student level [${userLevel}]..."
-        2. ADAPT YOUR TONE:
-           - If Level is 'beginner': Explain concepts simply, use analogies, avoid jargon.
-           - If Level is 'intermediate' or 'advanced': Be concise, technical, and professional.
-        3. DYNAMIC SCORING (HIDDEN):
-           - If the user demonstrates understanding of a specific topic (e.g., "SQL Injection", "XSS", "Cryptography"), append a hidden tag at the end of your response:
-             [[UPDATE_SCORE: {"topic": "Topic Name", "delta": 5}]]
-           - If the user is confused or incorrect:
-             [[UPDATE_SCORE: {"topic": "Topic Name", "delta": -5}]]
-           - The topic name should be consistent (e.g., "SQL Injection", not "sqli").
-      `;
-
-        // Get AI response
+        const personalizationInstruction = `You are a helpful cybersecurity tutor. User Level: ${userLevel}. Score: ${userScore}. Begin with "Based on your scores [${userScore}] and level [${userLevel}]...". If user shows understanding, append [[UPDATE_SCORE: {"topic": "Name", "delta": 5}]].`;
         response = await aiService.chat(composedPrompt, personalizationInstruction);
-
-        // Parse and handle hidden score updates
         const scoreTagRegex = /\[\[UPDATE_SCORE:\s*({.*?})\]\]/;
         const match = response.match(scoreTagRegex);
-
         if (match && match[1]) {
           try {
             const updateData = JSON.parse(match[1]);
-            if (user?.id && updateData.topic && updateData.delta) {
-              console.log("Updating knowledge graph:", updateData);
-              learnerMemoryService.updateConfidence(user.id, updateData.topic, updateData.delta);
-            }
-            // Remove tag from display
+            if (user?.id && updateData.topic && updateData.delta) learnerMemoryService.updateConfidence(user.id, updateData.topic, updateData.delta);
             response = response.replace(match[0], '').trim();
-          } catch (e) {
-            console.error("Failed to parse score update:", e);
-          }
+          } catch { }
         }
-      } // End of Gemini provider block
-
-      const botMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        message: response,
-        isUser: false,
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => [...prev, botMessage]);
+      }
+      setMessages(prev => [...prev, { id: (Date.now() + 1).toString(), message: response, isUser: false, timestamp: new Date() }]);
     } catch (error: unknown) {
       console.error('Error generating response:', error);
-      const safeMsg = error instanceof Error ? error.message : String(error) || 'Unknown error from AI service.';
-      // ... error handling ...
     } finally {
       setIsTyping(false);
     }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); }
   };
 
   const toggleMode = () => {
     const newMode = mode === 'chat' ? 'interview' : 'chat';
     setMode(newMode);
-    // Reset state for new mode
-    setInterviewCategory(null);
-    setCurrentQuestion(null);
-    setIsWaitingForAnswer(false);
-    setMessages([{
-      id: Date.now().toString(),
-      message: newMode === 'chat'
-        ? "Switched to Standard Chat Mode. How can I help you?"
-        : "Switched to Interview Simulation Mode. Select a category below.",
-      isUser: false,
-      timestamp: new Date(),
-    }]);
+    setInterviewCategory(null); setCurrentQuestion(null); setIsWaitingForAnswer(false);
+    setMessages([{ id: Date.now().toString(), message: newMode === 'chat' ? 'Switched to Chat. How can I help?' : 'Interview mode. Select a category below.', isUser: false, timestamp: new Date() }]);
   };
 
   if (!isOpen) return null;
 
+  const isInterview = mode === 'interview';
+  const isLangflow = chatProvider === 'langflow';
+
   return (
-    <div className="fixed bottom-4 right-4 w-96 h-[600px] bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col z-50 overflow-hidden font-sans">
-      {/* Header */}
-      <div className={`p-4 flex items-center justify-between ${mode === 'interview' ? 'bg-purple-600' : chatProvider === 'langflow' ? 'bg-emerald-600' : 'bg-orange-600'} text-white transition-colors duration-300`}>
-        <div className="flex items-center space-x-2">
-          {mode === 'interview' ? <Brain className="h-6 w-6" /> : chatProvider === 'langflow' ? <Zap className="h-6 w-6" /> : <Bot className="h-6 w-6" />}
+    <div className="fixed bottom-4 right-4 w-[380px] max-w-[calc(100vw-2rem)] h-[600px] max-h-[calc(100vh-6rem)] flex flex-col z-9999 overflow-hidden rounded-2xl border border-[#00ff88]/15 bg-[#080d08]"
+      style={{ animation: 'chatSlideIn 0.25s cubic-bezier(0.4,0,0.2,1)' }}>
+
+      {/* ── Header ── */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-[#00ff88]/10 bg-[#0a0f0a] shrink-0">
+        <div className="flex items-center gap-3">
+          {/* Avatar */}
+          <div className="h-8 w-8 rounded-lg bg-[#00ff88]/10 border border-[#00ff88]/20 flex items-center justify-center shrink-0">
+            {isInterview ? <Brain className="h-4 w-4 text-[#00ff88]" /> : isLangflow ? <Zap className="h-4 w-4 text-[#00ff88]" /> : <Bot className="h-4 w-4 text-[#00ff88]" />}
+          </div>
           <div>
-            <h3 className="font-bold text-sm">
-              {mode === 'interview' ? 'Interview Simulator' : chatProvider === 'langflow' ? 'Langflow AI' : 'CyberSec AI Assistant'}
-            </h3>
-            <p className="text-[10px] opacity-80">
-              {mode === 'interview' ? 'Technical • HR • Aptitude' : chatProvider === 'langflow' ? 'Powered by Langflow' : 'Ask me anything'}
+            <p className="text-sm font-semibold text-white leading-tight">
+              {isInterview ? 'Interview Simulator' : isLangflow ? 'Langflow AI' : 'CyberCoach AI'}
             </p>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#00ff88]" style={{ animation: 'statusPulse 2.5s ease-in-out infinite' }} />
+              <span className="text-[10px] text-[#4d7a4d]">
+                {isInterview ? 'Interview mode' : isLangflow ? 'Langflow' : 'Online'}
+              </span>
+            </div>
           </div>
         </div>
-        <div className="flex items-center space-x-2">
-          {mode === 'chat' && (
+
+        <div className="flex items-center gap-1.5">
+          {/* Provider toggle */}
+          {!isInterview && (
             <button
-              onClick={() => {
-                const newProvider = chatProvider === 'gemini' ? 'langflow' : 'gemini';
-                setChatProvider(newProvider);
-                // Reset session when switching to Langflow
-                if (newProvider === 'langflow') {
-                  setLangflowSessionId(null);
-                }
-              }}
-              className={`text-xs px-2 py-1 rounded transition-colors ${chatProvider === 'langflow' ? 'bg-white/30' : 'bg-white/20 hover:bg-white/30'}`}
+              onClick={() => { const p = chatProvider === 'gemini' ? 'langflow' : 'gemini'; setChatProvider(p); if (p === 'langflow') setLangflowSessionId(null); }}
+              className="px-2 py-1 rounded-md text-[10px] font-medium text-[#4d7a4d] border border-[#00ff88]/10 hover:border-[#00ff88]/25 hover:text-[#00ff88] hover:bg-[#00ff88]/5 transition-all"
               title={`Switch to ${chatProvider === 'gemini' ? 'Langflow' : 'Gemini'}`}
             >
-              {chatProvider === 'langflow' ? <Bot className="h-4 w-4 inline mr-1" /> : <Zap className="h-4 w-4 inline mr-1" />}
               {chatProvider === 'gemini' ? 'Langflow' : 'Gemini'}
             </button>
           )}
-          <button onClick={toggleMode} className="text-xs bg-white/20 hover:bg-white/30 px-2 py-1 rounded transition-colors">
-            {mode === 'interview' ? 'Exit Interview' : 'Start Interview'}
+          {/* Mode toggle */}
+          <button
+            onClick={toggleMode}
+            className="px-2 py-1 rounded-md text-[10px] font-medium text-[#4d7a4d] border border-[#00ff88]/10 hover:border-[#00ff88]/25 hover:text-[#00ff88] hover:bg-[#00ff88]/5 transition-all"
+          >
+            {isInterview ? 'Exit Interview' : 'Interview'}
           </button>
-          <button onClick={onClose} className="text-white/80 hover:text-white">
-            <X className="h-5 w-5" />
+          {/* Close */}
+          <button onClick={onClose} className="h-7 w-7 rounded-md flex items-center justify-center text-[#4d7a4d] hover:text-white hover:bg-[#00ff88]/5 transition-all">
+            <X className="h-4 w-4" />
           </button>
         </div>
       </div>
 
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-gray-900/50">
-        {/* Interview Category Selection */}
-        {mode === 'interview' && !interviewCategory && (
-          <div className="grid grid-cols-1 gap-2 mb-4">
-            <button
-              onClick={() => startInterview('technical')}
-              className="flex items-center p-3 bg-white dark:bg-gray-800 border border-purple-500/30 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all text-left group"
-            >
-              <div className="bg-purple-100 dark:bg-purple-900/50 p-2 rounded-md mr-3 group-hover:scale-110 transition-transform">
-                <Brain className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-              </div>
-              <div>
-                <div className="font-semibold text-gray-900 dark:text-white text-sm">Technical Round</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">Cybersecurity & Coding</div>
-              </div>
-            </button>
+      {/* ── Context pill ── */}
+      {context?.courseTitle && !isInterview && (
+        <div className="flex items-center gap-2 px-4 py-2 bg-[#00ff88]/5 border-b border-[#00ff88]/8 shrink-0">
+          <Terminal className="h-3 w-3 text-[#00ff88]/60 shrink-0" />
+          <span className="text-[10px] text-[#4d7a4d] truncate">
+            Context: <span className="text-[#99ddaa] font-medium">{context.courseTitle}</span>
+            {context.moduleTitle && <> · {context.moduleTitle}</>}
+          </span>
+        </div>
+      )}
 
-            <button
-              onClick={() => startInterview('hr')}
-              className="flex items-center p-3 bg-white dark:bg-gray-800 border border-pink-500/30 rounded-lg hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-all text-left group"
-            >
-              <div className="bg-pink-100 dark:bg-pink-900/50 p-2 rounded-md mr-3 group-hover:scale-110 transition-transform">
-                <Users className="h-5 w-5 text-pink-600 dark:text-pink-400" />
-              </div>
-              <div>
-                <div className="font-semibold text-gray-900 dark:text-white text-sm">HR Round</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">Behavioral & Culture Fit</div>
-              </div>
-            </button>
+      {/* ── Messages ── */}
+      <div className="flex-1 overflow-y-auto cc-scrollbar px-4 py-3 space-y-3 bg-[#060d06]">
 
-            <button
-              onClick={() => startInterview('aptitude')}
-              className="flex items-center p-3 bg-white dark:bg-gray-800 border border-blue-500/30 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all text-left group"
-            >
-              <div className="bg-blue-100 dark:bg-blue-900/50 p-2 rounded-md mr-3 group-hover:scale-110 transition-transform">
-                <Briefcase className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <div className="font-semibold text-gray-900 dark:text-white text-sm">Aptitude Round</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">Logic & Reasoning</div>
-              </div>
-            </button>
-          </div>
-        )}
-
-        {messages.map((message) => (
-          <div key={message.id} className={`flex flex-col ${message.isUser ? 'items-end' : 'items-start'}`}>
-            <div className={`flex ${message.isUser ? 'justify-end' : 'justify-start'} max-w-[85%]`}>
-              <div
-                className={`p-3 rounded-2xl shadow-sm ${message.isUser
-                  ? 'bg-gradient-to-r from-orange-600 to-orange-500 text-white rounded-tr-none'
-                  : message.type === 'feedback'
-                    ? message.feedback?.isCorrect
-                      ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-gray-800 dark:text-green-100 rounded-tl-none'
-                      : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-gray-800 dark:text-red-100 rounded-tl-none'
-                    : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-100 rounded-tl-none'
-                  }`}
-              >
-                <div className="flex items-start space-x-2">
-                  {!message.isUser && (
-                    <div className={`mt-0.5 ${message.type === 'feedback' ? (message.feedback?.isCorrect ? 'text-green-500' : 'text-red-500') : 'text-orange-500'}`}>
-                      {message.type === 'feedback' ? (message.feedback?.isCorrect ? '✅' : '❌') : <Bot className="h-4 w-4" />}
-                    </div>
-                  )}
-                  <div className="flex-1">
-                    <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.message}</p>
-                    <p className={`text-[10px] mt-1.5 opacity-60 ${message.isUser ? 'text-orange-100' : 'text-gray-500 dark:text-gray-400'}`}>
-                      {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Next Question Button for Feedback Messages */}
-            {message.type === 'feedback' && interviewCategory && message === messages[messages.length - 1] && (
+        {/* Interview category selection */}
+        {isInterview && !interviewCategory && (
+          <div className="space-y-2 pt-1">
+            <p className="text-xs text-[#4d7a4d] font-medium px-1 mb-3">Choose an interview category:</p>
+            {([
+              { id: 'technical' as InterviewCategory, label: 'Technical', desc: 'Cybersecurity & Coding', icon: <Brain className="h-4 w-4" /> },
+              { id: 'hr' as InterviewCategory, label: 'HR Round', desc: 'Behavioral & Culture Fit', icon: <Users className="h-4 w-4" /> },
+              { id: 'aptitude' as InterviewCategory, label: 'Aptitude', desc: 'Logic & Reasoning', icon: <Briefcase className="h-4 w-4" /> },
+            ]).map(cat => (
               <button
-                onClick={() => loadNextQuestion(interviewCategory)}
-                className="mt-2 flex items-center space-x-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-medium rounded-full shadow-lg transition-all animate-in fade-in slide-in-from-bottom-2"
+                key={cat.id}
+                onClick={() => startInterview(cat.id)}
+                className="w-full flex items-center gap-3 p-3 rounded-xl border border-[#00ff88]/10 bg-[#0f1a0f] hover:bg-[#00ff88]/5 hover:border-[#00ff88]/25 transition-all text-left group"
               >
-                <RefreshCw className="h-3 w-3" />
-                <span>Next Question</span>
-              </button>
-            )}
-          </div>
-        ))}
-
-        {isTyping && (
-          <div className="flex justify-start">
-            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 rounded-2xl rounded-tl-none shadow-sm">
-              <div className="flex items-center space-x-2">
-                <Bot className="h-4 w-4 text-orange-500 animate-bounce" />
-                <div className="flex space-x-1">
-                  <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse"></div>
-                  <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse delay-75"></div>
-                  <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse delay-150"></div>
+                <div className="h-8 w-8 rounded-lg bg-[#00ff88]/8 border border-[#00ff88]/15 flex items-center justify-center text-[#00ff88] shrink-0">
+                  {cat.icon}
                 </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-white">{cat.label}</p>
+                  <p className="text-xs text-[#4d7a4d]">{cat.desc}</p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-[#3d6b3d] group-hover:text-[#00ff88] transition-colors" />
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Messages */}
+        {messages.map((msg) => {
+          let timeStr = '';
+          try { timeStr = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); } catch { }
+
+          const isFeedback = msg.type === 'feedback';
+          const isCorrect = msg.feedback?.isCorrect;
+
+          return (
+            <div key={msg.id} className={`flex flex-col gap-1 ${msg.isUser ? 'items-end' : 'items-start'}`}
+              style={{ animation: 'msgIn 0.2s ease-out' }}>
+              <div className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${msg.isUser
+                ? 'bg-[#00ff88] text-black rounded-br-sm font-medium'
+                : isFeedback
+                  ? isCorrect
+                    ? 'bg-[#0a1f0a] border border-[#00ff88]/25 text-[#ccffcc] rounded-bl-sm'
+                    : 'bg-[#1f0a0a] border border-red-500/20 text-[#ffcccc] rounded-bl-sm'
+                  : 'bg-[#0f1a0f] border border-[#00ff88]/10 text-[#ccffcc] rounded-bl-sm'
+                }`}>
+                {isFeedback && (
+                  <span className="text-[10px] font-bold uppercase tracking-wider mr-2 opacity-70">
+                    {isCorrect ? '✓ Correct' : '✗ Incorrect'}
+                  </span>
+                )}
+                <p className="whitespace-pre-wrap">{msg.message}</p>
+              </div>
+              <span className="text-[10px] text-[#2d4a2d] px-1">{timeStr}</span>
+            </div>
+          );
+        })}
+
+        {/* Next question button */}
+        {messages.length > 0 && messages[messages.length - 1].type === 'feedback' && interviewCategory && (
+          <button
+            onClick={() => loadNextQuestion(interviewCategory)}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#0f1a0f] border border-[#00ff88]/15 text-[#00ff88] text-xs font-medium hover:bg-[#00ff88]/8 transition-all"
+          >
+            <RefreshCw className="h-3 w-3" /> Next Question
+          </button>
+        )}
+
+        {/* Typing indicator */}
+        {isTyping && (
+          <div className="flex items-start gap-1">
+            <div className="bg-[#0f1a0f] border border-[#00ff88]/10 rounded-2xl rounded-bl-sm px-4 py-3">
+              <div className="flex gap-1 items-center">
+                {[0, 0.2, 0.4].map((delay, i) => (
+                  <div key={i} className="h-1.5 w-1.5 rounded-full bg-[#00ff88]/60"
+                    style={{ animation: `typing 1.4s ease-in-out ${delay}s infinite` }} />
+                ))}
               </div>
             </div>
           </div>
         )}
+
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Area */}
-      <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800">
-        <div className="flex items-end space-x-2">
-          {mode === 'interview' && interviewCategory && (
-            <button
-              onClick={() => {
-                setInterviewCategory(null);
-                setMessages(prev => [...prev, {
-                  id: Date.now().toString(),
-                  message: "Interview paused. Select a category to continue or switch modes.",
-                  isUser: false,
-                  timestamp: new Date()
-                }]);
-              }}
-              className="mb-2 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
-              title="Back to Categories"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </button>
-          )}
-          <div className="flex-1 relative">
-            <textarea
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder={mode === 'interview' ? "Type your answer here..." : "Ask me anything about cybersecurity..."}
-              className="w-full resize-none border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all pr-10"
-              rows={1}
-              style={{ minHeight: '44px', maxHeight: '120px' }}
-            />
-          </div>
+      {/* ── Input ── */}
+      <div className="flex items-end gap-2 px-3 py-3 border-t border-[#00ff88]/10 bg-[#0a0f0a] shrink-0">
+        {/* Back button in interview */}
+        {isInterview && interviewCategory && (
           <button
-            onClick={handleSendMessage}
-            disabled={!newMessage.trim() || isTyping}
-            className={`mb-0.5 p-3 rounded-xl shadow-md transition-all ${!newMessage.trim() || isTyping
-              ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
-              : 'bg-orange-600 hover:bg-orange-700 text-white hover:shadow-lg active:scale-95'
-              }`}
+            onClick={() => { setInterviewCategory(null); setMessages(prev => [...prev, { id: Date.now().toString(), message: 'Interview paused. Select a category to continue.', isUser: false, timestamp: new Date() }]); }}
+            className="h-9 w-9 rounded-lg flex items-center justify-center text-[#4d7a4d] border border-[#00ff88]/10 hover:text-[#00ff88] hover:bg-[#00ff88]/5 transition-all shrink-0"
+            title="Back to categories"
           >
-            <Send className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4" />
           </button>
-        </div>
+        )}
+
+        <textarea
+          value={newMessage}
+          onChange={(e) => setNewMessage(e.target.value)}
+          onKeyPress={handleKeyPress}
+          placeholder={isInterview ? 'Type your answer…' : 'Ask anything about cybersecurity…'}
+          className="flex-1 resize-none rounded-xl px-3.5 py-2.5 text-sm bg-[#0f1a0f] border border-[#00ff88]/10 text-[#ccffcc] placeholder:text-[#2d4a2d] outline-none focus:border-[#00ff88]/30 transition-colors cc-scrollbar"
+          rows={1}
+          style={{ minHeight: '40px', maxHeight: '100px' }}
+        />
+
+        <button
+          onClick={handleSendMessage}
+          disabled={!newMessage.trim() || isTyping}
+          className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 transition-all ${!newMessage.trim() || isTyping
+            ? 'bg-[#0f1a0f] text-[#2d4a2d] border border-[#00ff88]/5 cursor-not-allowed'
+            : 'bg-[#00ff88] text-black hover:bg-[#00dd77] active:scale-95'
+            }`}
+        >
+          <Send className="h-4 w-4" />
+        </button>
       </div>
+
+      {/* Inline keyframe animations */}
+      <style>{`
+        @keyframes chatSlideIn { from { opacity:0; transform:translateY(12px) scale(0.97); } to { opacity:1; transform:translateY(0) scale(1); } }
+        @keyframes msgIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes typing { 0%,60%,100% { transform:translateY(0); opacity:0.4; } 30% { transform:translateY(-5px); opacity:1; } }
+        @keyframes statusPulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+      `}</style>
     </div>
   );
 };
-
