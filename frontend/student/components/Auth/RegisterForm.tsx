@@ -4,6 +4,7 @@ import { useAuth } from '@context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AuthLayout } from '../../../components/auth/AuthLayout';
+import LightMorphWrapper from '@/components/ui/LightMorphWrapper';
 import { useNavigate, Link } from 'react-router-dom';
 import { SEO } from '@/components/SEO/SEO';
 
@@ -77,10 +78,12 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           </p>
 
           <div className="space-y-4">
-            <Link to="/login" className="block">
-              <Button className="w-full h-12 bg-[#00FF88] text-black hover:bg-[#00CC66] font-black rounded-xl">
-                Return to Login
-              </Button>
+            <Link to="/login" className="block w-full">
+              <LightMorphWrapper containerClass="w-full rounded-xl p-0.5" inerContainerClass="w-full rounded-[0.9rem]">
+                <Button className="w-full h-12 bg-transparent text-white font-black hover:text-[#00FF88] rounded-xl">
+                  Return to Login
+                </Button>
+              </LightMorphWrapper>
             </Link>
 
             <p className="text-[#00B37A]/50 text-[10px] uppercase font-mono">
@@ -160,28 +163,27 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             />
           </div>
 
-          <Button
-            type="submit"
-            isLoading={isLoading}
-            className="w-full h-12 bg-[#00FF88] text-black hover:bg-[#00CC66] font-black rounded-xl transition-all group"
-          >
-            {isLoading ? 'Signing up...' : (
-              <span className="flex items-center justify-center gap-2">
-                Sign Up <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-              </span>
-            )}
-          </Button>
+          <div className="pt-2">
+            <LightMorphWrapper containerClass="w-full rounded-xl p-0.5" inerContainerClass="w-full rounded-[0.9rem]">
+              <Button
+                type="submit"
+                isLoading={isLoading}
+                className="w-full h-12 bg-transparent text-white font-black hover:text-[#00FF88] rounded-xl transition-all group"
+              >
+                {isLoading ? 'Signing up...' : (
+                  <span className="flex items-center justify-center gap-2">
+                    Sign Up <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  </span>
+                )}
+              </Button>
+            </LightMorphWrapper>
+          </div>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-[#00FF88]/10 flex flex-col items-center gap-4">
-          <p className="text-[#00B37A] text-xs">Already have an account?</p>
-          <Link to="/login" className="w-full relative z-20">
-            <Button
-              variant="outline"
-              className="w-full border-[#00FF88]/20 text-[#00FF88] hover:bg-[#00FF88]/10 font-bold rounded-xl transition-all"
-            >
-              Login
-            </Button>
+        <div className="mt-8 pt-6 border-t border-[#00FF88]/10 flex flex-col items-center gap-2">
+          <p className="text-[#00B37A]/60 text-[10px] uppercase font-mono tracking-widest">Already licensed?</p>
+          <Link to="/login" className="text-[#00FF88] text-sm font-bold hover:underline underline-offset-4 transition-all uppercase tracking-tighter">
+            Access Terminal
           </Link>
         </div>
       </div>

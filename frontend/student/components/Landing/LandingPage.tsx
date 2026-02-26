@@ -14,6 +14,7 @@ import {
   MobileNavToggle,
   MobileNavMenu,
 } from '@/components/ui/resizable-navbar';
+import LightMorphWrapper from '@/components/ui/LightMorphWrapper';
 
 // Lazy-load ShaderGradient to prevent client-side crashes from killing the whole page
 const ShaderGradientCanvas = lazy(() =>
@@ -294,9 +295,11 @@ export const LandingPage: React.FC = () => {
               ]}
             />
             <div className="flex items-center gap-3">
-              <NavbarButton variant="primary" onClick={() => handleGetStarted('student')}>
-                {user ? 'Dashboard' : 'Sign Up Free'}
-              </NavbarButton>
+              <LightMorphWrapper containerClass="rounded-xl p-0.5" inerContainerClass="rounded-[0.9rem]">
+                <NavbarButton variant="primary" onClick={() => handleGetStarted('student')} className="bg-transparent shadow-none hover:bg-transparent text-white font-black">
+                  {user ? 'Dashboard' : 'SIGN UP FREE'}
+                </NavbarButton>
+              </LightMorphWrapper>
             </div>
           </NavBody>
           <MobileNav>
@@ -349,13 +352,15 @@ export const LandingPage: React.FC = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 items-center pt-8">
-              <button
-                onClick={() => handleGetStarted('student')}
-                className="flex items-center justify-center gap-2 px-8 py-4 bg-[#10B981] hover:bg-[#059669] text-white rounded-lg font-semibold text-lg transition-colors w-full sm:w-auto min-w-[200px]"
-              >
-                {user ? 'Go to Dashboard' : 'Start Learning Free'}
-                <ArrowRight className="h-5 w-5" />
-              </button>
+              <LightMorphWrapper containerClass="rounded-xl p-0.5" inerContainerClass="rounded-[0.9rem]">
+                <button
+                  onClick={() => handleGetStarted('student')}
+                  className="flex items-center justify-center gap-2 px-8 py-4 bg-transparent text-white rounded-lg font-black text-lg transition-all w-full sm:w-auto min-w-[200px] hover:scale-105"
+                >
+                  {user ? 'Go to Dashboard' : 'START LEARNING FREE'}
+                  <ArrowRight className="h-5 w-5" />
+                </button>
+              </LightMorphWrapper>
             </div>
 
             <div className="pt-16 pb-4 flex flex-col items-center gap-4 border-t border-white/5 w-full max-w-2xl mt-8">
@@ -600,13 +605,17 @@ export const LandingPage: React.FC = () => {
             <p className="text-[#A1A1AA] text-lg mb-8 max-w-xl mx-auto">
               Join our platform today and acquire the skills needed to protect modern digital infrastructure.
             </p>
-            <button
-              onClick={() => handleGetStarted('student', 'register')}
-              className="inline-flex items-center gap-2 px-8 py-4 bg-[#10B981] hover:bg-[#059669] text-white rounded-lg font-semibold text-lg transition-all hover:scale-105 active:scale-95 shadow-lg shadow-[#10B981]/20"
-            >
-              Sign Up For Free
-              <ArrowRight className="h-5 w-5" />
-            </button>
+            <div className="flex justify-center">
+              <LightMorphWrapper containerClass="rounded-xl p-0.5" inerContainerClass="rounded-[0.9rem]">
+                <button
+                  onClick={() => handleGetStarted('student', 'register')}
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-transparent text-white rounded-lg font-black text-lg transition-all hover:scale-105"
+                >
+                  SIGN UP FOR FREE
+                  <ArrowRight className="h-5 w-5" />
+                </button>
+              </LightMorphWrapper>
+            </div>
           </div>
         </section>
 

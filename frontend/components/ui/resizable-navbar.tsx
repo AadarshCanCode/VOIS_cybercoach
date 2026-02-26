@@ -9,6 +9,7 @@ import {
 } from "motion/react";
 
 import React, { useState } from "react";
+import LightMorphWrapper from "./LightMorphWrapper";
 
 
 interface NavbarProps {
