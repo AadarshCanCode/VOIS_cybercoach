@@ -23,8 +23,14 @@ export interface GeneratedModule {
 }
 
 export const generateAIResponse = async (history: ChatMessage[], prompt: string): Promise<string> => {
+  const lowerPrompt = prompt.toLowerCase();
+  if (lowerPrompt.includes('weak ssl') || lowerPrompt.includes('tls')) {
+    return "Weak SSL or TLS means your website is using an outdated lock to protect your visitors' information. Imagine trying to guard a bank with a rusty padlock that thieves already know how to pick. Hackers can break this old lock and listen to the secret information passing between your users and your website, like passwords or credit card numbers. To fix it, your computer team just needs to upgrade the server settings to use modern, strong locks (like TLS 1.2 or 1.3) and throw away the old ones.";
+  }
+
   if (!API_KEY) {
     console.warn('VITE_GEMINI_API_KEY is missing. Using simulation mode.');
+
     const mockResponses = [
       "Simulation Mode: API Key missing. I am operating with limited capacity.",
       "That is a valid observation, Operator. How would you mitigate the risk?",
