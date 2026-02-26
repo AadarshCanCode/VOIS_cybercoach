@@ -293,7 +293,7 @@ export const CommunityPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     return (
         <div className="min-h-screen bg-[#000000] text-[#EAEAEA] font-sans selection:bg-[#00FF88]/30">
             <SEO
-                title="Community Feed"
+                title="Community Page"
                 description="Connect with elite operatives. Share threat intel, bounties, and strategies in the global cybersecurity network."
             />
             {/* Grid Background */}
@@ -307,7 +307,7 @@ export const CommunityPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             <ArrowLeft className="h-6 w-6" />
                         </button>
                         <div>
-                            <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tighter text-white">Neural Hub</h1>
+                            <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tighter text-white">Community Page</h1>
                             <p className="text-xs text-[#00B37A]/60 mt-0.5">{posts.length} transmissions • Real-time feed</p>
                         </div>
                     </div>
