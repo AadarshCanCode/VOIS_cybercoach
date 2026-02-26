@@ -119,12 +119,25 @@ export const LabViewer: React.FC<LabViewerProps> = ({ labId, onBack }) => {
           </div>
         </div>
 
-        {/* Theory Section */}
-        <div className="bg-[#0A0F0A] rounded-xl border border-[#00FF88]/10 overflow-hidden">
-          <div className="p-6 border-b border-[#00FF88]/10">
+        {/* Theory Section - Terminal Window */}
+        <div className="bg-[#0A0F0A] rounded-xl border border-[#00FF88]/20 overflow-hidden shadow-[0_0_40px_rgba(0,255,136,0.05)]">
+          {/* Terminal MacOS Header */}
+          <div className="bg-[#121A16] px-4 py-3 border-b border-[#00FF88]/10 flex items-center justify-between">
+            <div className="flex space-x-2">
+              <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
+              <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+              <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
+            </div>
+            <div className="text-[#00B37A] text-xs font-mono tracking-widest opacity-70">
+              user@cybercoach: ~/labs/{lab.id}
+            </div>
+            <div className="w-12"></div> {/* Spacer for center alignment */}
+          </div>
+          <div className="p-6 border-b border-[#00FF88]/5 bg-[#0A0F0A]">
             <h2 className="text-xl font-bold text-white flex items-center space-x-2">
               <Terminal className="h-5 w-5 text-[#00FF88]" />
-              <span>Learning Materials</span>
+              <span className="font-mono">cat learning-materials.md</span>
+              <span className="animate-pulse w-3 h-5 bg-[#00FF88] inline-block ml-1"></span>
             </h2>
           </div>
 

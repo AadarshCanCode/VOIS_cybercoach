@@ -1,5 +1,8 @@
-import React from 'react';
+import { useState, useEffect, FC } from 'react';
 import { FlaskRound as Flask, Clock, User, CheckCircle, ArrowRight, Terminal, Activity, Lock, Brain } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { CyberBackground } from '@/components/ui/cyber-background';
+import { AnimatedCounter } from '@/components/ui/animated-counter';
 import { cyberLabs, nlpLabs } from '@data/labs';
 import { useAuth } from '@context/AuthContext';
 import { getCompletedLabs } from '@utils/labCompletion';
@@ -9,16 +12,16 @@ interface LabsListProps {
   onLabSelect: (labId: string) => void;
 }
 
-export const LabsList: React.FC<LabsListProps> = ({ onLabSelect }) => {
-  const { user } = useAuth();
-  const [completedLabs, setCompletedLabs] = React.useState<string[]>([]);
-  const [labStats, setLabStats] = React.useState<LabStats | null>(null);
-  const [activeTab, setActiveTab] = React.useState<'cybersecurity' | 'nlp'>('cybersecurity');
+export const LabsList: FC<LabsListProps> = ({ onLabSelect }) => {
+  const { } = useAuth();
+  const [completedLabs, setCompletedLabs] = useState<string[]>([]);
+  const [labStats, setLabStats] = useState<LabStats | null>(null);
+  const [activeTab, setActiveTab] = useState<'cybersecurity' | 'nlp'>('cybersecurity');
 
   const allLabs = [...cyberLabs, ...nlpLabs];
   const visibleLabs = activeTab === 'cybersecurity' ? cyberLabs : nlpLabs;
 
-  React.useEffect(() => {
+  useEffect(() => {
     // First, load from localStorage
     setCompletedLabs(getCompletedLabs());
 
@@ -55,9 +58,15 @@ export const LabsList: React.FC<LabsListProps> = ({ onLabSelect }) => {
         const isCompleted = completedLabs.includes(lab.id);
 
         return (
-          <div key={lab.id} className={`bg-[#0A0F0A] rounded-xl border ${isLocked ? 'border-[#00FF88]/5 opacity-75' : 'border-[#00FF88]/10 hover:border-[#00FF88]/30'} overflow-hidden transition-all duration-300 group relative`}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: labs.indexOf(lab) * 0.1 }}
+            key={lab.id}
+            className={`bg-[#0A0F0A]/80 backdrop-blur-md rounded-xl border ${isLocked ? 'border-[#00FF88]/5 opacity-75' : 'border-[#00FF88]/20 hover:border-[#00FF88]/50 hover:shadow-[0_0_30px_rgba(0,255,136,0.15)]'} overflow-hidden transition-all duration-500 group relative`}
+          >
             {/* Hover Glow */}
-            {!isLocked && <div className="absolute inset-0 bg-gradient-to-r from-[#00FF88]/0 via-[#00FF88]/0 to-[#00FF88]/0 group-hover:via-[#00FF88]/5 transition-all duration-500" />}
+            {!isLocked && <div className="absolute inset-0 bg-linear-to-r from-transparent via-[#00FF88]/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />}
 
             <div className="p-6 relative">
               <div className="flex items-start justify-between mb-6">
@@ -124,34 +133,47 @@ export const LabsList: React.FC<LabsListProps> = ({ onLabSelect }) => {
                 </button>
               </div>
             </div>
-          </div>
+          </motion.div>
         );
       })}
     </div>
   );
 
   return (
-    <div className="p-6 min-h-screen animate-fade-in text-[#EAEAEA]">
-      <div className="max-w-6xl mx-auto space-y-8">
+    <div className="relative p-6 min-h-screen text-[#EAEAEA] overflow-hidden">
+      <CyberBackground />
+      <div className="max-w-6xl mx-auto space-y-8 relative z-10 pt-4">
 
-        {/* Header */}
+        {/* Header with Typewriter/Glitch feel */}
         <div className="flex items-center justify-between border-b border-[#00FF88]/10 pb-6">
-          <div>
-            <h1 className="text-3xl font-black tracking-tighter text-white uppercase">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <h1 className="text-3xl font-black tracking-tighter text-white uppercase flex items-center gap-2">
+              <Terminal className="h-6 w-6 text-[#00FF88]" />
               Virtual <span className="text-[#00FF88]">Simulations</span>
+              <span className="animate-pulse w-3 h-8 bg-[#00FF88] inline-block ml-1"></span>
             </h1>
-            <p className="text-[#00B37A] font-mono text-sm mt-1">DEPLOY ACTIVE COUNTERMEASURES</p>
-          </div>
-          <div className="h-10 w-10 rounded bg-[#00FF88]/10 border border-[#00FF88]/20 flex items-center justify-center">
-            {activeTab === 'cybersecurity' ? <Flask className="h-5 w-5 text-[#00FF88]" /> : <Brain className="h-5 w-5 text-[#00FF88]" />}
-          </div>
+            <p className="text-[#00B37A] font-mono text-sm mt-2 flex items-center">
+              <span className="text-[#00FF88] mr-2">&gt;</span> DEPLOY ACTIVE COUNTERMEASURES
+            </p>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="h-12 w-12 rounded bg-[#00FF88]/10 border border-[#00FF88]/20 flex items-center justify-center shadow-[0_0_15px_rgba(0,255,136,0.2)]"
+          >
+            {activeTab === 'cybersecurity' ? <Flask className="h-6 w-6 text-[#00FF88]" /> : <Brain className="h-6 w-6 text-[#00FF88]" />}
+          </motion.div>
         </div>
 
         {/* Tabs */}
         <div className="flex gap-4 border-b border-[#00FF88]/10 pb-1">
           <button
             onClick={() => setActiveTab('cybersecurity')}
-            className={`flex items-center gap-2 px-6 py-3 rounded-t-lg font-bold transition-all relative top-[1px] ${activeTab === 'cybersecurity'
+            className={`flex items-center gap-2 px-6 py-3 rounded-t-lg font-bold transition-all relative top-px ${activeTab === 'cybersecurity'
               ? 'bg-[#00FF88]/10 border-t border-x border-[#00FF88] text-[#00FF88] border-b-black'
               : 'bg-transparent border border-transparent text-[#EAEAEA]/60 hover:text-[#EAEAEA] hover:bg-[#00FF88]/5'
               }`}
@@ -161,7 +183,7 @@ export const LabsList: React.FC<LabsListProps> = ({ onLabSelect }) => {
           </button>
           <button
             onClick={() => setActiveTab('nlp')}
-            className={`flex items-center gap-2 px-6 py-3 rounded-t-lg font-bold transition-all relative top-[1px] ${activeTab === 'nlp'
+            className={`flex items-center gap-2 px-6 py-3 rounded-t-lg font-bold transition-all relative top-px ${activeTab === 'nlp'
               ? 'bg-[#00FF88]/10 border-t border-x border-[#00FF88] text-[#00FF88] border-b-black'
               : 'bg-transparent border border-transparent text-[#EAEAEA]/60 hover:text-[#EAEAEA] hover:bg-[#00FF88]/5'
               }`}
@@ -186,26 +208,34 @@ export const LabsList: React.FC<LabsListProps> = ({ onLabSelect }) => {
         {/* Lab Statistics - Only show if labs exist */}
         {allLabs.length > 0 && (
           <div className="bg-[#0A0F0A] rounded-xl border border-[#00FF88]/10 p-6 relative overflow-hidden mt-12">
-            <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(0,255,136,0.02)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%,100%_100%] animate-[shimmer_3s_infinite]" />
+            <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(0,255,136,0.02)_50%,transparent_75%,transparent_100%)] bg-size-[250%_250%,100%_100%] animate-[shimmer_3s_infinite]" />
             <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2 relative z-10">
               <Activity className="h-5 w-5 text-[#00FF88]" />
               Simulation Metrics
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative z-10">
               <div className="text-center p-4 bg-black/40 rounded-lg border border-[#00FF88]/10">
-                <div className="text-3xl font-bold text-[#00FF88] mb-1 font-mono">{labStats?.completedLabs ?? completedLabs.length}</div>
+                <div className="text-3xl font-bold text-[#00FF88] mb-1 font-mono">
+                  <AnimatedCounter value={labStats?.completedLabs ?? completedLabs.length} />
+                </div>
                 <div className="text-[#00B37A] text-xs uppercase tracking-wider">Completed</div>
               </div>
               <div className="text-center p-4 bg-black/40 rounded-lg border border-[#00FF88]/10">
-                <div className="text-3xl font-bold text-yellow-400 mb-1 font-mono">{labStats ? labStats.totalLabs - labStats.completedLabs : allLabs.length - completedLabs.length}</div>
+                <div className="text-3xl font-bold text-yellow-400 mb-1 font-mono">
+                  <AnimatedCounter value={labStats ? labStats.totalLabs - labStats.completedLabs : allLabs.length - completedLabs.length} />
+                </div>
                 <div className="text-[#00B37A] text-xs uppercase tracking-wider">Pending</div>
               </div>
               <div className="text-center p-4 bg-black/40 rounded-lg border border-[#00FF88]/10">
-                <div className="text-3xl font-bold text-[#00FF88] mb-1 font-mono">{labStats ? Math.round(labStats.completionPercentage) : (allLabs.length > 0 ? Math.round((completedLabs.length / allLabs.length) * 100) : 0)}%</div>
+                <div className="text-3xl font-bold text-[#00FF88] mb-1 font-mono">
+                  <AnimatedCounter value={labStats ? Math.round(labStats.completionPercentage) : (allLabs.length > 0 ? Math.round((completedLabs.length / allLabs.length) * 100) : 0)} suffix="%" />
+                </div>
                 <div className="text-[#00B37A] text-xs uppercase tracking-wider">Success Rate</div>
               </div>
               <div className="text-center p-4 bg-black/40 rounded-lg border border-[#00FF88]/10">
-                <div className="text-3xl font-bold text-[#EAEAEA] mb-1 font-mono">~{allLabs.length * 60}</div>
+                <div className="text-3xl font-bold text-[#EAEAEA] mb-1 font-mono">
+                  <AnimatedCounter prefix="~" value={allLabs.length * 60} />
+                </div>
                 <div className="text-[#00B37A] text-xs uppercase tracking-wider">Total Minutes</div>
               </div>
             </div>

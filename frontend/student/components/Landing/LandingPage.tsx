@@ -335,7 +335,7 @@ export const LandingPage: React.FC = () => {
 
             <h1 className="text-5xl sm:text-7xl md:text-8xl font-bold tracking-tight text-white leading-tight">
               Learn Cybersecurity<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#10B981] to-[#34D399]">
+              <span className="text-transparent bg-clip-text bg-linear-to-r from-[#10B981] to-[#34D399]">
                 The Right Way
               </span>
             </h1>
@@ -479,7 +479,7 @@ export const LandingPage: React.FC = () => {
                   <button
                     key={tab.id}
                     onClick={() => setActivePreview(i)}
-                    className={`flex-shrink-0 text-left p-5 rounded-xl border transition-all text-left ${i === activePreview
+                    className={`shrink-0 text-left p-5 rounded-xl border transition-all ${i === activePreview
                       ? 'bg-[#121815] border-[#10B981]/30'
                       : 'bg-[#121212] border-white/5 hover:border-white/10 hover:bg-[#181818]'
                       }`}
@@ -501,7 +501,7 @@ export const LandingPage: React.FC = () => {
                       <div className="w-3 h-3 rounded-full bg-[#28c840]/80" />
                     </div>
                   </div>
-                  <div className="relative aspect-[16/10] bg-[#0A0A0A]">
+                  <div className="relative aspect-16/10 bg-[#0A0A0A]">
                     {previewTabs.map((tab, i) => (
                       <img
                         key={tab.id}

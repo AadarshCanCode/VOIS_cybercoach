@@ -5,6 +5,7 @@ import { useAuth } from '@context/AuthContext';
 import { courseService } from '@services/courseService';
 import type { Course } from '@types';
 import { EnrollmentModal } from './EnrollmentModal';
+import { CardContainer, CardBody, CardItem } from '@/components/ui/3d-card';
 
 interface CourseListProps {
   onCourseSelect: (courseId: string) => void;
@@ -125,7 +126,7 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
               {/* Disclaimer */}
               <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 mb-6">
                 <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 mt-0.5">
+                  <div className="shrink-0 mt-0.5">
                     <svg className="h-5 w-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                     </svg>
@@ -246,49 +247,51 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {dbCourses.map((course) => (
-                  <div
-                    key={course.id}
-                    onClick={() => handleTeacherCourseSelect(course.id)}
-                    className="bg-[#0A0F0A] rounded-xl border border-[#00FF88]/10 overflow-hidden group hover:border-[#00FF88]/30 transition-all duration-300 cursor-pointer"
-                  >
-                    <div className="p-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                          <h2 className="text-xl font-bold text-white mb-2 group-hover:text-[#00FF88] transition-colors">
-                            {course.title}
-                          </h2>
-                          <p className="text-[#00B37A] text-sm mb-4 line-clamp-2">
-                            {course.description}
-                          </p>
-                        </div>
-                      </div>
+                  <CardContainer key={course.id} className="w-full">
+                    <CardBody className="w-full h-full">
+                      <CardItem
+                        translateZ={50}
+                        onClick={() => handleTeacherCourseSelect(course.id)}
+                        className="w-full h-full bg-[#0A0F0A] rounded-xl border border-[#00FF88]/10 overflow-hidden group hover:border-[#00FF88]/30 transition-all duration-300 cursor-pointer flex flex-col"
+                      >
+                        <div className="p-6 flex flex-col h-full">
+                          <div className="flex items-start justify-between mb-4 flex-1">
+                            <div className="flex-1">
+                              <h2 className="text-xl font-bold text-white mb-2 group-hover:text-[#00FF88] transition-colors">
+                                {course.title}
+                              </h2>
+                              <p className="text-[#00B37A] text-sm mb-4 line-clamp-2">
+                                {course.description}
+                              </p>
+                            </div>
+                          </div>
 
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3 text-xs text-[#EAEAEA]/60">
-                          <span className="px-2 py-1 rounded bg-[#00FF88]/10 text-[#00FF88]">
-                            {course.difficulty || 'Intermediate'}
-                          </span>
-                          <div className="flex items-center space-x-1">
-                            <Clock className="h-3 w-3" />
-                            <span>{course.estimated_hours || 10} hours</span>
+                          <div className="flex items-center justify-between mt-auto">
+                            <div className="flex items-center space-x-3 text-xs text-[#EAEAEA]/60">
+                              <span className="px-2 py-1 rounded bg-[#00FF88]/10 text-[#00FF88]">
+                                {course.difficulty || 'Intermediate'}
+                              </span>
+                              <div className="flex items-center space-x-1">
+                                <Clock className="h-3 w-3" />
+                                <span>{course.estimated_hours || 10} hours</span>
+                              </div>
+                            </div>
+                            <div className="text-[#00FF88] text-sm font-bold group-hover:translate-x-1 transition-transform">
+                              Access Course →
+                            </div>
+                          </div>
+
+                          {/* Module Count */}
+                          <div className="mt-4 pt-4 border-t border-[#00FF88]/10">
+                            <div className="flex items-center space-x-2 text-sm text-[#EAEAEA]/60">
+                              <CheckCircle className="h-4 w-4 text-[#00FF88]" />
+                              <span>{(course.module_count || course.modules?.length || course.course_modules?.length || 0)} Modules</span>
+                            </div>
                           </div>
                         </div>
-                        <div className="text-[#00FF88] text-sm font-bold group-hover:translate-x-1 transition-transform">
-                          {/* We don't know if locked or not until click, but can assume locked symbol if not yet enrolled? 
-                              For simplicity, just show arrow. */}
-                          Access Course →
-                        </div>
-                      </div>
-
-                      {/* Module Count */}
-                      <div className="mt-4 pt-4 border-t border-[#00FF88]/10">
-                        <div className="flex items-center space-x-2 text-sm text-[#EAEAEA]/60">
-                          <CheckCircle className="h-4 w-4 text-[#00FF88]" />
-                          <span>{(course.module_count || course.modules?.length || course.course_modules?.length || 0)} Modules</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                      </CardItem>
+                    </CardBody>
+                  </CardContainer>
                 ))}
               </div>
             )}
@@ -337,70 +340,74 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
           {/* Courses Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {courses.map((course) => (
-              <div
-                key={course.id}
-                onClick={() => canAccessCourses && setSelectedCourse(course)}
-                className={`bg-[#0A0F0A] rounded-xl border border-[#00FF88]/10 overflow-hidden group transition-all duration-300 relative ${canAccessCourses ? 'cursor-pointer hover:border-[#00FF88]/30' : 'opacity-40 cursor-not-allowed'
-                  }`}
-              >
-                {/* Lock Overlay for individual courses */}
-                {!canAccessCourses && (
-                  <div className="absolute inset-0 bg-black/70 backdrop-blur-sm z-10 flex items-center justify-center">
-                    <div className="text-center">
-                      <Lock className="h-12 w-12 text-white/40 mx-auto mb-2" />
-                      <p className="text-white/60 font-bold text-xs">ASSESSMENT REQUIRED</p>
-                    </div>
-                  </div>
-                )}
-                <div className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <h2 className="text-xl font-bold text-white mb-2 group-hover:text-[#00FF88] transition-colors">
-                        {course.title}
-                      </h2>
-                      <p className="text-[#00B37A] text-sm mb-4 line-clamp-2">
-                        {course.description}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3 text-xs text-[#EAEAEA]/60">
-                      <span className={`px-2 py-1 rounded ${course.difficulty === 'Beginner' ? 'bg-green-500/10 text-green-500' :
-                        course.difficulty === 'Intermediate' ? 'bg-yellow-500/10 text-yellow-500' :
-                          'bg-red-500/10 text-red-500'
-                        }`}>
-                        {course.difficulty}
-                      </span>
-                      <div className="flex items-center space-x-1">
-                        <Clock className="h-3 w-3" />
-                        <span>{course.duration}</span>
-                      </div>
-                    </div>
-                    {canAccessCourses && (
-                      <div className="text-[#00FF88] text-sm font-bold group-hover:translate-x-1 transition-transform">
-                        View Details →
+              <CardContainer key={course.id} className="w-full">
+                <CardBody className="w-full h-full">
+                  <CardItem
+                    translateZ={50}
+                    onClick={() => canAccessCourses && setSelectedCourse(course)}
+                    className={`w-full h-full bg-[#0A0F0A] rounded-xl border border-[#00FF88]/10 overflow-hidden group transition-all duration-300 relative ${canAccessCourses ? 'cursor-pointer hover:border-[#00FF88]/30' : 'opacity-40 cursor-not-allowed'
+                      }`}
+                  >
+                    {/* Lock Overlay for individual courses */}
+                    {!canAccessCourses && (
+                      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm z-10 flex items-center justify-center">
+                        <div className="text-center">
+                          <Lock className="h-12 w-12 text-white/40 mx-auto mb-2" />
+                          <p className="text-white/60 font-bold text-xs">ASSESSMENT REQUIRED</p>
+                        </div>
                       </div>
                     )}
-                  </div>
+                    <div className="p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex-1">
+                          <h2 className="text-xl font-bold text-white mb-2 group-hover:text-[#00FF88] transition-colors">
+                            {course.title}
+                          </h2>
+                          <p className="text-[#00B37A] text-sm mb-4 line-clamp-2">
+                            {course.description}
+                          </p>
+                        </div>
+                      </div>
 
-                  {/* Skills Preview */}
-                  <div className="mt-4 pt-4 border-t border-[#00FF88]/10">
-                    <div className="flex flex-wrap gap-1.5">
-                      {course.skills.slice(0, 3).map((skill, idx) => (
-                        <span key={idx} className="px-2 py-0.5 bg-[#00FF88]/5 text-[#00FF88] text-xs rounded">
-                          {skill}
-                        </span>
-                      ))}
-                      {course.skills.length > 3 && (
-                        <span className="px-2 py-0.5 text-[#00B37A] text-xs">
-                          +{course.skills.length - 3} more
-                        </span>
-                      )}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3 text-xs text-[#EAEAEA]/60">
+                          <span className={`px-2 py-1 rounded ${course.difficulty === 'Beginner' ? 'bg-green-500/10 text-green-500' :
+                            course.difficulty === 'Intermediate' ? 'bg-yellow-500/10 text-yellow-500' :
+                              'bg-red-500/10 text-red-500'
+                            }`}>
+                            {course.difficulty}
+                          </span>
+                          <div className="flex items-center space-x-1">
+                            <Clock className="h-3 w-3" />
+                            <span>{course.duration}</span>
+                          </div>
+                        </div>
+                        {canAccessCourses && (
+                          <div className="text-[#00FF88] text-sm font-bold group-hover:translate-x-1 transition-transform">
+                            View Details →
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Skills Preview */}
+                      <div className="mt-4 pt-4 border-t border-[#00FF88]/10">
+                        <div className="flex flex-wrap gap-1.5">
+                          {course.skills.slice(0, 3).map((skill, idx) => (
+                            <span key={idx} className="px-2 py-0.5 bg-[#00FF88]/5 text-[#00FF88] text-xs rounded">
+                              {skill}
+                            </span>
+                          ))}
+                          {course.skills.length > 3 && (
+                            <span className="px-2 py-0.5 text-[#00B37A] text-xs">
+                              +{course.skills.length - 3} more
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </div>
+                  </CardItem>
+                </CardBody>
+              </CardContainer>
             ))}
           </div>
         </div>
@@ -451,66 +458,60 @@ export const CourseList: React.FC<CourseListProps> = ({ onCourseSelect }) => {
             const courses = getCoursesByCategory(category.id);
 
             return (
-              <div
-                key={category.id}
-                onClick={() => canAccessCourses && setSelectedCategory(category.id)}
-                className={`bg-gradient-to-br ${category.color} rounded-xl border border-[#00FF88]/10 overflow-hidden group transition-all duration-300 relative ${canAccessCourses ? 'cursor-pointer hover:border-[#00FF88]/30' : 'opacity-40 cursor-not-allowed'
-                  }`}
-              >
-                {/* Lock Overlay - Removed */}
-                {/* {!canAccessCourses && (
-                  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-10 flex items-center justify-center">
-                    <div className="text-center">
-                      <Lock className="h-16 w-16 text-white/40 mx-auto mb-3" />
-                      <p className="text-white/60 font-bold text-sm">LOCKED</p>
-                      <p className="text-white/40 text-xs mt-1">Complete Assessment</p>
-                    </div>
-                  </div>
-                )} */}
-                <div className="bg-[#0A0F0A]/80 backdrop-blur-sm p-8 h-full">
-                  <div className="flex items-start justify-between mb-6">
-                    <div className="flex items-center space-x-4">
-                      <div className="text-5xl">{category.icon}</div>
-                      <div>
-                        <h2 className="text-2xl font-bold text-white tracking-tight group-hover:text-[#00FF88] transition-colors">
-                          {category.title}
-                        </h2>
-                        <p className="text-[#00B37A] text-sm mt-1">
-                          {category.description}
-                        </p>
+              <CardContainer key={category.id} className="w-full">
+                <CardBody className="w-full h-full">
+                  <CardItem
+                    translateZ={50}
+                    onClick={() => canAccessCourses && setSelectedCategory(category.id)}
+                    className={`w-full h-full bg-linear-to-br ${category.color} rounded-xl border border-[#00FF88]/10 overflow-hidden group transition-all duration-300 relative flex flex-col ${canAccessCourses ? 'cursor-pointer hover:border-[#00FF88]/30' : 'opacity-40 cursor-not-allowed'
+                      }`}
+                  >
+                    <div className="bg-[#0A0F0A]/80 backdrop-blur-sm p-8 h-full flex flex-col">
+                      <div className="flex items-start justify-between mb-6 flex-1">
+                        <div className="flex items-center space-x-4">
+                          <div className="text-5xl">{category.icon}</div>
+                          <div>
+                            <h2 className="text-2xl font-bold text-white tracking-tight group-hover:text-[#00FF88] transition-colors">
+                              {category.title}
+                            </h2>
+                            <p className="text-[#00B37A] text-sm mt-1">
+                              {category.description}
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
 
-                  <div className="space-y-3 mb-6">
-                    <div className="flex items-center space-x-2 text-sm text-[#EAEAEA]/60">
-                      <CheckCircle className="h-4 w-4 text-[#00FF88]" />
-                      <span>{courses.length} Comprehensive Courses</span>
-                    </div>
-                    <div className="flex items-center space-x-2 text-sm text-[#EAEAEA]/60">
-                      <Clock className="h-4 w-4 text-[#00FF88]" />
-                      <span>Self-paced Learning</span>
-                    </div>
-                    <div className="flex items-center space-x-2 text-sm text-[#EAEAEA]/60">
-                      <Award className="h-4 w-4 text-[#00FF88]" />
-                      <span>Industry Recognition</span>
-                    </div>
-                  </div>
+                      <div className="space-y-3 mb-6 mt-auto">
+                        <div className="flex items-center space-x-2 text-sm text-[#EAEAEA]/60">
+                          <CheckCircle className="h-4 w-4 text-[#00FF88]" />
+                          <span>{courses.length} Comprehensive Courses</span>
+                        </div>
+                        <div className="flex items-center space-x-2 text-sm text-[#EAEAEA]/60">
+                          <Clock className="h-4 w-4 text-[#00FF88]" />
+                          <span>Self-paced Learning</span>
+                        </div>
+                        <div className="flex items-center space-x-2 text-sm text-[#EAEAEA]/60">
+                          <Award className="h-4 w-4 text-[#00FF88]" />
+                          <span>Industry Recognition</span>
+                        </div>
+                      </div>
 
-                  {canAccessCourses && (
-                    <div className="flex items-center justify-between pt-4 border-t border-[#00FF88]/10">
-                      <span className="text-[#00B37A] text-sm font-mono">EXPLORE {courses.length} COURSES</span>
-                      <svg className="h-6 w-6 text-[#00FF88] group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                      </svg>
+                      {canAccessCourses && (
+                        <div className="flex items-center justify-between pt-4 border-t border-[#00FF88]/10">
+                          <span className="text-[#00B37A] text-sm font-mono">EXPLORE {courses.length} COURSES</span>
+                          <svg className="h-6 w-6 text-[#00FF88] group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                          </svg>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              </div>
+                  </CardItem>
+                </CardBody>
+              </CardContainer>
             );
           })}
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 };
