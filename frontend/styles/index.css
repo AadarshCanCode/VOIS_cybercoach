@@ -267,6 +267,49 @@
     animation: float 3s ease-in-out infinite;
   }
 
+  /* ── Custom Slim Scrollbars ── */
+  /* Global scrollbar – thin, dark */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #1a2e1a;
+    border-radius: 99px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #00ff88;
+  }
+
+  /* Cyber green scrollbar for cc-scrollbar elements */
+  .cc-scrollbar::-webkit-scrollbar {
+    width: 3px;
+  }
+
+  .cc-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .cc-scrollbar::-webkit-scrollbar-thumb {
+    background: #003322;
+    border-radius: 99px;
+  }
+
+  .cc-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #00ff88;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #1a2e1a transparent;
+  }
+
   /* Blobby background animations */
   .animate-blob {
     animation: blob 7s infinite;
