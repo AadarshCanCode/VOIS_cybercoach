@@ -334,7 +334,7 @@ export const LandingPage: React.FC = () => {
             </div>
 
             <h1 className="text-5xl sm:text-7xl md:text-8xl font-bold tracking-tight text-white leading-tight">
-              Learn Cybersecurity<br />
+              Master Courses<br />
               <span className="text-transparent bg-clip-text bg-linear-to-r from-[#10B981] to-[#34D399]">
                 The Right Way
               </span>
