@@ -136,7 +136,7 @@ export const VerifyCertificate = () => {
             </main>
 
             <footer className="p-6 text-center text-gray-600 text-sm">
-                &copy; {new Date().getFullYear()} CyberCoach Security Platform. All verification data is secured.
+                &copy; {new Date().getFullYear()} GradeU Learning Platform. All verification data is secured.
             </footer>
         </div>
     );

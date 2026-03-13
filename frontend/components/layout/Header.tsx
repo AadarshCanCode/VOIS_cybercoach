@@ -30,9 +30,9 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
                         onClick={handleLogoClick}
                         className="flex items-center gap-3 mr-6 hover:opacity-80 transition-opacity cursor-pointer"
                     >
-                        <img src="/cybercoach.png" alt="Cybercoach" className="h-10 w-10" />
+                        <img src="/cybercoach.png" alt="GradeU" className="h-10 w-10" />
                         <span className="text-xl font-bold bg-linear-to-r from-white to-[#00FF88] bg-clip-text text-transparent hidden sm:inline-block">
-                            Cybercoach
+                            GradeU
                         </span>
                     </button>
 

@@ -229,12 +229,12 @@ export const NavbarLogo = ({ onClick }: { onClick?: () => void }) => {
                 <div className="absolute -inset-2 bg-[#00FF88]/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition duration-500" />
                 <img
                     src="/cybercoach.png"
-                    alt="Cybercoach"
+                    alt="GradeU"
                     className="relative h-10 w-10 group-hover:scale-110 transition-transform duration-300"
                 />
             </div>
             <span className="font-black text-white text-lg tracking-tight uppercase hidden sm:block">
-                Cyber<span className="text-[#00FF88]">coach</span>
+                Grade<span className="text-[#00FF88]">U</span>
             </span>
         </button>
     );

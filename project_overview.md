@@ -52,21 +52,5 @@ GradeU relies heavily on a deeply integrated, modern architecture to deliver a s
 3. **API-First Integration:** Data requirements are mapped out in Supabase/MongoDB before Next.js Route handlers are written. Client-side fetch logic heavily relies on Zustand to minimize re-renders and React state clutter.
 4. **Serverless Deployment:** Built to be primarily hosted on edge-optimized platforms like Vercel, maximizing Next.js caching capabilities.
 
-## 🚀 Novel Upcoming Features (Roadmap additions)
-
-The platform is expanding to include deeply specialized integrations tailored for personalized learning and academic research:
-
-### 1. Knowledge Graph Memory for Learning Patterns
-
-This feature will construct a personalized, conceptual map of a student’s cognitive abilities dynamically:
-
-- **Identification of Strong/Weak Topics:** Instead of linear numeric grades, the system tracks specific nodes (e.g., "calculus", "machine learning concepts"). If a student fails questions related to a sub-node, the graph memory registers it as a weak point and re-configures future practice questions.
-- **Adaptive Remediation:** The graph acts globally. If the student enters a new course related to a weak node, the system will explicitly inject prerequisite refresher materials prior to starting.
-
-### 2. Automated DOI Research Paper Fetcher
-
-A dedicated integration that streamlines academic research for educators and specific advanced courses:
-
-- **Direct Querying:** Users submit a DOI (Digital Object Identifier) link into a dedicated module interface.
-- **Automated Metadata & Content Parsing:** GradeU will reach out to publisher APIs (like Crossref) to securely fetch abstracts, authors, citations, and—where open-access allows—the full text PDF.
-- **Integration into Course Material:** Instructors can immediately add these fetched, verified papers as required reading modules within the `Courses` component.
+## 🚀 Roadmap
+The platform is expanding to include more hyper-personalized learning tools, deeper institutional analytics, and enhanced AI-driven assessment capabilities.

@@ -103,7 +103,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
     >
       <SEO
         title="Sign Up"
-        description="Join the elite cybersecurity training platform. Create your account to start hands-on labs and assessments."
+        description="Join the GradeU learning platform. Create your account to start your hyperpersonalised courses and research."
       />
       <div className="bg-[#0A0F0A] border border-[#00FF88]/20 rounded-2xl p-8 shadow-[0_0_50px_rgba(0,255,136,0.05)] backdrop-blur-xl relative overflow-hidden group w-full">
         <div className="absolute inset-0 bg-linear-to-b from-[#00FF88]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
@@ -181,9 +181,9 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         </form>
 
         <div className="mt-8 pt-6 border-t border-[#00FF88]/10 flex flex-col items-center gap-2">
-          <p className="text-[#00B37A]/60 text-[10px] uppercase font-mono tracking-widest">Already licensed?</p>
+          <p className="text-[#00B37A]/60 text-[10px] uppercase font-mono tracking-widest">Already a learner?</p>
           <Link to="/login" className="text-[#00FF88] text-sm font-bold hover:underline underline-offset-4 transition-all uppercase tracking-tighter">
-            Access Terminal
+            Enter Dashboard
           </Link>
         </div>
       </div>

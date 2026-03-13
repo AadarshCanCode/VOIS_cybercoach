@@ -129,7 +129,7 @@ export const LabViewer: React.FC<LabViewerProps> = ({ labId, onBack }) => {
               <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
             </div>
             <div className="text-[#00B37A] text-xs font-mono tracking-widest opacity-70">
-              user@cybercoach: ~/labs/{lab.id}
+              user@gradeu: ~/labs/{lab.id}
             </div>
             <div className="w-12"></div> {/* Spacer for center alignment */}
           </div>

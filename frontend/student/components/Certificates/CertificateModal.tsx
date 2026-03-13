@@ -4,7 +4,7 @@ import { supabase } from '@lib/supabase';
 import { useAuth } from '@context/AuthContext';
 
 import vuLogo from '../../../assets/images/vu-logo.png';
-import cyberCoachLogo from '../../../assets/images/cybercoach-logo.png';
+const gradeULogo = "/cybercoach.png";
 
 interface CertificateModalProps {
   isOpen: boolean;
@@ -225,7 +225,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
                     SOVAP
                   </div>
                 )}
-                <img src={cyberCoachLogo} alt="CyberCoach" style={{ height: '40px', objectFit: 'contain', marginLeft: '16px', maxWidth: '150px' }} />
+                <img src={gradeULogo} alt="GradeU" style={{ height: '40px', objectFit: 'contain', marginLeft: '16px', maxWidth: '150px' }} />
               </div>
 
               <p style={{ marginBottom: '8px', fontFamily: 'Arial, sans-serif', fontSize: '14px', color: '#6b7280' }}>
@@ -258,7 +258,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
                   </div>
                 ) : (
                   <div>
-                    <p style={{ fontFamily: 'cursive', fontSize: '30px', marginBottom: '4px' }}>CyberCoach</p>
+                    <p style={{ fontFamily: 'cursive', fontSize: '30px', marginBottom: '4px' }}>GradeU</p>
                     <div style={{ width: '192px', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderColor: '#000000' }}></div>
                     <p style={{ fontSize: '12px', marginTop: '4px', fontWeight: 'bold', fontFamily: 'Arial, sans-serif', textTransform: 'uppercase', color: '#374151' }}>Chief Security Officer</p>
                   </div>

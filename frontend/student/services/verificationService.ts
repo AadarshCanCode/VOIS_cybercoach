@@ -53,7 +53,7 @@ class VerificationService {
                 location: result.details?.domain_registrar || 'Unknown',
                 description: result.explanation || result.scraped_data?.description || 'No description available.',
                 certifications: result.details?.green_flags || [],
-                verification_source: 'CyberCoach AI Analyzer',
+                verification_source: 'GradeU AI Analyzer',
                 last_verified_at: new Date().toISOString(),
 
                 verdict: result.verdict,

@@ -42,7 +42,7 @@ app.use('/', adminLegacyRoutes);
 
 app.get('/', (_req: Request, res: Response): void => {
   res.json({
-    message: 'VOIS Hackathon API',
+    message: 'GradeU Core API',
     modules: ['student', 'teacher', 'admin']
   });
 });

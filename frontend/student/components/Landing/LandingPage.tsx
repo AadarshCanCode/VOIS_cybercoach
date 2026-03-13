@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, useRef, useCallback, Component, type ReactNode, lazy, Suspense } from 'react';
-import { Shield, ArrowRight, Terminal, Users, Activity, Brain, Crosshair, BookOpen, Award, Eye, Lock, Globe, BarChart3, Star } from 'lucide-react';
+import { Shield, ArrowRight, Terminal, Users, Activity, Brain, Crosshair, BookOpen, Award, Eye, Lock, BarChart3, Star } from 'lucide-react';
 import { useAuth } from '@context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { SEO } from '@/components/SEO/SEO';
@@ -196,7 +196,7 @@ export const LandingPage: React.FC = () => {
     { name: 'Shriram Dixit', title: 'Red Team Lead', quote: 'The interactive labs and AI mock interviews are standard-setting. It accurately prepares students for the industry.', initials: 'SD' },
     { name: 'Sujal Gundlapelli', title: 'Security Researcher', quote: 'The platform integrates learning, practice, and career preparation seamlessly. Highly recommended for beginners.', initials: 'SG' },
     { name: 'Sanika Sadre', title: 'SOC Manager', quote: 'Tracking student progress through the platform provides excellent visibility into their readiness.', initials: 'SS' },
-    { name: 'Abhijit Karji', title: 'Education Specialist', quote: 'Cybercoach is the ideal companion for classroom learning, offering robust practical exercises.', initials: 'AK' },
+    { name: 'Abhijit Karji', title: 'Education Specialist', quote: 'GradeU is the ideal companion for classroom learning, offering robust practical exercises.', initials: 'AK' },
   ], []);
 
   const [activeTestimonial, setActiveTestimonial] = useState(0);
@@ -226,8 +226,8 @@ export const LandingPage: React.FC = () => {
   return (
     <>
       <SEO
-        title="Cybercoach - Master Cybersecurity"
-        description="The AI-powered platform for cybersecurity education. Master real-world skills with interactive labs and assessments."
+        title="GradeU - Hyperpersonalised Learning Platform"
+        description="The advanced AI-powered platform for hyperpersonalised learning. Empowering students, teachers, and universities with adaptive learning paths and automated course generation."
       />
 
       <div className="relative min-h-screen bg-[#050505] text-[#FAFAFA] font-sans selection:bg-[#10B981]/30 overflow-x-hidden">
@@ -330,23 +330,23 @@ export const LandingPage: React.FC = () => {
           <div className="max-w-5xl mx-auto w-full flex flex-col items-center text-center relative z-10 space-y-8">
 
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981] text-xs sm:text-sm font-medium">
-              VOIS Hackathon 2025 Education Track
+              Revolutionizing Higher Education with AI
             </div>
 
             <h1 className="text-5xl sm:text-7xl md:text-8xl font-bold tracking-tight text-white leading-tight">
-              Master Courses<br />
+              GradeU<br />
               <span className="text-transparent bg-clip-text bg-linear-to-r from-[#10B981] to-[#34D399]">
-                The Right Way
+                Learning Refined.
               </span>
             </h1>
 
             <div className="max-w-2xl mx-auto space-y-2">
               <p className="text-lg sm:text-xl text-[#A1A1AA] font-normal leading-relaxed">
-                The AI-powered platform that turns learners into
+                The AI-powered platform that empowers
               </p>
               <div className="text-xl sm:text-2xl font-semibold text-white h-10">
                 <TypingText
-                  texts={['Security Analysts', 'Ethical Hackers', 'SOC Engineers', 'Penetration Testers', 'Incident Responders']}
+                  texts={['Curious Students', 'Innovative Teachers', 'Modern Universities', 'Lifelong Learners', 'Academic Researchers']}
                 />
               </div>
             </div>
@@ -357,14 +357,14 @@ export const LandingPage: React.FC = () => {
                   onClick={() => handleGetStarted('student')}
                   className="flex items-center justify-center gap-2 px-8 py-4 bg-transparent text-white rounded-lg font-black text-lg transition-all w-full sm:w-auto min-w-[200px] hover:scale-105"
                 >
-                  {user ? 'Go to Dashboard' : 'START LEARNING FREE'}
+                  {user ? 'Go to Dashboard' : 'GET STARTED FOR FREE'}
                   <ArrowRight className="h-5 w-5" />
                 </button>
               </LightMorphWrapper>
             </div>
 
             <div className="pt-16 pb-4 flex flex-col items-center gap-4 border-t border-white/5 w-full max-w-2xl mt-8">
-              <span className="text-sm font-medium text-[#71717A]">Created by</span>
+              <span className="text-sm font-medium text-[#71717A]">Created with passion by the GradeU Team</span>
               <div className="flex flex-wrap justify-center gap-8">
                 {[
                   { name: 'Piyush Dhoka', url: 'https://piyush.sparkstudio.co.in' },
@@ -383,49 +383,51 @@ export const LandingPage: React.FC = () => {
         </section>
 
         {/* ══════════════════════════════════════════════════
-            ACTION CARDS — Community / Verify / Analyze
+            ACTION CARDS — Community / Research / Knowledge
            ══════════════════════════════════════════════════ */}
         <section className="relative py-16 px-6 bg-[#0A0A0A] border-y border-white/5">
-          <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div
-              onClick={() => navigate('/community')}
-              className="cursor-pointer group flex flex-col p-8 bg-[#121212] border border-white/5 hover:border-[#10B981]/30 rounded-2xl transition-all"
-            >
-              <div className="mb-4 p-3 bg-[#10B981]/10 rounded-xl w-max">
-                <Users className="h-6 w-6 text-[#10B981]" />
+          <div className="max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div
+                onClick={() => navigate('/community')}
+                className="cursor-pointer group flex flex-col p-8 bg-[#121212] border border-white/5 hover:border-[#10B981]/30 rounded-2xl transition-all"
+              >
+                <div className="mb-4 p-3 bg-[#10B981]/10 rounded-xl w-max">
+                  <Users className="h-6 w-6 text-[#10B981]" />
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-2">Student Hub</h3>
+                <p className="text-[#A1A1AA] leading-relaxed flex-1">Collaborate with peers, join study groups, and share insights in our global learning network.</p>
+                <div className="mt-6 flex items-center gap-2 text-sm font-medium text-[#10B981]">
+                  Join Study Group <ArrowRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
+                </div>
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">Community</h3>
-              <p className="text-[#A1A1AA] leading-relaxed flex-1">Connect with peers, share findings, ask questions, and collaborate in our dedicated cybersecurity forum.</p>
-              <div className="mt-6 flex items-center gap-2 text-sm font-medium text-[#10B981]">
-                Join Discussion <ArrowRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
-              </div>
-            </div>
 
-            <div
-              onClick={() => navigate('/company-verification')}
-              className="cursor-pointer group flex flex-col p-8 bg-[#121212] border border-white/5 hover:border-[#10B981]/30 rounded-2xl transition-all"
-            >
-              <div className="mb-4 p-3 bg-[#10B981]/10 rounded-xl w-max">
-                <Shield className="h-6 w-6 text-[#10B981]" />
+              <div
+                onClick={() => navigate('/company-verification')}
+                className="cursor-pointer group flex flex-col p-8 bg-[#121212] border border-white/5 hover:border-[#10B981]/30 rounded-2xl transition-all"
+              >
+                <div className="mb-4 p-3 bg-[#10B981]/10 rounded-xl w-max">
+                  <Shield className="h-6 w-6 text-[#10B981]" />
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-2">Company Verification</h3>
+                <p className="text-[#A1A1AA] leading-relaxed flex-1">Validate company legitimacy with our AI analysis tools before you apply to open roles.</p>
+                <div className="mt-6 flex items-center gap-2 text-sm font-medium text-[#10B981]">
+                  Verify Company <ArrowRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
+                </div>
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">Company Verification</h3>
-              <p className="text-[#A1A1AA] leading-relaxed flex-1">Validate company legitimacy with our AI analysis tools before you apply to open cybersecurity roles.</p>
-              <div className="mt-6 flex items-center gap-2 text-sm font-medium text-[#10B981]">
-                Verify Company <ArrowRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
-              </div>
-            </div>
 
-            <div
-              onClick={() => navigate('/analyze-target')}
-              className="cursor-pointer group flex flex-col p-8 bg-[#121212] border border-white/5 hover:border-[#10B981]/30 rounded-2xl transition-all"
-            >
-              <div className="mb-4 p-3 bg-[#10B981]/10 rounded-xl w-max">
-                <Activity className="h-6 w-6 text-[#10B981]" />
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-2">Analyze Target</h3>
-              <p className="text-[#A1A1AA] leading-relaxed flex-1">Deploy automated heuristic analysis on external domains to detect vulnerabilities and potential attack vectors.</p>
-              <div className="mt-6 flex items-center gap-2 text-sm font-medium text-[#10B981]">
-                Start Analysis <ArrowRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
+              <div
+                onClick={() => navigate('/analyze-target')}
+                className="cursor-pointer group flex flex-col p-8 bg-[#121212] border border-white/5 hover:border-[#10B981]/30 rounded-2xl transition-all"
+              >
+                <div className="mb-4 p-3 bg-[#10B981]/10 rounded-xl w-max">
+                  <Activity className="h-6 w-6 text-[#10B981]" />
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-2">Analyze Target</h3>
+                <p className="text-[#A1A1AA] leading-relaxed flex-1">Deploy automated heuristic analysis on external domains to detect vulnerabilities and insights.</p>
+                <div className="mt-6 flex items-center gap-2 text-sm font-medium text-[#10B981]">
+                  Start Analysis <ArrowRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
+                </div>
               </div>
             </div>
           </div>
@@ -438,23 +440,24 @@ export const LandingPage: React.FC = () => {
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16 space-y-4">
               <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
-                Everything you need to succeed
+                Beyond Standard LMS
               </h2>
               <p className="text-lg text-[#A1A1AA] max-w-2xl mx-auto">
-                A comprehensive ecosystem featuring hands-on practice, AI tutoring, and career preparation.
+                A hyperpersonalised ecosystem designed for the next generation of digital education.
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              <FeatureCard icon={<BookOpen className="h-6 w-6" />} title="Interactive Courses" description="Structured curriculum covering OWASP, network defense, ethical hacking, and cryptography." delay={0} />
-              <FeatureCard icon={<Terminal className="h-6 w-6" />} title="Hands-on Labs" description="Browser-based labs with real, isolated vulnerability environments for safe practice." delay={50} />
-              <FeatureCard icon={<Brain className="h-6 w-6" />} title="AI Tutor" description="24/7 AI teaching assistant ready to explain complex concepts or help you get unstuck." delay={100} />
-              <FeatureCard icon={<Crosshair className="h-6 w-6" />} title="Proctored Assessments" description="Secure, webcam-proctored exams ensuring the integrity of your achieved certifications." delay={150} />
-              <FeatureCard icon={<Eye className="h-6 w-6" />} title="Mock Interviews" description="Practice job interviews with our AI system and receive actionable, scored feedback." delay={200} />
-              <FeatureCard icon={<BarChart3 className="h-6 w-6" />} title="Progress Tracking" description="Detailed analytics to monitor your learning journey, XP gains, and course completion." delay={250} />
-              <FeatureCard icon={<Award className="h-6 w-6" />} title="Certifications" description="Earn verifiable digital certificates to share on LinkedIn and professional networks." delay={300} />
-              <FeatureCard icon={<Globe className="h-6 w-6" />} title="Community Feed" description="A dedicated forum for students to share insights, code, and stay updated." delay={350} />
-              <FeatureCard icon={<Lock className="h-6 w-6" />} title="Security Scanners" description="Access built-in tools for verifying companies and analyzing domains safely." delay={400} />
+              <FeatureCard icon={<BookOpen className="h-6 w-6" />} title="Adaptive Courses" description="Personalized learning pathways that evolve based on your individual strengths and gaps." delay={0} />
+              <FeatureCard icon={<Terminal className="h-6 w-6" />} title="Interactive Modules" description="Rich media content, text-to-speech, and integrated labs for a truly immersive experience." delay={50} />
+              <FeatureCard icon={<Brain className="h-6 w-6" />} title="AI Learning Assistant" description="A 24/7 tutor powered by advanced RAG to help you master any subject with ease." delay={100} />
+              <FeatureCard icon={<Crosshair className="h-6 w-6" />} title="Integrity Proctoring" description="Browser-native initial-side proctoring ensures assessment credibility without invasive software." delay={150} />
+              <FeatureCard icon={<Eye className="h-6 w-6" />} title="Smart Remediation" description="The system automatically identifies and injects prerequisite materials before you struggle." delay={200} />
+              <FeatureCard icon={<BarChart3 className="h-6 w-6" />} title="Cognitive Analytics" description="Deep insights into your learning patterns and conceptual mastery over time." delay={250} />
+              <FeatureCard icon={<Award className="h-6 w-6" />} title="Digital Certificates" description="Earn verifiable, professional-grade certificates for every milestone you achieve." delay={300} />
+              <FeatureCard icon={<Shield className="h-6 w-6" />} title="Verification Tools" description="Validate company legitimacy and analyze external domains for security insights." delay={350} />
+              <FeatureCard icon={<Shield className="h-6 w-6" />} title="Verification Tools" description="Validate company legitimacy and analyze external domains for security insights." delay={400} />
+              <FeatureCard icon={<Lock className="h-6 w-6" />} title="University Dashboard" description="Powerful tools for institutions to manage cohorts, courses, and large-scale analytics." delay={450} />
             </div>
           </div>
         </section>
@@ -466,10 +469,10 @@ export const LandingPage: React.FC = () => {
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16 space-y-4">
               <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
-                Inside the Platform
+                Inside GradeU
               </h2>
               <p className="text-lg text-[#A1A1AA] max-w-2xl mx-auto">
-                Explore the tools designed specifically for modern cybersecurity education.
+                Experience a platform designed to be better than Coursera for the modern academic world.
               </p>
             </div>
 
@@ -485,9 +488,9 @@ export const LandingPage: React.FC = () => {
                       }`}
                   >
                     <div className={`text-base font-semibold mb-1 ${i === activePreview ? 'text-[#10B981]' : 'text-white'}`}>
-                      {tab.label}
+                      {tab.label === 'Hands-on Labs' ? 'Learning Labs' : tab.label === 'Career Hub' ? 'Talent Hub' : tab.label}
                     </div>
-                    <div className="text-sm text-[#A1A1AA] leading-snug">{tab.sub}</div>
+                    <div className="text-sm text-[#A1A1AA] leading-snug">{tab.id === 'resume' ? 'Build professional resumes with AI' : tab.sub}</div>
                   </button>
                 ))}
               </div>
@@ -523,10 +526,10 @@ export const LandingPage: React.FC = () => {
            ══════════════════════════════════════════════════ */}
         <section className="py-24 px-6 relative">
           <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
-            <AnimatedCounter end={2500} suffix="+" label="Active Learners" />
-            <AnimatedCounter end={150} suffix="+" label="Interactive Labs" />
-            <AnimatedCounter end={98} suffix="%" label="Course Completion" />
-            <AnimatedCounter end={50} suffix="K" label="Threats Analyzed" />
+            <AnimatedCounter end={10000} suffix="+" label="Satisfied Students" />
+            <AnimatedCounter end={500} suffix="+" label="Partner Institutions" />
+            <AnimatedCounter end={99} suffix="%" label="Learning Accuracy" />
+            <AnimatedCounter end={250} suffix="K" label="Papers Indexed" />
           </div>
         </section>
 
@@ -536,13 +539,13 @@ export const LandingPage: React.FC = () => {
         <section className="py-24 px-6 relative bg-[#0A0A0A] border-y border-white/5">
           <div className="max-w-4xl mx-auto text-center space-y-6">
             <h2 className="text-3xl font-bold text-white tracking-tight">
-              Stay Updated with our Telegram Bot
+              GradeU Mobile Assistant
             </h2>
             <p className="text-lg text-[#A1A1AA] max-w-xl mx-auto mb-8">
-              Get the latest cybersecurity news, emerging threats, and platform updates sent straight to your device.
+              Stay connected with your learning journey. Get course updates, deadline reminders, and AI help directly on Telegram.
             </p>
             <a
-              href="https://t.me/careerconnet_cyber_bot"
+              href="https://t.me/gradeu_learning_bot"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-3 px-8 py-4 bg-[#212121] hover:bg-[#2A2A2A] border border-white/10 text-white rounded-lg font-medium transition-colors"
@@ -551,7 +554,7 @@ export const LandingPage: React.FC = () => {
                 <circle cx="16" cy="16" r="14" fill="#0088cc" />
                 <path d="M22.9866 10.2088C23.1112 9.40332 22.3454 8.76755 21.6292 9.082L7.36482 15.3448C6.85123 15.5703 6.8888 16.3483 7.42147 16.5179L10.3631 17.4547C10.9246 17.6335 11.5325 17.541 12.0228 17.2023L18.655 12.6203C18.855 12.4821 19.073 12.7665 18.9021 12.9426L14.1281 17.8646C13.665 18.3421 13.7569 19.1512 14.314 19.5005L19.659 22.8523C20.2585 23.2282 21.0297 22.8506 21.1418 22.1261L22.9866 10.2088Z" fill="white" />
               </svg>
-              Open Telegram Bot
+              Open Mobile Assistant
             </a>
           </div>
         </section>
@@ -562,7 +565,7 @@ export const LandingPage: React.FC = () => {
         <section id="testimonials" className="py-24 px-6 relative">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl font-bold bg-linear-to-r from-white to-gray-400 bg-clip-text text-transparent">
-              Trusted by Professionals
+              Trusted by Leading Educators
             </h2>
 
             <div className="mb-12">
@@ -600,10 +603,10 @@ export const LandingPage: React.FC = () => {
           <div className="max-w-3xl mx-auto bg-linear-to-br from-[#1A1A1A] to-[#0F0F0F] border border-[#10B981]/15 rounded-3xl p-12 text-center shadow-2xl relative overflow-hidden group">
             <div className="absolute top-0 left-0 w-full h-1 bg-[#10B981]/30" />
             <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight mb-4">
-              Ready to start your journey?
+              Step into the future of learning.
             </h2>
             <p className="text-[#A1A1AA] text-lg mb-8 max-w-xl mx-auto">
-              Join our platform today and acquire the skills needed to protect modern digital infrastructure.
+              Join thousands of learners and educators who have already switched to a more intelligent, personalised way of learning.
             </p>
             <div className="flex justify-center">
               <LightMorphWrapper containerClass="rounded-xl p-0.5" inerContainerClass="rounded-[0.9rem]">
@@ -611,7 +614,7 @@ export const LandingPage: React.FC = () => {
                   onClick={() => handleGetStarted('student', 'register')}
                   className="inline-flex items-center gap-2 px-8 py-4 bg-transparent text-white rounded-lg font-black text-lg transition-all hover:scale-105"
                 >
-                  SIGN UP FOR FREE
+                  JOIN GRADEU TODAY
                   <ArrowRight className="h-5 w-5" />
                 </button>
               </LightMorphWrapper>
@@ -624,26 +627,28 @@ export const LandingPage: React.FC = () => {
           <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="flex items-center gap-3 text-white font-bold text-xl">
               <div className="p-1.5 bg-[#10B981]/10 rounded-lg border border-[#10B981]/20">
-                <img src="/cybercoach.png" alt="Cybercoach" className="h-6 w-6" />
+                <img src="/cybercoach.png" alt="GradeU" className="h-6 w-6" />
               </div>
-              Cybercoach
+              GradeU
             </div>
 
             <div className="flex gap-8">
-              <button onClick={() => navigate('/community')} className="text-sm font-medium text-[#A1A1AA] hover:text-[#10B981] transition-colors">Community</button>
+              <button onClick={() => navigate('/community')} className="text-sm font-medium text-[#A1A1AA] hover:text-[#10B981] transition-colors">Hub</button>
+              <button onClick={() => navigate('/research')} className="text-sm font-medium text-[#A1A1AA] hover:text-[#10B981] transition-colors">Research</button>
               <button onClick={() => navigate('/company-verification')} className="text-sm font-medium text-[#A1A1AA] hover:text-[#10B981] transition-colors">Verify</button>
               <button onClick={() => navigate('/analyze-target')} className="text-sm font-medium text-[#A1A1AA] hover:text-[#10B981] transition-colors">Analyze</button>
+              <button onClick={() => navigate('/institution')} className="text-sm font-medium text-[#A1A1AA] hover:text-[#10B981] transition-colors">Institutions</button>
             </div>
 
             <div className="flex items-center gap-3 px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm text-[#A1A1AA]">
               <div className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
-              <span className="text-[#FAFAFA]">System Status:</span> Operational
+              <span className="text-[#FAFAFA]">Education Network:</span> Active
             </div>
           </div>
 
           <div className="max-w-6xl mx-auto mt-8 pt-8 border-t border-white/5 text-center md:text-left">
             <p className="text-xs text-[#52525B]">
-              &copy; {new Date().getFullYear()} Cybercoach. All rights reserved.
+              &copy; {new Date().getFullYear()} GradeU Platform. All rights reserved.
             </p>
           </div>
         </footer>

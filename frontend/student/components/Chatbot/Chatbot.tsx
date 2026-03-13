@@ -43,7 +43,7 @@ export const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose, context }) =>
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '1',
-      message: "Hello! I'm your cybersecurity AI assistant. Ask me anything about security concepts, OWASP Top 10, penetration testing, and more.",
+      message: "Hello! I'm your GradeU AI assistant. Ask me anything about your courses, research, or learning paths.",
       isUser: false,
       timestamp: new Date(),
     },
@@ -123,7 +123,7 @@ export const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose, context }) =>
         const composedPrompt = `${memory ? `User context:\n${memory}\n\n` : ''}${context ? `Current Course Context:\nCourse: ${context.courseTitle}\nModule: ${context.moduleTitle}\nContent Snippet: ${context.moduleContent?.substring(0, 500)}...\n\n` : ''}${docs ? `Relevant docs:\n${docs}\n\n` : ''}Question: ${messageText}`;
         const userLevel = user?.level || 'beginner';
         const userScore = user?.certificates ? user.certificates.length * 100 : 0;
-        const personalizationInstruction = `You are a helpful cybersecurity tutor. User Level: ${userLevel}. Score: ${userScore}. Begin with "Based on your scores [${userScore}] and level [${userLevel}]...". If user shows understanding, append [[UPDATE_SCORE: {"topic": "Name", "delta": 5}]].`;
+        const personalizationInstruction = `You are a helpful learning assistant for GradeU. User Level: ${userLevel}. Score: ${userScore}. Begin with "Based on your scores [${userScore}] and level [${userLevel}]...". If user shows understanding, append [[UPDATE_SCORE: {"topic": "Name", "delta": 5}]].`;
         response = await aiService.chat(composedPrompt, personalizationInstruction);
         const scoreTagRegex = /\[\[UPDATE_SCORE:\s*({.*?})\]\]/;
         const match = response.match(scoreTagRegex);
@@ -172,7 +172,7 @@ export const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose, context }) =>
           </div>
           <div>
             <p className="text-sm font-semibold text-white leading-tight">
-              {isInterview ? 'Interview Simulator' : isLangflow ? 'Langflow AI' : 'CyberCoach AI'}
+              {isInterview ? 'Interview Simulator' : isLangflow ? 'Langflow AI' : 'GradeU AI'}
             </p>
             <div className="flex items-center gap-1.5 mt-0.5">
               <span className="h-1.5 w-1.5 rounded-full bg-[#00ff88]" style={{ animation: 'statusPulse 2.5s ease-in-out infinite' }} />

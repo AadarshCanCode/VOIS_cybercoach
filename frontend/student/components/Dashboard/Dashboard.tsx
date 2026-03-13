@@ -3,6 +3,7 @@ import {
   Shield, Target, Award, Activity, Play, ChevronRight,
   Terminal, BookOpen, Clock, TrendingUp, Zap, FileText, StickyNote
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@context/AuthContext';
 import { supabase } from '@lib/supabase';
 import { SEO } from '@/components/SEO/SEO';
@@ -58,6 +59,7 @@ const PieTip = ({ active, payload }: any) => {
 /* ── Dashboard ───────────────────────────────────── */
 export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const [statsData, setStatsData] = useState<StudentStats>({
     coursesCompleted: 0, assessmentScore: null,
@@ -107,6 +109,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
 
   const quickActions = [
     { label: 'Take Assessment', icon: <Target className="h-4 w-4" />, tab: 'assessment' },
+    { label: 'Company Verification', icon: <Shield className="h-4 w-4" />, action: () => navigate('/company-verification') },
+    { label: 'Analyze Target', icon: <Activity className="h-4 w-4" />, action: () => navigate('/analyze-target') },
     { label: 'View Certificates', icon: <Award className="h-4 w-4" />, tab: 'certificates' },
     { label: 'My Notes', icon: <StickyNote className="h-4 w-4" />, tab: 'notes' },
     { label: 'Browse Courses', icon: <BookOpen className="h-4 w-4" />, tab: 'courses' },
@@ -120,7 +124,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
 
   return (
     <div className="min-h-screen bg-[#060d06] p-6 space-y-6">
-      <SEO title="Dashboard" description="CyberCoach student dashboard." />
+      <SEO title="Dashboard" description="GradeU student dashboard." />
 
       {/* ── Page Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -128,7 +132,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
           <h1 className="text-2xl font-bold text-white">
             Welcome back{user?.name ? `, ${user.name.split(' ')[0]}` : ''} 👋
           </h1>
-          <p className="mt-0.5 text-sm text-[#4d7a4d]">Here's your cybersecurity training overview.</p>
+          <p className="mt-0.5 text-sm text-[#4d7a4d]">Here's your personalised learning overview.</p>
         </div>
         <div className="flex items-center gap-2 self-start sm:self-auto rounded-lg border border-[#00ff88]/15 bg-[#0f1a0f] px-3 py-2">
           <Shield className="h-4 w-4 text-[#00ff88]" />
@@ -298,10 +302,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
               <span className="text-sm font-semibold text-white">Quick Actions</span>
             </div>
             <div className="p-3 space-y-1">
-              {quickActions.map((a) => (
+              {quickActions.map((a, i) => (
                 <button
-                  key={a.tab}
-                  onClick={() => onTabChange?.(a.tab)}
+                  key={i}
+                  onClick={() => a.action ? a.action() : onTabChange?.(a.tab as string)}
                   className="w-full group flex items-center justify-between rounded-lg px-3 py-3 text-sm font-medium transition-all hover:bg-[#00ff88]/5 text-[#99ddaa]"
                 >
                   <div className="flex items-center gap-3">

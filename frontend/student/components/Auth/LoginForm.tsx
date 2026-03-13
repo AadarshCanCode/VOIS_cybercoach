@@ -75,7 +75,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     >
       <SEO
         title="Login"
-        description="Access your Cybercoach terminal. Sign in to continue your cybersecurity training and operations."
+        description="Access your GradeU Dashboard. Sign in to continue your personalised learning journey."
       />
       <div className="bg-[#0A0F0A] border border-[#00FF88]/20 rounded-2xl p-8 shadow-[0_0_50px_rgba(0,255,136,0.05)] backdrop-blur-xl relative overflow-hidden group">
         <div className="absolute inset-0 bg-linear-to-b from-[#00FF88]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
@@ -160,9 +160,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
         {role !== 'teacher' && (
           <div className="mt-8 pt-6 border-t border-[#00FF88]/10 flex flex-col items-center gap-2">
-            <p className="text-[#00B37A]/60 text-[10px] uppercase font-mono tracking-widest">New operative?</p>
+            <p className="text-[#00B37A]/60 text-[10px] uppercase font-mono tracking-widest">New learner?</p>
             <Link to="/signup" className="text-[#00FF88] text-sm font-bold hover:underline underline-offset-4 transition-all uppercase tracking-tighter">
-              Establish Account
+              Create Account
             </Link>
           </div>
         )}

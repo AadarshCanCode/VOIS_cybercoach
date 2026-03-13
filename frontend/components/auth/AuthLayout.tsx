@@ -20,10 +20,10 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, subtitl
       <div className={`w-full relative z-10 ${className}`}>
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-3 mb-6 group transition-all hover:scale-105">
-            <img src="/cybercoach.png" alt="Cybercoach" className="h-14 w-14 group-hover:scale-110 transition-transform" />
+            <img src="/cybercoach.png" alt="GradeU" className="h-14 w-14 group-hover:scale-110 transition-transform" />
             <div className="text-left">
-              <div className="text-xl font-black tracking-tighter text-white uppercase">Cyber <span className="text-[#00FF88]">Coach</span></div>
-              <div className="text-[10px] font-mono text-[#00B37A] tracking-widest uppercase">Cybersecurity Ops</div>
+              <div className="text-xl font-black tracking-tighter text-white uppercase">Grade<span className="text-[#00FF88]">U</span></div>
+              <div className="text-[10px] font-mono text-[#00B37A] tracking-widest uppercase">Hyperpersonalised Learning</div>
             </div>
           </Link>
           <h1 className="text-3xl font-black text-white uppercase tracking-tight mb-2">{title}</h1>

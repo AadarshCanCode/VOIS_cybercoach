@@ -1,8 +1,8 @@
-# Cybercoach
+# GradeU
 
-An AI-powered cybersecurity education platform that transforms passive learning into hands-on, job-ready skills. Featuring adaptive learning paths, proctored assessments, vulnerability labs, and career tools—all in one unified platform.
+An AI-powered hyperpersonalised learning platform that transforms education into a tailored, interactive experience. Featuring adaptive learning paths, automated course generation, integrated student communities, and advanced analytics—all in one unified platform.
 
-![Cybercoach](https://img.shields.io/badge/Cybercoach-Cybersecurity%20Education-00FF88)
+![GradeU](https://img.shields.io/badge/GradeU-Advanced%20LMS-00FF88)
 ![React](https://img.shields.io/badge/React-18-61dafb)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 ![Vite](https://img.shields.io/badge/Vite-7-646CFF)
@@ -12,48 +12,41 @@ An AI-powered cybersecurity education platform that transforms passive learning 
 ### 🎓 Learning & Education
 
 
-- **Adaptive Learning Paths** - AI-personalized curriculum that evolves based on performance
-- **Interactive Courses** - Structured modules with video, text, and lab content
-- **Hands-on Labs** - Real vulnerability scenarios and security challenges
-- **Progress Tracking** - Visual dashboards showing completion and skill levels
-- **RAG-Powered AI Tutor** - Answers grounded in OWASP/NIST frameworks
+- **Adaptive Learning Paths** - AI-personalized curriculum that evolves based on student performance
+- **Automated Course Generation** - AI-powered tools for educators to create structured modules quickly
+- **Interactive Courses** - Structured modules with video, text, and rich media content
+- **Knowledge Graph Memory** - Tracks cognitive patterns to optimize learning delivery
+- **RAG-Powered AI Tutor** - Answers grounded in academic frameworks and course material
 
 ### 📝 Assessments & Proctoring
 
-- **Proctored Exams** - Video monitoring with face detection for exam integrity
-- **Adaptive Difficulty** - Questions adjust based on learner performance
-- **Real-time Violation Detection** - Alerts for suspicious behavior during tests
-- **Detailed Analytics** - Performance breakdowns and skill gap analysis
-- **Certificate Generation** - Verifiable completion certificates
+- **AI-Driven Proctoring** - Client-side face detection for exam integrity via the browser
+- **Adaptive Difficulty** - Assessment questions adjust based on real-time student performance
+- **Real-time Evaluation** - Instant feedback and detailed analytics for learners
+- **Certificate Management** - Automated generation of verifiable course completion certificates
+- **Skill Gap Analysis** - Deep insights into strengths and areas for improvement
 
-### 🛡️ Security Tools
+### 🏫 Academic & Research Tools
 
-- **Vulnerability Scanner** - AI-powered security assessment simulation
-- **Company Verification** - Detective-style fraud detection for job listings
-- **Domain Intelligence** - WHOIS lookups and domain analysis
-- **Content Analysis** - NLP-based scam detection with red/green flags
+- **DOI Research Paper Fetcher** - Streamlines academic research by fetching metadata and full-text PDFs
+- **Personalized Remediation** - Automatically injects refresher materials based on learning gaps
+- **Student Communities** - Peer-to-peer engagement and collaborative learning hubs
+- **Comprehensive Analytics** - Tracks engagement points and optimizes content delivery
 
 ### 💼 Career Development
 
 - **AI Interview Bot** - Practice technical interviews with real-time feedback
-- **Resume Generator** - Create professional cybersecurity resumes
-- **Job Board** - Curated listings with company verification
-- **Technical Questions** - Categorized practice problems
+- **Resume Builder** - Create professional resumes tailored for specific roles
+- **Job Board** - Curated listings with AI-powered company verification
+- **Technical Question Bank** - Categorized practice problems for various disciplines
 
-### 👨‍🏫 Teacher Portal
+### 👨‍🏫 Teacher & Admin Portals
 
-- **AI Course Generator** - Auto-generate course outlines with Gemini
-- **Module Management** - Organize video, lab, and text content
-- **Student Analytics** - Track progress and identify struggling learners
-- **Assessment Builder** - Create custom quizzes and exams
+- **AI Course Designer** - Tools for educators to semi-automate structured learning pathways
+- **Student Analytics** - Track cohort progress and identify struggling learners at a glance
+- **Platform Monitoring** - System health and usage statistics for administrators
+- **Role-Based Access** - Secure management of student, teacher, and admin permissions
 
-
-### 🔧 Admin Portal
-
-- **Platform Monitoring** - System health and usage statistics
-- **Proctoring Logs** - Review flagged exam sessions
-- **User Management** - Role-based access control
-- **API Proxy Services** - Secure external API access
 
 ## 🚀 Quick Start
 
@@ -69,8 +62,8 @@ An AI-powered cybersecurity education platform that transforms passive learning 
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/your-username/cybercoach.git
-   cd cybercoach
+   git clone https://github.com/your-username/gradeu.git
+   cd gradeu
    ```
 
 2. **Install dependencies**
@@ -107,150 +100,47 @@ An AI-powered cybersecurity education platform that transforms passive learning 
    - Frontend: [http://localhost:5173](http://localhost:5173)
    - Backend API: [http://localhost:4000](http://localhost:4000)
 
-## 📖 Usage
-
-### Student Workflow
-
-1. **Register/Login** - Create an account or sign in
-2. **Take Assessment** - Complete initial skill evaluation with proctoring
-3. **Follow Learning Path** - AI recommends personalized course sequence
-4. **Complete Labs** - Hands-on security challenges
-5. **Practice Interviews** - AI-powered technical interview preparation
-6. **Apply for Jobs** - Browse verified job listings
-
-### Teacher Workflow
-
-1. **Create Course** - Use AI to generate course outline
-3. **Publish** - Make course available to students
-4. **Monitor** - Track student progress and analytics
-
 ## 🛠️ Tech Stack
 
 ### Frontend
 
-- **[React 18](https://react.dev/)** - UI library with hooks
-- **[TypeScript](https://www.typescriptlang.org/)** - Type safety
-- **[Vite](https://vitejs.dev/)** - Fast build tool and dev server
+- **[Next.js 16](https://nextjs.org/)** - App Router with React 19
+- **[TypeScript](https://www.typescriptlang.org/)** - Strict type safety
 - **[TailwindCSS](https://tailwindcss.com/)** - Utility-first styling
-- **[Lucide React](https://lucide.dev/)** - Icon library
-- **[React Router](https://reactrouter.com/)** - Client-side routing
+- **[Shadcn UI](https://ui.shadcn.com/)** - Accessible UI components
+- **[Zustand](https://github.com/pmndrs/zustand)** - Global state management
 
 ### Backend
 
-- **[Express 5](https://expressjs.com/)** - Web framework
-- **[TypeScript](https://www.typescriptlang.org/)** - Type safety
-- **[tsx](https://github.com/privatenumber/tsx)** - Fast TS execution
+- **[Express 5](https://expressjs.com/)** - Web framework for custom routes
+- **[Supabase](https://supabase.com/)** - PostreSQL, Auth, and Storage
+- **[MongoDB](https://www.mongodb.com/)** - Behavioral analytics and proctoring logs
 
-### Database & Auth
+### AI & specialized Libraries
 
-- **[Supabase](https://supabase.com/)** - PostgreSQL database + Auth + Real-time
+- **[Google Gemini](https://ai.google.dev/)** - Core AI engine for content generation
+- **[TensorFlow.js](https://www.tensorflow.org/js)** - Client-side face proctoring
+- **[Mermaid](https://mermaid.js.org/)** - Dynamic flowchart generation
 
-### AI & ML
-
-- **[Google Gemini 2.5 Flash](https://ai.google.dev/)** - AI responses, quiz generation, content analysis
-- **[face-api.js](https://github.com/justadudewhohacks/face-api.js/)** - Face detection for proctoring
-- **[Natural](https://naturalnode.github.io/natural/)** - NLP for content analysis
-
-### Other
-
-- **[PDF.js](https://mozilla.github.io/pdf.js/)** - PDF rendering
-- **[Cheerio](https://cheerio.js.org/)** - Web scraping for company verification
-- **[jsPDF](https://github.com/parallax/jsPDF)** - Certificate generation
 
 ## 📁 Project Structure
 
 ```text
-cybercoach/
-├── frontend/                # React application
+gradeu/
+├── frontend/                # Next.js application
 │   ├── admin/              # Admin dashboard
 │   ├── student/            # Student portal
 │   │   ├── components/     # UI components
 │   │   │   ├── Assessment/ # Proctored tests
 │   │   │   ├── Career/     # Job board, resume
-│   │   │   ├── Chatbot/    # AI tutor
+│   │   │   ├── Chatbot/    # AI assistant
 │   │   │   ├── Course/     # Learning modules
-│   │   │   ├── Landing/    # Homepage
-│   │   │   └── Tools/      # Security tools
+│   │   │   └── Landing/    # Homepage
 │   │   └── pages/          # Route pages
 │   ├── teacher/            # Teacher dashboard
-│   ├── components/         # Shared components
-│   ├── context/            # React context (Auth)
-│   ├── services/           # API service layer
-│   └── types/              # TypeScript definitions
 ├── backend/                 # Express API
-│   ├── admin/              # Admin routes/services
-│   ├── student/            # Student routes/services
-│   ├── teacher/            # Teacher routes/services
-│   └── server.ts           # Entry point
-├── public/                  # Static assets
-│   ├── docs/               # RAG documents
-│   └── models/             # Face detection models
 └── supabase/               # Database migrations
 ```
-
-## 📜 Available Scripts
-
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start Vite frontend dev server |
-| `npm run dev:full` | Start both frontend and backend |
-| `npm run build` | Build frontend for production |
-| `npm run preview` | Preview production build |
-| `npm run proxy` | Run backend server |
-| `npm run backend:dev` | Run backend with hot reload |
-| `npm run backend:build` | Compile TypeScript backend |
-| `npm run lint` | Run ESLint |
-| `npm run fetch-faceapi` | Download face detection models |
-
-## 🔌 API Endpoints
-
-### Student
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/student/overview` | Dashboard summary |
-| GET | `/api/student/jobs` | Job listings |
-
-### Teacher
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/teacher/overview` | Teacher dashboard |
-
-### Admin
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/admin/status` | System status |
-| GET | `/api/admin/models` | Model availability |
-| POST | `/api/admin/proctor/logs` | Record proctoring events |
-
-## 🔒 Security
-
-- **Proctored Assessments** - Face detection prevents exam fraud
-- **CORS Configuration** - Secure cross-origin requests
-- **Environment Variables** - Secrets never in code
-- **Type-Safe API** - TypeScript prevents runtime errors
-- **Authorized Testing Only** - Detective tools require consent
-
-## 🐛 Troubleshooting
-
-### Loading screen stuck
-- Check Supabase credentials in `.env`
-- Ensure `VITE_SUPABASE_URL` starts with `https://`
-- Disable ad blockers for localhost
-
-### Backend doesn't start
-- Ensure port 4000 is available
-- Run `npm run backend:build` to check for TS errors
-
-### AI features not working
-- Verify `VITE_GEMINI_API_KEY` is set
-- Check API quota in Google AI Studio
-
-### Proctoring not detecting face
-- Run `npm run fetch-faceapi` to download models
-- Ensure camera permissions are granted
 
 ## 👥 Team
 
@@ -263,6 +153,7 @@ cybercoach/
 ## 📄 License
 
 This project is licensed under the terms specified in the [LICENSE](./LICENSE) file.
+ject is licensed under the terms specified in the [LICENSE](./LICENSE) file.
 
 ## 🤝 Contributing
 
