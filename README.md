@@ -121,7 +121,6 @@ An AI-powered cybersecurity education platform that transforms passive learning 
 ### Teacher Workflow
 
 1. **Create Course** - Use AI to generate course outline
-2. **Add Modules** - Upload videos, create labs, write content
 3. **Publish** - Make course available to students
 4. **Monitor** - Track student progress and analytics
 
